@@ -1,0 +1,249 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2865
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\froman\fcharset0 Times-Roman;\f1\froman\fcharset0 Times-Bold;\f2\froman\fcharset0 Times-Italic;
+\f3\fmodern\fcharset0 Courier;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;\red109\green109\blue109;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;\cssrgb\c50196\c50196\c50196;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}}{\leveltext\leveltemplateid101\'01\'00;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid2}
+{\list\listtemplateid3\listhybrid{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}}{\leveltext\leveltemplateid201\'01\'00;}{\levelnumbers\'01;}\fi-360\li720\lin720 }{\listname ;}\listid3}
+{\list\listtemplateid4\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid301\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listlevel\levelnfc0\levelnfcn0\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{decimal\}}{\leveltext\leveltemplateid302\'01\'01;}{\levelnumbers\'01;}\fi-360\li1440\lin1440 }{\listname ;}\listid4}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}{\listoverride\listid4\listoverridecount0\ls4}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\fs24 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Excellent question \'97 yes, 
+\f1\b you absolutely should include questions (user intents)
+\f0\b0  if your chatbot is designed to 
+\f2\i \strokec2 converse
+\f0\i0 \strokec2 , not just 
+\f2\i \strokec2 search or retrieve
+\f0\i0 \strokec2 .\
+Here\'92s a professional breakdown of 
+\f1\b why
+\f0\b0  and 
+\f1\b how
+\f0\b0  to handle it for your two agreements:\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f1\b\fs36 \cf0 \strokec2 \uc0\u55358 \u56800  Why Include Questions\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b0\fs24 \cf0 Even though your JSON already holds policy data, customers won\'92t ask in clause language \'97 they\'92ll use natural speech.\
+For example:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls1\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 You have a clause: 
+\f3\fs26 "Late payment fee \'a310 per day capped at \'a3100"
+\f0\fs24 .\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 The user says: \'93I missed my payment \'97 what happens now?\'94\
+\ls1\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Without linked 
+\f1\b question mappings
+\f0\b0 , your chatbot won\'92t know that\'92s a 
+\f2\i Late Payment
+\f0\i0  query.\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 So, to train or match intent, you need:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls2\ilvl0
+\f1\b \cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	1	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 User questions / phrasings
+\f0\b0  (synonyms, casual forms, \'93how / when / can\'94)\
+\ls2\ilvl0
+\f1\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	2	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Intent or category link
+\f0\b0  (to tie the query to the right clause)\
+\ls2\ilvl0
+\f1\b \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	3	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Answer text
+\f0\b0  (the natural, concise version)\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f1\b\fs36 \cf0 \strokec2 \uc0\u55358 \u56809  Recommended JSON Structure\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b0\fs24 \cf0 You can either:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls3\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	1	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Extend your existing clause JSON (add \'93user_queries\'94 under each), or\
+\ls3\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	2	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Create a 
+\f1\b separate dataset
+\f0\b0  for chatbot question-response pairs.\
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 Most chatbot frameworks (Dialogflow, Rasa, OpenAI retrievals, etc.) prefer 
+\f2\i \strokec2 separate question-intent pairs
+\f0\i0 \strokec2 .\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f1\b\fs36 \cf0 \strokec2 \uc0\u9989  Example Structure (for Each Agreement Individually)\
+\pard\pardeftab720\sa280\partightenfactor0
+
+\fs28 \cf0 1\uc0\u65039 \u8419  FINANCE / SALE AGREEMENT \'96 Example Question Dataset\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 \strokec2 \{\
+  "agreement_type": "Finance Agreement FAQs",\
+  "faqs": [\
+    \{\
+      "intent": "contract_overview",\
+      "user_queries": [\
+        "What is the finance contract?",\
+        "Is this a credit agreement?",\
+        "Do you charge interest?",\
+        "How long is the finance plan?"\
+      ],\
+      "bot_answer": "Our motorcycle sale agreement is a 12-month interest-free purchase plan, not a regulated credit agreement under the Consumer Credit Act."\
+    \},\
+    \{\
+      "intent": "payment_terms",\
+      "user_queries": [\
+        "How do I make payments?",\
+        "Do you take card or only bank transfer?",\
+        "When do I pay my instalments?",\
+        "What happens if I pay late?"\
+      ],\
+      "bot_answer": "Payments are made by BACS transfer to Neguinho Motors within 48 hours. A late fee of \'a310 per day applies after 7 days, capped at \'a3100 per instalment period."\
+    \},\
+    \{\
+      "intent": "ownership_transfer",\
+      "user_queries": [\
+        "When do I own the bike?",\
+        "Do I own the bike during finance?",\
+        "Can I sell the bike before finishing payments?"\
+      ],\
+      "bot_answer": "Ownership transfers to you only after full payment is received and confirmed by Neguinho Motors."\
+    \},\
+    \{\
+      "intent": "fines_and_fees",\
+      "user_queries": [\
+        "Who pays for parking or speeding fines?",\
+        "Do I pay congestion or ULEZ charges?",\
+        "What is the admin fee for PCNs?"\
+      ],\
+      "bot_answer": "You\'92re responsible for any penalties, ULEZ, or congestion charges during your contract. A \'a325 admin fee applies per notice processed."\
+    \},\
+    \{\
+      "intent": "repossession_policy",\
+      "user_queries": [\
+        "Can my bike be repossessed?",\
+        "What happens if I stop paying?",\
+        "How much is the repossession fee?"\
+      ],\
+      "bot_answer": "If payment is over 7 days late, we may repossess the vehicle. The repossession fee is \'a3300, and previous payments aren\'92t refunded."\
+    \}\
+  ]\
+\}\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa280\partightenfactor0
+
+\f1\b\fs28 \cf0 \strokec2 2\uc0\u65039 \u8419  RENTAL / HIRE AGREEMENT \'96 Example Question Dataset\
+\pard\pardeftab720\partightenfactor0
+
+\f3\b0\fs26 \cf0 \strokec2 \{\
+  "agreement_type": "Rental Agreement FAQs",\
+  "faqs": [\
+    \{\
+      "intent": "rental_overview",\
+      "user_queries": [\
+        "What kind of rental contract is this?",\
+        "Do I own the bike after renting?",\
+        "Is it a finance or credit deal?",\
+        "How long can I rent a bike for?"\
+      ],\
+      "bot_answer": "Our rental agreement is a simple hire for up to 12 months. It doesn\'92t include ownership or finance and isn\'92t regulated by the FCA."\
+    \},\
+    \{\
+      "intent": "payment_and_deposit",\
+      "user_queries": [\
+        "When do I pay rent?",\
+        "How much is the deposit?",\
+        "When do I get my deposit back?",\
+        "Do you charge interest on rent?"\
+      ],\
+      "bot_answer": "Rent is paid monthly in advance by bank transfer. Your deposit is refunded within 14 days of return after inspection, minus authorised deductions. No interest or finance charges apply."\
+    \},\
+    \{\
+      "intent": "termination_notice",\
+      "user_queries": [\
+        "What is the minimum hire period?",\
+        "Can I end my rental early?",\
+        "Will I lose my deposit if I return the bike early?"\
+      ],\
+      "bot_answer": "There\'92s a minimum six-week hire period. You can end it later with seven days\'92 written notice. Early return before six weeks forfeits the deposit."\
+    \},\
+    \{\
+      "intent": "late_payment_and_fines",\
+      "user_queries": [\
+        "What if I miss a rental payment?",\
+        "How much are late fees?",\
+        "Who pays traffic fines or ULEZ charges?"\
+      ],\
+      "bot_answer": "Late rent costs \'a310 per day, capped at \'a3100 per month. You\'92re responsible for all fines or PCNs, and a \'a325 admin fee applies for each notice we handle."\
+    \},\
+    \{\
+      "intent": "insurance_and_responsibility",\
+      "user_queries": [\
+        "Do you provide insurance?",\
+        "What insurance do I need for rental?",\
+        "What happens if I crash or damage the bike?"\
+      ],\
+      "bot_answer": "You must maintain comprehensive insurance for the entire rental period. In case of an accident, report it immediately \'97 we\'92ll handle repairs or claims through the proper channels."\
+    \}\
+  ]\
+\}\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf3 \strokec3 \
+\pard\pardeftab720\sa298\partightenfactor0
+
+\f1\b\fs36 \cf0 \strokec2 \uc0\u55358 \u56830  Recommended Setup\
+\pard\pardeftab720\sa240\partightenfactor0
+
+\f0\b0\fs24 \cf0 For best performance:\
+\pard\tx220\tx720\pardeftab720\li720\fi-720\sa240\partightenfactor0
+\ls4\ilvl0\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Keep the 
+\f1\b clause JSON
+\f0\b0  (the official legal summary) separate from the 
+\f1\b FAQ JSON
+\f0\b0  (the conversational intents).\
+\ls4\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Link both by 
+\f3\fs26 agreement_type
+\f0\fs24  and optionally 
+\f3\fs26 intent
+\f0\fs24  or 
+\f3\fs26 category
+\f0\fs24 .\
+\ls4\ilvl0\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	\uc0\u8226 	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 This allows your bot to:\
+\pard\tx940\tx1440\pardeftab720\li1440\fi-1440\sa240\partightenfactor0
+\ls4\ilvl1\cf0 \kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	1	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Give a short, conversational answer.\
+\ls4\ilvl1\kerning1\expnd0\expndtw0 \outl0\strokewidth0 {\listtext	2	}\expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 Quote or reference the relevant clause for legal accuracy.\
+\pard\pardeftab720\partightenfactor0
+\cf3 \strokec3 \
+\pard\pardeftab720\sa240\partightenfactor0
+\cf0 \strokec2 Would you like me to now generate the 
+\f1\b full extended FAQ question sets
+\f0\b0  (20\'9630 per agreement) \'97 so your chatbot covers 
+\f2\i \strokec2 every clause
+\f0\i0 \strokec2  automatically, not just a few?\uc0\u8232 That would make it truly production-ready for both 
+\f1\b Finance
+\f0\b0  and 
+\f1\b Rental
+\f0\b0 .\
+}

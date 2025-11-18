@@ -1,0 +1,46 @@
+# Core Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+pydantic-settings==2.1.0
+
+# Database
+sqlalchemy==2.0.25
+alembic==1.13.1
+# sqlite3 is built into Python, no need to install
+
+# Vector Database & Embeddings
+chromadb==0.4.22
+sentence-transformers==2.3.1
+openai==1.12.0
+
+# LLM Integration
+ollama==0.1.7
+langchain==0.1.6
+langchain-community==0.0.20
+
+# Utilities
+python-dotenv==1.0.1
+python-multipart==0.0.6
+aiofiles==23.2.1
+httpx>=0.25.2,<0.26.0
+requests==2.31.0
+
+# CORS & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# Logging & Monitoring
+loguru==0.7.2
+
+# Date & Time
+python-dateutil==2.8.2
+
+# JSON Handling
+orjson==3.9.10
+
+# Testing (optional)
+pytest==7.4.4
+pytest-asyncio==0.23.3
+

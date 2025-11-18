@@ -1,0 +1,711 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2865
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fmodern\fcharset0 Courier;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs26 \cf0 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 \{\
+  "meta": \{\
+    "dataset_name": "NGN Motors \'96 Finance & Rental Contracts (Chatbot KB)",\
+    "version": "1.0.0",\
+    "generated_at": "2025-11-12",\
+    "language": "en-GB",\
+    "currency": "GBP",\
+    "scope": [\
+      "Motorcycle Sale Agreement (interest-free instalments)",\
+      "Motorcycle Rental / Hire Agreement",\
+      "FAQs for both agreements",\
+      "Fallback and escalation",\
+      "Data capture schemas"\
+    ]\
+  \},\
+  "business": \{\
+    "legal_name": "Neguinho Motors Ltd",\
+    "trading_names": ["NGN Motors", "Neguinho Motors", "NGN"],\
+    "addresses": [\
+      \{\
+        "branch": "Catford",\
+        "address_line": "9\'9613 Catford Hill",\
+        "city": "London",\
+        "postcode": "SE6 4NU"\
+      \}\
+    ],\
+    "phones": ["0203 409 5478", "0208 314 1498"],\
+    "emails": ["customerservice@neguinhomotors.co.uk", "enquiries@neguinhomotors.co.uk"],\
+    "website": "https://ngnmotors.co.uk",\
+    "opening_hours": \{\
+      "monday": "09:00\'9618:00",\
+      "tuesday": "09:00\'9618:00",\
+      "wednesday": "09:00\'9618:00",\
+      "thursday": "09:00\'9618:00",\
+      "friday": "09:00\'9618:00",\
+      "saturday": "09:00\'9618:00",\
+      "sunday": "not specified"\
+    \},\
+    "bank_details": \{\
+      "bank_name": "Barclays Bank Plc",\
+      "account_name": "Neguinho Motors Ltd",\
+      "sort_code": "20-57-76",\
+      "account_number": "53113418",\
+      "payment_reference_hint": "Use your vehicle registration (VRM) as reference"\
+    \}\
+  \},\
+  "channels": \{\
+    "phone": ["0203 409 5478", "0208 314 1498"],\
+    "email": ["customerservice@neguinhomotors.co.uk", "enquiries@neguinhomotors.co.uk"],\
+    "whatsapp": "Use the phone numbers above on WhatsApp"\
+  \},\
+  "fallback_and_escalation": \{\
+    "principles": [\
+      "Acknowledge the question",\
+      "Be transparent if data isn\'92t in the bot",\
+      "Offer a next action (handover, quote, booking)",\
+      "Capture contact details before handover"\
+    ],\
+    "lead_capture_fields": ["full_name", "phone", "email", "preferred_channel", "VRM_or_make_model", "enquiry_topic", "postcode_if_delivery"],\
+    "auto_escalate_when": [\
+      "legal interpretation or policy wording requested",\
+      "payment dispute or refund request",\
+      "custom quote not in price list",\
+      "complaint or safety issue"\
+    ],\
+    "targets": \{\
+      "general": \{\
+        "to": ["customerservice@neguinhomotors.co.uk", "0203 409 5478"]\
+      \},\
+      "enquiries": \{\
+        "to": ["enquiries@neguinhomotors.co.uk", "0208 314 1498"]\
+      \}\
+    \},\
+    "templates": \{\
+      "unknown_info": "That isn\'92t listed in my current details. I can pass this to our team now or you can reach us on 0203 409 5478 or enquiries@neguinhomotors.co.uk.",\
+      "quote_needed": "Prices vary by model/condition. I\'92ll collect a few details and have a confirmed quote sent to you today.",\
+      "handover_offer": "Would you like me to forward your name, number and question to our advisor to contact you?",\
+      "booking_despite_unknown": "While I get that checked, we can still pencil in your preferred date/time and confirm details by text."\
+    \}\
+  \},\
+  "data_capture_schema": \{\
+    "finance_sale": \{\
+      "required": [\
+        "customer.full_name",\
+        "customer.dob",\
+        "customer.phone",\
+        "customer.email",\
+        "customer.address",\
+        "customer.city",\
+        "customer.postcode",\
+        "licence.number",\
+        "licence.issued_on",\
+        "licence.expires_on",\
+        "licence.issuing_country",\
+        "vehicle.vrm",\
+        "vehicle.make",\
+        "vehicle.model",\
+        "vehicle.engine_cc",\
+        "vehicle.year",\
+        "contract.total_price",\
+        "contract.deposit",\
+        "contract.instalment_amount",\
+        "contract.term_months"\
+      ],\
+      "optional": [\
+        "customer.whatsapp",\
+        "vehicle.colour",\
+        "contract.extras_description",\
+        "contract.extras_total",\
+        "staff.handled_by"\
+      ],\
+      "computed": ["contract.balance_due = total_price + extras_total - deposit"]\
+    \},\
+    "rental_hire": \{\
+      "required": [\
+        "customer.full_name",\
+        "customer.dob",\
+        "customer.phone",\
+        "customer.email",\
+        "customer.address",\
+        "customer.city",\
+        "customer.postcode",\
+        "licence.number",\
+        "licence.issued_on",\
+        "licence.expires_on",\
+        "licence.issuing_country",\
+        "vehicle.make",\
+        "vehicle.model",\
+        "vehicle.engine_cc",\
+        "vehicle.year",\
+        "rental.term_weeks_or_months",\
+        "rental.monthly_rent",\
+        "rental.security_deposit",\
+        "insurance.policy_provider",\
+        "insurance.policy_number",\
+        "insurance.cover_type"\
+      ],\
+      "optional": [\
+        "vehicle.vrm",\
+        "vehicle.colour",\
+        "rental.start_date",\
+        "rental.allowed_use_notes",\
+        "staff.handled_by"\
+      ]\
+    \}\
+  \},\
+  "agreements": \{\
+    "finance_sale": \{\
+      "agreement_type": "Motorcycle Sale Agreement (Finance Purchase)",\
+      "version": "v1.0",\
+      "jurisdiction": "England and Wales",\
+      "governing_law": "English law",\
+      "clauses": [\
+        \{\
+          "id": 1,\
+          "title": "Contract Term and Type",\
+          "policy_text": "Fixed-term sale agreement for up to 12 months. Not a regulated credit agreement under the Consumer Credit Act 1974. No interest or additional finance charges.",\
+          "summary": "12-month interest-free instalment plan; not consumer credit."\
+        \},\
+        \{\
+          "id": 2,\
+          "title": "Payments and Deposit",\
+          "policy_text": "All payments by BACS within 48 hours of signing. Deposit is non-refundable unless required by law. Balance payable monthly.",\
+          "summary": "Pay deposit and monthly instalments by bank transfer within the stated time."\
+        \},\
+        \{\
+          "id": 3,\
+          "title": "Ownership and Title",\
+          "policy_text": "Ownership remains with Neguinho Motors Ltd until full payment is received. Vehicle may be repossessed for breach or non-payment.",\
+          "summary": "You own the bike only once fully paid."\
+        \},\
+        \{\
+          "id": 4,\
+          "title": "Late Payment and Repossession",\
+          "policy_text": "\'a310 per day late fee capped at \'a3100 per instalment. If payment is 7 days overdue, the bike may be repossessed. Repossession fee \'a3300. No refund of sums already paid unless required by law.",\
+          "summary": "Fees apply for late payment; bikes can be recovered after 7 days overdue."\
+        \},\
+        \{\
+          "id": 5,\
+          "title": "Licence Requirements",\
+          "policy_text": "Customer must hold a valid UK driving licence. International licence holders must obtain a UK licence within 6 months of the start date.",\
+          "summary": "Valid UK licence required; international licences must be converted within six months."\
+        \},\
+        \{\
+          "id": 6,\
+          "title": "Maintenance and Repairs",\
+          "policy_text": "Routine servicing at authorised workshops. Damage from neglect or misuse is the customer\'92s responsibility. Third-party work requires prior written approval and remains at customer cost unless agreed otherwise.",\
+          "summary": "Service with NGN-approved garages; misuse damage is chargeable."\
+        \},\
+        \{\
+          "id": 7,\
+          "title": "Use of Vehicle",\
+          "policy_text": "Use limited to the UK and lawful road use. No sub-hire, resale, lending, or modifications without written consent. No racing or unlawful purposes.",\
+          "summary": "Use it legally in the UK; no unauthorised lending or mods."\
+        \},\
+        \{\
+          "id": 8,\
+          "title": "Police, Council and Legal Liability",\
+          "policy_text": "Customer liable for all fines, tolls, congestion and ULEZ charges. An admin fee of \'a325 per notice processed by the Seller.",\
+          "summary": "You pay any fines; a \'a325 admin fee applies per notice."\
+        \},\
+        \{\
+          "id": 9,\
+          "title": "Impoundment and Recovery",\
+          "policy_text": "If the vehicle is impounded due to the Customer\'92s actions, recovery costs up to \'a3950 are payable by the Customer.",\
+          "summary": "Impound recovery (due to your actions) is chargeable up to \'a3950."\
+        \},\
+        \{\
+          "id": 10,\
+          "title": "Fees Schedule",\
+          "policy_text": "Late \'a310/day (cap \'a3100); Repossession \'a3100\'96\'a3300; Recovery \'a3100; Impound up to \'a3950; PCN Admin \'a325; Cleaning \'a350; Lost Keys \'a3150; Lost Documents \'a350.",\
+          "summary": "Standard admin, recovery and loss fees may apply."\
+        \},\
+        \{\
+          "id": 11,\
+          "title": "Termination",\
+          "policy_text": "Agreement may be terminated for overdue payments, material breach, or illegal use. Payments already made are non-refundable except where law requires.",\
+          "summary": "Breach or non-payment can end the agreement without refund."\
+        \},\
+        \{\
+          "id": 12,\
+          "title": "Legal Framework",\
+          "policy_text": "Governed by English law; disputes handled by courts of England and Wales.",\
+          "summary": "Disputes are under English law."\
+        \},\
+        \{\
+          "id": 13,\
+          "title": "Customer Rights",\
+          "policy_text": "Nothing affects statutory rights under the Consumer Rights Act 2015. Vehicle supplied roadworthy and fit for normal use.",\
+          "summary": "Your consumer rights remain protected."\
+        \}\
+      ],\
+      "fees_schedule": [\
+        \{ "type": "late_payment", "amount_gbp": 10, "cap_gbp": 100, "per": "day", "notes": "Cap per instalment period" \},\
+        \{ "type": "repossession_fee", "amount_gbp": 300, "notes": "If vehicle is repossessed (range \'a3100\'96\'a3300 depending on case)" \},\
+        \{ "type": "vehicle_recovery", "amount_gbp": 100, "notes": "General recovery cost" \},\
+        \{ "type": "impound_recovery", "amount_gbp_max": 950, "notes": "If impounded due to customer actions" \},\
+        \{ "type": "pcn_admin", "amount_gbp": 25, "notes": "Admin per PCN/notice processed" \},\
+        \{ "type": "cleaning_valet", "amount_gbp": 50, "notes": "If returned in unacceptable condition" \},\
+        \{ "type": "lost_keys", "amount_gbp": 150, "notes": "Includes lock set & reprogramming" \},\
+        \{ "type": "lost_documents", "amount_gbp": 50, "notes": "Replacement processing" \}\
+      ],\
+      "repairs_indicative": [\
+        \{ "item": "Front wheel", "amount_gbp": 230 \},\
+        \{ "item": "Rear wheel", "amount_gbp": 250 \},\
+        \{ "item": "Wheel bearings (pair) per wheel", "amount_gbp": 65 \},\
+        \{ "item": "Front tyre (fitted)", "amount_gbp": 65 \},\
+        \{ "item": "Rear tyre (fitted)", "amount_gbp": 75 \},\
+        \{ "item": "Brake pads (per set)", "amount_gbp": 45 \},\
+        \{ "item": "Brake disc (each)", "amount_gbp": 110 \},\
+        \{ "item": "Fork damage (each leg)", "amount_gbp": 195 \},\
+        \{ "item": "Rear suspension (each)", "amount_gbp": 155 \},\
+        \{ "item": "Body panel \'96 front", "amount_gbp": 355 \},\
+        \{ "item": "Body panel \'96 side (each)", "amount_gbp": 105 \},\
+        \{ "item": "Body panel \'96 minor repair", "amount_gbp": 45 \},\
+        \{ "item": "Seat unit", "amount_gbp": 235 \},\
+        \{ "item": "Headlight assembly", "amount_gbp": 255 \},\
+        \{ "item": "Tail light", "amount_gbp": 70 \},\
+        \{ "item": "Indicator unit (each)", "amount_gbp": 75 \},\
+        \{ "item": "Dashboard / instrument cluster", "amount_gbp": 180 \},\
+        \{ "item": "Engine damage (major)", "amount_gbp_from": 1000 \},\
+        \{ "item": "Chassis / frame", "amount_gbp": 535 \},\
+        \{ "item": "Exhaust system", "amount_gbp": 195 \},\
+        \{ "item": "Delivery box/rack", "amount_gbp": 120 \},\
+        \{ "item": "ECU", "amount_gbp": 450 \},\
+        \{ "item": "Key fob / smart key", "amount_gbp": 180 \},\
+        \{ "item": "Immobiliser / control unit", "amount_gbp": 320 \},\
+        \{ "item": "Starter motor (fitted)", "amount_gbp": 160 \},\
+        \{ "item": "Battery (12V scooter)", "amount_gbp": 95 \},\
+        \{ "item": "Wiring harness (loom + labour)", "amount_gbp": 350 \},\
+        \{ "item": "Switchgear (each side)", "amount_gbp": 85 \},\
+        \{ "item": "Electrical diagnostics (per session)", "amount_gbp": 65 \},\
+        \{ "item": "General electrical repairs (per hour + parts)", "amount_gbp_from": 95 \}\
+      ]\
+    \},\
+    "rental_hire": \{\
+      "agreement_type": "Motorcycle Rental / Hire Agreement",\
+      "version": "v1.0",\
+      "jurisdiction": "England and Wales",\
+      "governing_law": "English law",\
+      "clauses": [\
+        \{\
+          "id": 1,\
+          "title": "Contract Term and Regulatory Status",\
+          "policy_text": "Fixed-term hire up to 12 months. Rental only: no title or option to purchase; no rent counts towards purchase. Not regulated by the Consumer Credit Act 1974 or the FCA.",\
+          "summary": "Hire only (max 12 months); not finance; no ownership."\
+        \},\
+        \{\
+          "id": 2,\
+          "title": "Vehicle Details",\
+          "policy_text": "Supplied roadworthy and safe with any listed accessories.",\
+          "summary": "Bike is handed over roadworthy with the accessories shown on your agreement."\
+        \},\
+        \{\
+          "id": 3,\
+          "title": "Payments and Deposit",\
+          "policy_text": "Monthly rent in advance by BACS. Security deposit held for damage, unpaid sums, or breach; refundable within 14 days of return less authorised deductions with itemised statement. No interest or finance charges.",\
+          "summary": "Pay monthly in advance; your deposit is refunded within 14 days after inspection."\
+        \},\
+        \{\
+          "id": 4,\
+          "title": "Use of Vehicle",\
+          "policy_text": "Valid UK licence required. Use limited to the UK unless written consent. Keep secure; correct fuel; no sub-hire, lending, sale, pledge, modification, racing, or unlawful use.",\
+          "summary": "Ride legally in the UK with a valid licence; no unauthorised use."\
+        \},\
+        \{\
+          "id": 5,\
+          "title": "Maintenance and Repairs",\
+          "policy_text": "Routine servicing at Owner\'92s authorised workshops. Damage from neglect/misuse at Customer\'92s cost. Third-party garages allowed only with prior written approval; Owner not liable for third-party workmanship. Owner bears fair wear and tear.",\
+          "summary": "Service with NGN-approved sites; fair wear covered; misuse is chargeable."\
+        \},\
+        \{\
+          "id": 6,\
+          "title": "Insurance",\
+          "policy_text": "Customer must maintain comprehensive insurance throughout hire (including business use if applicable). Provide proof on request; Owner may be noted as owner/interested party. Excesses/uninsured losses are payable by Customer.",\
+          "summary": "You must keep comprehensive insurance active for the whole hire."\
+        \},\
+        \{\
+          "id": 7,\
+          "title": "Liability",\
+          "policy_text": "Nothing limits liability for death/personal injury due to negligence. Owner not liable for indirect/consequential loss. Customer indemnifies Owner for losses arising from negligence, unlawful use, or breach.",\
+          "summary": "You\'92re responsible for your use; NGN isn\'92t liable for indirect losses."\
+        \},\
+        \{\
+          "id": 8,\
+          "title": "Non-Payment and Repossession",\
+          "policy_text": "If rent is overdue by more than 3 days, Owner may terminate and repossess. Reasonable repossession fee as in Appendix B. Paid sums are not refundable unless law requires.",\
+          "summary": "Over 3 days late can trigger repossession and fees."\
+        \},\
+        \{\
+          "id": 9,\
+          "title": "Minimum Hire Period and Early Termination Notice",\
+          "policy_text": "Minimum six (6) weeks hire. Customer may terminate after Minimum Hire Period by giving seven (7) days\'92 written notice. Return before minimum or without notice forfeits deposit as liquidated damages. Statutory rights unaffected.",\
+          "summary": "Minimum six weeks; after that, give seven days\'92 notice or lose the deposit."\
+        \},\
+        \{\
+          "id": 10,\
+          "title": "Late Payment Fees",\
+          "policy_text": "\'a310 per day from Day 2 of missed payment, capped at \'a3100 per monthly rental period.",\
+          "summary": "Late rent is \'a310/day, capped at \'a3100 per month."\
+        \},\
+        \{\
+          "id": 11,\
+          "title": "Police, Council and Legal Liability",\
+          "policy_text": "Customer responsible for all penalties, congestion/ULEZ charges, tolls, etc. Owner may pass details lawfully. Admin fee payable per notice (Appendix B).",\
+          "summary": "You pay any fines; a \'a325 admin fee per notice applies."\
+        \},\
+        \{\
+          "id": 12,\
+          "title": "Impoundment and Recovery Costs",\
+          "policy_text": "If impounded due to Customer\'92s actions, Customer pays reasonable recovery costs per Appendix B.",\
+          "summary": "Impound recovery (if your fault) is chargeable."\
+        \},\
+        \{\
+          "id": 13,\
+          "title": "Customer\'92s Legal Rights",\
+          "policy_text": "Nothing affects rights under the Consumer Rights Act 2015 or Road Traffic Act 1988.",\
+          "summary": "Your statutory rights remain."\
+        \},\
+        \{\
+          "id": 14,\
+          "title": "Compliance with Legislation & Variation",\
+          "policy_text": "Subject to UK laws; Owner may issue revised agreement where law changes. Failure to sign may result in termination and recovery. Statutory rights unaffected.",\
+          "summary": "Terms may change if the law changes; rights protected."\
+        \},\
+        \{\
+          "id": 15,\
+          "title": "Governing Law",\
+          "policy_text": "English law; courts of England and Wales have exclusive jurisdiction.",\
+          "summary": "Disputes handled under English law."\
+        \},\
+        \{\
+          "id": 16,\
+          "title": "Road Traffic Accidents & Claims",\
+          "policy_text": "Customer must notify immediately; Owner controls repairs/claims/recovery. Customer must cooperate and not admit liability without consent. Excess/uninsured losses payable by Customer.",\
+          "summary": "Report accidents immediately; follow NGN\'92s claim instructions."\
+        \},\
+        \{\
+          "id": 17,\
+          "title": "Ownership & Title",\
+          "policy_text": "Ownership remains with Owner at all times; title never passes. Owner may recover the vehicle on breach.",\
+          "summary": "Hired bikes always belong to NGN Motors."\
+        \},\
+        \{\
+          "id": 18,\
+          "title": "Risk & Responsibility",\
+          "policy_text": "Risk passes on handover and remains until return/acceptance. Customer liable for loss, theft, or damage while in possession.",\
+          "summary": "You\'92re responsible for the bike until it\'92s returned and accepted."\
+        \},\
+        \{\
+          "id": 19,\
+          "title": "Customer Obligations & Licence",\
+          "policy_text": "Keep the vehicle insured/roadworthy; report theft/accident; keep contact/licence details current. International licence holders must obtain UK licence within six (6) months.",\
+          "summary": "Maintain licence and keep details up to date."\
+        \},\
+        \{\
+          "id": 20,\
+          "title": "Prohibited Use",\
+          "policy_text": "No racing, trials, competitions, overloading, illegal activities, sub-letting, resale, or lending.",\
+          "summary": "No racing or illegal/unauthorised use."\
+        \},\
+        \{\
+          "id": 21,\
+          "title": "Inspection & Access",\
+          "policy_text": "Owner may inspect on reasonable notice. Customer must provide access for inspection, servicing, or repossession if required.",\
+          "summary": "Allow NGN access to check or recover the bike when needed."\
+        \},\
+        \{\
+          "id": 22,\
+          "title": "Termination",\
+          "policy_text": "Owner may terminate immediately where rent > 3 days overdue, material breach, or refusal to sign updates required by law/Owner. Sums already paid are non-refundable except where law requires.",\
+          "summary": "Serious breach can end the hire with no refund."\
+        \},\
+        \{\
+          "id": 23,\
+          "title": "Indemnity",\
+          "policy_text": "Customer indemnifies Owner against losses/claims arising from Customer\'92s use, including legal costs; survives termination.",\
+          "summary": "You cover NGN\'92s losses caused by your misuse."\
+        \},\
+        \{\
+          "id": 24,\
+          "title": "No Waiver",\
+          "policy_text": "Failure to enforce rights is not a waiver.",\
+          "summary": "Rules still apply even if not enforced immediately."\
+        \},\
+        \{\
+          "id": 25,\
+          "title": "Severability",\
+          "policy_text": "If any provision is unlawful/unenforceable, the remainder remains valid.",\
+          "summary": "Invalid clauses don\'92t void the contract."\
+        \},\
+        \{\
+          "id": 26,\
+          "title": "Resolution of Issues & Reasonable Timeframe",\
+          "policy_text": "Report issues promptly. Owner has a reasonable period (normally up to 14 days, subject to external factors) to resolve; statutory rights unaffected.",\
+          "summary": "We aim to resolve issues within about two weeks."\
+        \},\
+        \{\
+          "id": 27,\
+          "title": "Administration & Fees Schedule",\
+          "policy_text": "Late \'a310/day (cap \'a3100); Repossession \'a3300; Recovery \'a3100; Impound up to \'a3950; PCN Admin \'a325; Cleaning \'a350; Missing Keys \'a3150; Lost Documents \'a350; plus indicative repair costs.",\
+          "summary": "Standard fees and typical repair costs."\
+        \},\
+        \{\
+          "id": 28,\
+          "title": "Legal Proceedings & Costs",\
+          "policy_text": "Customers may bring claims in English courts. If unsuccessful, may need to reimburse Owner\'92s reasonable legal costs, subject to court discretion.",\
+          "summary": "Unsuccessful claims may incur NGN\'92s reasonable legal costs."\
+        \}\
+      ],\
+      "fees_schedule": [\
+        \{ "type": "late_payment", "amount_gbp": 10, "cap_gbp": 100, "per": "day", "notes": "From Day 2; cap per rental month" \},\
+        \{ "type": "repossession_fee", "amount_gbp": 300, "notes": "If vehicle is repossessed" \},\
+        \{ "type": "vehicle_recovery", "amount_gbp": 100, "notes": "General recovery cost" \},\
+        \{ "type": "impound_recovery", "amount_gbp_max": 950, "notes": "If impounded due to customer actions" \},\
+        \{ "type": "pcn_admin", "amount_gbp": 25, "notes": "Admin per PCN/notice processed" \},\
+        \{ "type": "cleaning_valet", "amount_gbp": 50, "notes": "If returned in unacceptable condition" \},\
+        \{ "type": "lost_keys", "amount_gbp": 150, "notes": "Includes lock set & reprogramming" \},\
+        \{ "type": "lost_documents", "amount_gbp": 50, "notes": "Replacement processing" \}\
+      ],\
+      "repairs_indicative": [\
+        \{ "item": "Front wheel", "amount_gbp": 230 \},\
+        \{ "item": "Rear wheel", "amount_gbp": 250 \},\
+        \{ "item": "Wheel bearings (pair) per wheel", "amount_gbp": 65 \},\
+        \{ "item": "Front tyre (fitted)", "amount_gbp": 65 \},\
+        \{ "item": "Rear tyre (fitted)", "amount_gbp": 75 \},\
+        \{ "item": "Brake pads (per set)", "amount_gbp": 45 \},\
+        \{ "item": "Brake disc (each)", "amount_gbp": 110 \},\
+        \{ "item": "Fork damage (each leg)", "amount_gbp": 195 \},\
+        \{ "item": "Rear suspension (each)", "amount_gbp": 155 \},\
+        \{ "item": "Body panel \'96 front", "amount_gbp": 355 \},\
+        \{ "item": "Body panel \'96 side (each)", "amount_gbp": 105 \},\
+        \{ "item": "Body panel \'96 minor repair", "amount_gbp": 45 \},\
+        \{ "item": "Seat unit", "amount_gbp": 235 \},\
+        \{ "item": "Headlight assembly", "amount_gbp": 255 \},\
+        \{ "item": "Tail light", "amount_gbp": 70 \},\
+        \{ "item": "Indicator unit (each)", "amount_gbp": 75 \},\
+        \{ "item": "Dashboard / instrument cluster", "amount_gbp": 180 \},\
+        \{ "item": "Engine damage (major)", "amount_gbp_from": 1000 \},\
+        \{ "item": "Chassis / frame", "amount_gbp": 535 \},\
+        \{ "item": "Exhaust system", "amount_gbp": 195 \},\
+        \{ "item": "Delivery box/rack", "amount_gbp": 120 \},\
+        \{ "item": "ECU", "amount_gbp": 450 \},\
+        \{ "item": "Key fob / smart key", "amount_gbp": 180 \},\
+        \{ "item": "Immobiliser / control unit", "amount_gbp": 320 \},\
+        \{ "item": "Starter motor (fitted)", "amount_gbp": 160 \},\
+        \{ "item": "Battery (12V scooter)", "amount_gbp": 95 \},\
+        \{ "item": "Wiring harness (loom + labour)", "amount_gbp": 350 \},\
+        \{ "item": "Switchgear (each side)", "amount_gbp": 85 \},\
+        \{ "item": "Electrical diagnostics (per session)", "amount_gbp": 65 \},\
+        \{ "item": "General electrical repairs (per hour + parts)", "amount_gbp_from": 95 \}\
+      ]\
+    \}\
+  \},\
+  "faqs": \{\
+    "finance_sale": [\
+      \{\
+        "intent": "finance_overview",\
+        "clause_refs": [1],\
+        "user_queries": [\
+          "What is your finance contract?",\
+          "Is this a credit agreement?",\
+          "Do you charge interest?",\
+          "How long is the plan?"\
+        ],\
+        "bot_answer": "It\'92s a 12-month, interest-free sale agreement, not a regulated credit agreement."\
+      \},\
+      \{\
+        "intent": "finance_payments",\
+        "clause_refs": [2],\
+        "user_queries": [\
+          "How do I pay?",\
+          "Do you take card or bank transfer?",\
+          "When do I pay the first instalment?",\
+          "Is the deposit refundable?"\
+        ],\
+        "bot_answer": "Pay by bank transfer within 48 hours. The deposit is non-refundable unless required by law. Instalments are monthly."\
+      \},\
+      \{\
+        "intent": "finance_ownership",\
+        "clause_refs": [3],\
+        "user_queries": [\
+          "When do I own the bike?",\
+          "Do I own it during finance?"\
+        ],\
+        "bot_answer": "Ownership transfers once the full balance is paid and confirmed."\
+      \},\
+      \{\
+        "intent": "finance_late_and_repossession",\
+        "clause_refs": [4, 10, 11],\
+        "user_queries": [\
+          "What if I miss a payment?",\
+          "Can you repossess the bike?",\
+          "How much is the repossession fee?"\
+        ],\
+        "bot_answer": "Late fees are \'a310/day capped at \'a3100 per instalment period. If you\'92re over 7 days late, the bike may be repossessed and a \'a3300 fee can apply."\
+      \},\
+      \{\
+        "intent": "finance_licence",\
+        "clause_refs": [5],\
+        "user_queries": [\
+          "Can I buy on finance with an international licence?",\
+          "What if my licence expires?"\
+        ],\
+        "bot_answer": "You need a valid UK licence. If you start with an international licence, you must obtain a UK licence within six months."\
+      \},\
+      \{\
+        "intent": "finance_servicing_repairs",\
+        "clause_refs": [6],\
+        "user_queries": [\
+          "Where do I service the bike?",\
+          "Can I use my own garage?",\
+          "Who pays for damage?"\
+        ],\
+        "bot_answer": "Routine servicing is done at NGN-authorised workshops. Third-party work needs written approval. Damage from misuse/neglect is chargeable."\
+      \},\
+      \{\
+        "intent": "finance_use_rules",\
+        "clause_refs": [7],\
+        "user_queries": [\
+          "Can I modify the bike?",\
+          "Can I lend it to a friend?",\
+          "Can I ride it outside the UK?"\
+        ],\
+        "bot_answer": "No modifications or lending without written approval, and use is limited to the UK."\
+      \},\
+      \{\
+        "intent": "finance_fines",\
+        "clause_refs": [8, 10],\
+        "user_queries": [\
+          "Who pays ULEZ or parking fines?",\
+          "Is there an admin fee for PCNs?"\
+        ],\
+        "bot_answer": "You pay any fines/charges. We charge a \'a325 admin fee per notice processed."\
+      \},\
+      \{\
+        "intent": "finance_impound",\
+        "clause_refs": [9],\
+        "user_queries": [\
+          "What if the bike is impounded?"\
+        ],\
+        "bot_answer": "If the bike is impounded due to your actions, recovery costs up to \'a3950 are payable."\
+      \},\
+      \{\
+        "intent": "finance_rights_law",\
+        "clause_refs": [12, 13],\
+        "user_queries": [\
+          "What law applies?",\
+          "Do I still have consumer rights?"\
+        ],\
+        "bot_answer": "Agreements are under English law, and your statutory consumer rights remain protected."\
+      \}\
+    ],\
+    "rental_hire": [\
+      \{\
+        "intent": "rental_overview",\
+        "clause_refs": [1],\
+        "user_queries": [\
+          "Is this rental a finance deal?",\
+          "Do I own the bike after renting?",\
+          "How long can I rent for?"\
+        ],\
+        "bot_answer": "It\'92s a simple hire for up to 12 months. No ownership or finance is included."\
+      \},\
+      \{\
+        "intent": "rental_payments_deposit",\
+        "clause_refs": [3],\
+        "user_queries": [\
+          "When do I pay rent?",\
+          "Is the deposit refundable?",\
+          "How long till the deposit comes back?"\
+        ],\
+        "bot_answer": "Rent is paid monthly in advance by bank transfer. The deposit is refunded within 14 days of return minus any authorised deductions."\
+      \},\
+      \{\
+        "intent": "rental_minimum_and_notice",\
+        "clause_refs": [9],\
+        "user_queries": [\
+          "What is the minimum rental period?",\
+          "Can I return early?",\
+          "Do I lose my deposit if I end early?"\
+        ],\
+        "bot_answer": "Minimum hire is six weeks. After that, give seven days\'92 written notice. Early return before six weeks or without notice forfeits the deposit."\
+      \},\
+      \{\
+        "intent": "rental_late_payment",\
+        "clause_refs": [10, 8, 27],\
+        "user_queries": [\
+          "What if I miss a rent payment?",\
+          "Are there late fees?"\
+        ],\
+        "bot_answer": "Late rent is \'a310/day from Day 2, capped at \'a3100 per month. If more than three days late, the hire may be terminated and the bike repossessed."\
+      \},\
+      \{\
+        "intent": "rental_use_rules",\
+        "clause_refs": [4, 20],\
+        "user_queries": [\
+          "Can I lend the rental bike?",\
+          "Can I ride it outside the UK?",\
+          "Can I modify it?"\
+        ],\
+        "bot_answer": "No lending or modifications without written consent, and use is UK-only unless we agree in writing."\
+      \},\
+      \{\
+        "intent": "rental_servicing_repairs",\
+        "clause_refs": [5],\
+        "user_queries": [\
+          "Where do I service the rental bike?",\
+          "Who pays for damage?",\
+          "Can I use my own garage?"\
+        ],\
+        "bot_answer": "Routine servicing is at NGN-approved sites. Fair wear is covered; damage from misuse/neglect is charged. Third-party garages need written approval."\
+      \},\
+      \{\
+        "intent": "rental_insurance",\
+        "clause_refs": [6],\
+        "user_queries": [\
+          "Do you provide insurance?",\
+          "What insurance do I need?",\
+          "Can I use it for delivery work?"\
+        ],\
+        "bot_answer": "You must keep comprehensive insurance throughout the hire. Business use is fine if covered by your policy."\
+      \},\
+      \{\
+        "intent": "rental_fines",\
+        "clause_refs": [11, 27],\
+        "user_queries": [\
+          "Who pays parking or ULEZ fines?",\
+          "Is there an admin fee for fines?"\
+        ],\
+        "bot_answer": "You\'92re responsible for fines. We charge a \'a325 admin fee per notice we process."\
+      \},\
+      \{\
+        "intent": "rental_impound",\
+        "clause_refs": [12, 27],\
+        "user_queries": [\
+          "What if the rental is impounded?"\
+        ],\
+        "bot_answer": "If impounded due to your actions, recovery costs (up to \'a3950) are payable by you."\
+      \},\
+      \{\
+        "intent": "rental_accidents",\
+        "clause_refs": [16],\
+        "user_queries": [\
+          "What should I do if I crash?",\
+          "Who handles repairs after an accident?"\
+        ],\
+        "bot_answer": "Report any accident immediately with full details. We\'92ll decide repairs/claims and you\'92ll need to cooperate fully."\
+      \},\
+      \{\
+        "intent": "rental_rights_law",\
+        "clause_refs": [13, 15, 28],\
+        "user_queries": [\
+          "What law applies?",\
+          "Do I still have rights if something goes wrong?"\
+        ],\
+        "bot_answer": "The agreement is governed by English law. Your statutory rights remain protected."\
+      \}\
+    ]\
+  \}\
+\}\
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "question": "office hours",
+    "answer": "Our office hours are Monday-Friday, 9 AM – 6 PM."
+  },
+  {
+    "question": "ceo",
+    "answer": "Our CEO is John Doe."
+  },
+  {
+    "question": "support",
+    "answer": "You can contact support at support@company.com."
+  },
+  {
+    "question": "products",
+    "answer": "We offer Product A, Product B, and Product C."
+  },
+  {
+    "question": "greeting",
+    "answer": "Hi there! How can I help you today?"
+  }
+]

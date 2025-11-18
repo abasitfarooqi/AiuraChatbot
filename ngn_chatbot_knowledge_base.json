@@ -1,0 +1,1000 @@
+{
+  "metadata": {
+    "version": "1.1.0",
+    "last_updated": "2025-01-27",
+    "description": "Comprehensive knowledge base for Neguinho Motors - suitable for LLM training, RAG, and conversational AI",
+    "data_sources": [
+      "neguinhomotors.co.uk",
+      "Companies House data",
+      "Finance and Rental Agreement contracts",
+      "Rental Agreement contract",
+      "Finance Sale Agreement contract",
+      "Customer question bank",
+      "Fallback strategy documentation",
+      "Master interview questionnaire"
+    ]
+  },
+  "company": {
+    "registered_name": "NEGUINHO MOTORS LTD",
+    "company_number": "11600635",
+    "trading_names": ["NGN Motors", "Neguinho Motors", "NGN"],
+    "registered_address": "9-13 Catford Hill, London, SE6 4NU",
+    "incorporation_date": "October 2018",
+    "email": "enquiries@neguinhomotors.co.uk",
+    "customer_service_email": "customerservice@neguinhomotors.co.uk",
+    "primary_phone": "0208 314 1498",
+    "secondary_phone": "0203 409 5478",
+    "emergency_phones": ["0203 409 5478", "0208 314 1498"],
+    "bank_account": {
+      "bank": "Barclays Bank Plc",
+      "account_name": "Neguinho Motors Ltd",
+      "account_number": "53113418",
+      "sort_code": "20-57-76",
+      "payment_reference": "Vehicle Registration number"
+    },
+    "description": "London-based motorcycle business specialising in Honda & Yamaha scooters and motorcycles. Offers rentals, sales, servicing, MOT testing, nationwide delivery, accident management, and accessories.",
+    "core_activities": [
+      "Motorcycle rentals (short & long term)",
+      "New and used motorcycle sales",
+      "Servicing and repairs",
+      "MOT testing",
+      "Nationwide vehicle delivery",
+      "Accident management support",
+      "Online/offline accessories shop"
+    ],
+    "primary_brands": ["Honda", "Yamaha"],
+    "customer_types": ["individuals", "businesses"],
+    "languages_supported": ["English"]
+  },
+  "branches": [
+    {
+      "name": "Catford",
+      "address": "9-13 Unit 1179 Catford Hill, London SE6 4NU",
+      "phone": "0208 314 1498",
+      "email": "enquiries@neguinhomotors.co.uk",
+      "whatsapp_available": true,
+      "opening_hours": {
+        "monday": "09:00-18:00",
+        "tuesday": "09:00-18:00",
+        "wednesday": "09:00-18:00",
+        "thursday": "09:00-18:00",
+        "friday": "09:00-18:00",
+        "saturday": "09:00-18:00",
+        "sunday": "closed",
+        "bank_holidays": "varies - check seasonal hours"
+      },
+      "services_offered": ["sales", "rentals", "servicing", "repairs", "MOT", "delivery"],
+      "specialisations": [],
+      "parking_available": true,
+      "wheelchair_accessible": false,
+      "nearest_transport": []
+    },
+    {
+      "name": "Tooting",
+      "address": "4A Penwortham Road, London SW16 6RE",
+      "phone": "0203 409 5478",
+      "email": "enquiries@neguinhomotors.co.uk",
+      "whatsapp_available": true,
+      "opening_hours": {
+        "monday": "09:00-18:00",
+        "tuesday": "09:00-18:00",
+        "wednesday": "09:00-18:00",
+        "thursday": "09:00-18:00",
+        "friday": "09:00-18:00",
+        "saturday": "09:00-18:00",
+        "sunday": "closed"
+      },
+      "services_offered": ["sales", "rentals", "servicing", "repairs", "MOT", "delivery"],
+      "specialisations": [],
+      "parking_available": true,
+      "wheelchair_accessible": false,
+      "nearest_transport": []
+    },
+    {
+      "name": "Sutton",
+      "address": "329 High St, Sutton SM1 1LW",
+      "phone": "0208 412 9275",
+      "email": "enquiries@neguinhomotors.co.uk",
+      "whatsapp_available": true,
+      "opening_hours": {
+        "monday": "09:00-18:00",
+        "tuesday": "09:00-18:00",
+        "wednesday": "09:00-18:00",
+        "thursday": "09:00-18:00",
+        "friday": "09:00-18:00",
+        "saturday": "09:00-18:00",
+        "sunday": "closed"
+      },
+      "services_offered": ["sales", "rentals", "servicing", "repairs", "MOT", "delivery"],
+      "specialisations": [],
+      "parking_available": true,
+      "wheelchair_accessible": false,
+      "nearest_transport": []
+    }
+  ],
+  "services": {
+    "rentals": {
+      "description": "Motorcycle and scooter rental/hire service",
+      "contract_type": "Motorcycle Rental Agreement - fixed-term hire",
+      "contract_term_years": 5,
+      "contract_term_max": "Up to 5 years from contract start date",
+      "regulatory_status": "Not a regulated agreement under Consumer Credit Act 1974, not regulated by Financial Conduct Authority (FCA)",
+      "ownership": "Rental contract only - does not confer title or option to purchase, no rent constitutes part-payment towards any price",
+      "minimum_hire_period_weeks": 6,
+      "early_termination": {
+        "minimum_period": "6 weeks from Contract Start Date",
+        "notice_required": "7 days written notice after minimum period",
+        "early_return_penalty": "If returned before minimum period or without required notice, Security Deposit forfeited in full as liquidated damages"
+      },
+      "includes": ["tax", "MOT", "weekly_maintenance"],
+      "weekly_prices": {
+        "Honda Vision 125": 70,
+        "Honda Forza 125": 75,
+        "Honda PCX 125": 75,
+        "Honda SH 125": 75,
+        "Yamaha NMAX 125": 75,
+        "Yamaha XMAX 125": 100,
+        "note": "Prices start from £70/week, exact prices vary by model and availability (contact for details at 0208 314 1498 or enquiries@neguinhomotors.co.uk)"
+      },
+      "deposit_required": true,
+      "deposit_type": "Security Deposit",
+      "deposit_amount": "varies - contact for details at 0208 314 1498 or enquiries@neguinhomotors.co.uk",
+      "deposit_refund": "Refundable within 14 days of return, less authorised deductions (with itemised statement)",
+      "deposit_purpose": "Held as security for damage, unpaid sums, or breach",
+      "payment_terms": {
+        "method": "BACS (Bank transfer)",
+        "frequency": "Monthly in advance",
+        "deadline": "All documents and initial payment must be completed within 48 hours of contract signature, otherwise agreement may be cancelled",
+        "bank_account": "Barclays Bank Plc, Neguinho Motors Ltd, A/C: 53113418 / 20-57-76",
+        "payment_reference": "Vehicle Registration number"
+      },
+      "insurance_included": false,
+      "insurance_required": true,
+      "insurance_type": "Comprehensive insurance throughout hire (including business use if applicable)",
+      "insurance_requirements": "Customer must provide evidence of insurance on request, may be required to note Owner as owner/interested party",
+      "insurance_excess": "Any excess or uninsured losses payable by Customer",
+      "mileage_limits": false,
+      "documents_required": ["driving_licence", "ID", "proof_of_address"],
+      "minimum_age": "varies by model",
+      "licence_requirements": {
+        "uk_licence": "Customer must hold valid UK driving licence appropriate to vehicle",
+        "international_licence": "If starting with international licence valid in UK, must obtain UK licence within 6 months. Failure constitutes breach permitting termination and recovery without refund",
+        "licence_types_accepted": ["CBT", "A1", "A2", "A"],
+        "licence_validity": "Licence must remain valid throughout contract term"
+      },
+      "use_restrictions": {
+        "geographic": "Limited to United Kingdom unless Owner consents in writing",
+        "prohibited": ["sub-hire", "lend", "sell", "pledge", "modify vehicle", "racing", "competition", "unlawful purposes"]
+      },
+      "maintenance": {
+        "routine_servicing": "Normally carried out at Owner's authorised workshops at intervals appropriate to vehicle",
+        "customer_damage": "Customer responsible for damage from neglect, misuse, or unauthorised repairs",
+        "third_party_garages": "With prior written approval, work may be performed by third-party garage; costs remain Customer's responsibility unless agreed otherwise. Owner not liable for third-party workmanship",
+        "wear_tear": "Owner bears reasonable costs due solely to fair wear and tear"
+      },
+      "courier_work_allowed": "contact for details at 0208 314 1498 or enquiries@neguinhomotors.co.uk",
+      "delivery_available": true,
+      "extension_allowed": true,
+      "late_payment": {
+        "fee_per_day": 10,
+        "starts_from": "Day 2 of missed payment",
+        "cap_per_period": 100,
+        "period": "per monthly rental period",
+        "repossession_threshold": "If rent overdue by more than 3 days, Owner may terminate and repossess"
+      },
+      "repossession": {
+        "trigger": "Rent overdue by more than 3 days",
+        "fee": 300,
+        "refund_policy": "Amounts already paid not refundable except as required by law"
+      },
+      "fees": {
+        "late_payment": "£10 per day (cap £100 per rental period) - applies from Day 2",
+        "repossession": "£300",
+        "vehicle_recovery": "£100",
+        "impoundment_recovery": "Up to £950",
+        "pcn_processing": "£25 per notice",
+        "cleaning_deep_valet": "£50",
+        "missing_keys": "£150 (includes replacement lock set & reprogramming)",
+        "lost_documents": "£50"
+      }
+    },
+    "sales": {
+      "new_bikes": {
+        "brands": ["Honda", "Yamaha"],
+        "models_2025": [
+          "Honda PCX125",
+          "Honda Vision 110",
+          "Honda CB125F",
+          "Yamaha YZF-R125",
+          "Yamaha MT-125",
+          "Yamaha NMAX 125",
+          "More Motorcycles Contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+        ],
+        "warranty_period": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+        "warranty_coverage": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+      },
+      "used_bikes": {
+        "price_range_examples": [
+          {"model": "Yamaha NMAX 125", "price": 1799},
+          {"model": "Honda PCX 125", "price": 2199.99},
+          {"model": "Honda NSC110", "price": 999.99},
+          {"model": "Honda Forza 125", "price": 3699.99},
+          {"model": "Honda CB 500 F", "price": 2499.99}
+        ],
+        "warranty_period": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+        "note": "Inventory changes frequently - check website or call for current stock"
+      },
+      "test_rides": {
+        "available": true,
+        "process": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+        "deposit_required": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+        "licence_required": true
+      },
+      "part_exchange": {
+        "accepted": true,
+        "process": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+      },
+      "delivery": {
+        "available": true,
+        "price": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+        "insured": true,
+        "timeframe": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+      },
+      "payment_methods": ["cash", "bank_transfer", "card", "finance"],
+      "finance_available": true
+    },
+    "servicing": {
+      "types": [
+        {
+          "name": "Basic Service",
+          "recommended_interval_miles": 6000,
+          "includes": [
+            "Engine oil & filter change",
+            "Brake inspection",
+            "Tyre check",
+            "Chain/belt inspection",
+            "Basic electrical checks",
+            "General safety inspection"
+          ],
+          "price": "contact for quote",
+          "duration": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+        },
+        {
+          "name": "Full/Major Service",
+          "recommended_interval_miles": 12000,
+          "includes": [
+            "All basic service items",
+            "Oil & filters",
+            "Spark plugs",
+            "Transmission maintenance",
+            "Advanced brake servicing",
+            "Suspension & steering inspection",
+            "Frame inspection",
+            "Exhaust inspection"
+          ],
+          "price": "contact for quote",
+          "duration": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+        }
+      ],
+      "repairs": {
+        "available": true,
+        "types": [
+          "Fault diagnosis",
+          "Chain & sprocket replacement",
+          "Brake pads & discs",
+          "Tyre replacement",
+          "Accessory fitting",
+          "General mechanical repairs",
+          "Electrical repairs"
+        ],
+        "diagnostic_fee": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+        "labour_rate": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+      },
+      "electric_bikes": {
+        "serviced": true
+      },
+      "bring_own_parts": {
+        "allowed": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+      },
+      "service_book_stamping": true,
+      "digital_records": true,
+      "collection_delivery": {
+        "available": true,
+        "free_with_repair_service": true,
+        "price_otherwise": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+      },
+      "same_day_service": "contact for availability",
+      "walk_in": "contact for availability",
+      "booking_process": "phone, form, or email"
+    },
+    "mot_testing": {
+      "available": true,
+      "branches": ["all branches"],
+      "price": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+      "duration": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+      "pre_mot_check": "contact for availability",
+      "mot_repairs": "contact for availability",
+      "retest_discount": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+      "collection_available": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+      "while_you_wait": "contact for availability",
+      "online_booking": "contact for availability"
+    },
+    "delivery_transport": {
+      "nationwide_england": {
+        "price": 249.99,
+        "description": "Flat rate for anywhere in England",
+        "insured": true,
+        "insurance_value": "up to £100,000",
+        "timeframe": "24 hours to 7 working days depending on option",
+        "tracking": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+      },
+      "free_collection": {
+        "condition": "when choosing repair service",
+        "radius": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+      },
+      "scotland_wales_ni": {
+        "available": "contact for custom quote"
+      },
+      "recovery_service": {
+        "available": true,
+        "cost": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+        "coverage": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+      },
+      "booking_process": "phone, email, or WhatsApp"
+    },
+    "finance": {
+      "available": true,
+      "contract_type": "Motorcycle Sale Agreement - fixed-term sale agreement",
+      "contract_term_months": 12,
+      "contract_term_max": "Maximum period of 12 months from start date",
+      "regulatory_status": "Not a regulated credit agreement under Consumer Credit Act 1974",
+      "interest_charge": "No interest charge - instalments are interest-free",
+      "additional_charges": "No additional charges, fees, or penalties added to Total Price of Vehicle",
+      "total_price_calculation": "Vehicle Price + Accessories Total",
+      "deposit": {
+        "required": true,
+        "refundable": "Non-refundable except where required by law",
+        "amount": "varies - contact for details at 0208 314 1498 or enquiries@neguinhomotors.co.uk"
+      },
+      "payment_terms": {
+        "method": "BACS (Bank transfer)",
+        "frequency": "Monthly instalments",
+        "deadline": "All documents and payments must be done within 48 hours of contract, failing to do so will cancel this contract and no refund will be due",
+        "bank_account": "Barclays Bank Plc, Neguinho Motors Ltd, A/C: 53113418 / 20-57-76",
+        "payment_reference": "Vehicle Registration number"
+      },
+      "ownership": {
+        "transfer": "Ownership transfers to Customer only after full payment is received and confirmed by Neguinho Motors",
+        "during_contract": "Ownership remains with Seller until all sums due are paid in full",
+        "repossession_right": "Seller may repossess vehicle at any time if Customer breaches Agreement"
+      },
+      "late_payment": {
+        "fee_per_day": 10,
+        "starts_from": "Day 2 of missed payment",
+        "cap_per_period": 100,
+        "period": "per instalment period",
+        "repossession_threshold": "If payment overdue by more than 7 days, Seller may repossess"
+      },
+      "repossession": {
+        "trigger": "Payment overdue by more than 7 days",
+        "fee": 100,
+        "refund_policy": "Any sums already paid will not be refunded, except where required by law"
+      },
+      "licence_requirements": {
+        "uk_licence": "Customer must hold valid UK driving licence with correct category",
+        "international_licence": "If starting with international licence valid in UK, must obtain UK licence within 6 months. Failure constitutes breach permitting termination and recovery without refund",
+        "licence_checks": "Customer must provide all necessary information for Seller to carry out reasonable checks (including DVLA licence checks)",
+        "licence_loss": "If Customer loses licence, is disqualified, or becomes unable to lawfully ride, must notify Seller immediately"
+      },
+      "use_restrictions": {
+        "geographic": "Vehicle must be used only in UK and in accordance with UK road traffic laws",
+        "prohibited": ["sub-hire", "resell", "lend vehicle", "racing", "competitions", "unlawful purposes", "modify vehicle without written consent"]
+      },
+      "maintenance": {
+        "routine_servicing": "Normally carried out at Seller's/Owner's authorised workshops",
+        "customer_damage": "Customer liable for damage from neglect, misuse, or failure to follow reasonable operating instructions",
+        "unauthorised_repairs": "Customer liable for damage from repairs, modifications, or servicing without Seller's prior written consent",
+        "third_party_garages": "With prior written consent, Customer may arrange repairs at third-party garage; Customer remains responsible for all costs unless agreed otherwise. Seller not liable for quality, suitability, or safety of third-party work"
+      },
+      "fees": {
+        "late_payment": "£10 per day (cap £100 per instalment period) - applies from Day 2",
+        "repossession": "£100",
+        "vehicle_recovery": "£100",
+        "impoundment_recovery": "Up to £950",
+        "pcn_processing": "£25 per notice",
+        "cleaning_deep_valet": "£50",
+        "missing_keys": "£150 (includes replacement lock set & reprogramming)",
+        "lost_documents": "£50"
+      },
+      "providers": "contact for details at 0208 314 1498 or enquiries@neguinhomotors.co.uk",
+      "products": "contact for details at 0208 314 1498 or enquiries@neguinhomotors.co.uk",
+      "eligibility": {
+        "age": "contact for details at 0208 314 1498 or enquiries@neguinhomotors.co.uk",
+        "licence_required": true,
+        "credit_check": true,
+        "employment": "contact for details at 0208 314 1498 or enquiries@neguinhomotors.co.uk",
+        "residency": "contact for details at 0208 314 1498 or enquiries@neguinhomotors.co.uk"
+      },
+      "online_application": "contact for availability",
+      "documents_required": "contact for details at 0208 314 1498 or enquiries@neguinhomotors.co.uk"
+    },
+    "accessories_shop": {
+      "categories": [
+        "Helmets",
+        "Clothing (textile & leather jackets)",
+        "Boots",
+        "Gloves",
+        "Luggage",
+        "Security (locks, chains)",
+        "Spares",
+        "Workshop consumables"
+      ],
+      "brands": "contact for current stock",
+      "online_available": true,
+      "in_store_available": true,
+      "click_collect": "contact for availability",
+      "shipping": {
+        "couriers": ["DPD", "UPS"],
+        "delivery_time": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+        "international": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+      },
+      "returns_policy": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+      "helmet_returns": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+    },
+    "accident_management": {
+      "available": true,
+      "description": "Expert claim handling for road traffic accidents",
+      "languages": ["English"],
+      "process": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+    }
+  },
+  "loyalty_programme": {
+    "name": "NGN Club",
+    "membership_type": "free",
+    "join_method": ["online_form", "in_store"],
+    "benefits": {
+      "discount_percentage": 10,
+      "discount_applies_to": "every purchase",
+      "credits_system": true,
+      "credit_earn_rate": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+      "credit_availability": "48 hours after purchase",
+      "credit_expiry_months": 6,
+      "credits_valid_for": ["purchases"],
+      "credits_not_valid_for": ["PCNs", "instalments", "rentals"]
+    },
+    "restrictions": {
+      "non_transferable": true,
+      "one_account_per_person": true,
+      "no_retroactive_credits": true
+    },
+    "balance_check": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+    "online_usage": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+    "stacking_with_offers": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+  },
+  "partner_programme": {
+    "available": true,
+    "eligibility": "registered business partners (6+ months trading)",
+    "benefits": {
+      "motorcycle_purchase_credit": {
+        "percentage": 4,
+        "note": "Some pages mention 17.5% credit on service spend - verify with business"
+      },
+      "credit_availability": "48 hours",
+      "credit_expiry_months": 6
+    },
+    "fleet_solutions": true,
+    "sign_up": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+  },
+  "repair_costs": {
+    "mechanical_parts": {
+      "front_wheel": {"cost": 230, "notes": "Includes fitting & balancing"},
+      "rear_wheel": {"cost": 250, "notes": "Includes fitting & balancing"},
+      "wheel_bearings_pair": {"cost": 65, "notes": "Per wheel"},
+      "front_tyre": {"cost": 65, "notes": "Branded tyre + fitting"},
+      "rear_tyre": {"cost": 75, "notes": "Branded tyre + fitting"},
+      "brake_pads_per_set": {"cost": 45, "notes": "Front or rear"},
+      "brake_disc": {"cost": 110, "notes": "Each"},
+      "fork_damage_per_leg": {"cost": 195, "notes": "Replacement + labour"},
+      "rear_suspension": {"cost": 155, "notes": "OEM spec replacement"},
+      "body_panel_front": {"cost": 355, "notes": "OEM part + paint if required"},
+      "body_panel_side": {"cost": 105, "notes": "Each panel (Left/Right)"},
+      "body_panel_repair_minor": {"cost": 45, "notes": "Cosmetic repair (minor scratches/cracks)"},
+      "seat_unit": {"cost": 235, "notes": "Complete replacement"},
+      "headlight_assembly": {"cost": 255, "notes": "OEM complete unit"},
+      "tail_light": {"cost": 70, "notes": "OEM replacement"},
+      "indicator_unit": {"cost": 75, "notes": "Each"},
+      "dashboard_instrument_cluster": {"cost": 180, "notes": "OEM complete unit"},
+      "engine_damage_major": {"cost": "From 1,000", "notes": "Depending on extent of damage"},
+      "chassis_frame_damage": {"cost": 535, "notes": "Structural replacement"},
+      "exhaust_system": {"cost": 195, "notes": "OEM replacement"},
+      "pizza_box_rack_damage": {"cost": 120, "notes": "Rack + delivery box"}
+    },
+    "electrical_electronic": {
+      "ecu_engine_control_unit": {"cost": 450, "notes": "OEM unit + programming"},
+      "key_fob_smart_key": {"cost": 180, "notes": "Includes reprogramming"},
+      "immobiliser_control_unit": {"cost": 320, "notes": "OEM replacement"},
+      "starter_motor": {"cost": 160, "notes": "Includes fitting"},
+      "battery_12v_scooter": {"cost": 95, "notes": "Branded replacement"},
+      "wiring_harness_main_loom": {"cost": 350, "notes": "OEM harness + labour"},
+      "switchgear_handlebar_controls": {"cost": 85, "notes": "Each side"},
+      "electrical_diagnostics": {"cost": 65, "notes": "Per session/inspection"},
+      "general_electrical_repairs": {"cost": "From 95", "notes": "Labour per hour + parts"}
+    },
+    "note": "Based on average market rates for Honda & Yamaha scooters up to 125cc. Costs are indicative and may vary."
+  },
+  "policies": {
+    "warranty": {
+      "new_bikes": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+      "used_bikes": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+      "coverage": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+      "claims_process": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+      "turnaround_time": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+    },
+    "returns": {
+      "accessories_clothing": {
+        "timeframe_days": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+        "condition": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+        "method": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+      },
+      "bikes": {
+        "policy": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+      },
+      "helmet_returns": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+      "shipping_cost": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+    },
+    "cancellations": {
+      "services": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+      "no_show_fee": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+    },
+    "complaints": {
+      "contact_method": "email or phone",
+      "response_time_goal": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk",
+      "escalation_process": "contact for details at 0208 314 1498 or enquires@neguinhomotors.co.uk"
+    }
+  },
+  "customer_questions": {
+    "categories": {
+      "general_business": [
+        "Who are you?",
+        "What does NGN Motors do?",
+        "Are you part of Neguinho Motors?",
+        "Are you an authorised Honda or Yamaha dealer?",
+        "Where are you based?",
+        "Do you have more than one branch?",
+        "How long have you been in business?",
+        "What are your opening hours?",
+        "Are you open on Sundays?",
+        "Are you open on bank holidays?",
+        "Do you close for lunch?",
+        "Do you have parking?",
+        "Is your workshop wheelchair accessible?",
+        "What's your phone number?",
+        "What's your email?",
+        "Do you have WhatsApp?",
+        "Where's your nearest branch to me?",
+        "Are you open now?",
+        "What's your postcode?",
+        "Can I speak to someone?",
+        "What languages do you speak?",
+        "Do you have reviews or testimonials?"
+      ],
+      "sales": [
+        "What bikes do you sell?",
+        "Do you sell new bikes or only used ones?",
+        "What brands do you have?",
+        "Do you sell Honda bikes?",
+        "Do you sell Yamaha bikes?",
+        "What's the price of a Honda PCX?",
+        "What's the cheapest scooter you have?",
+        "What used bikes are in stock right now?",
+        "Do you sell electric bikes?",
+        "Can I see your used bike listings?",
+        "Do you have finance options?",
+        "Can I part-exchange my old bike?",
+        "Do you take trade-ins?",
+        "Can I reserve a bike?",
+        "How much deposit do I need?",
+        "What's the APR or interest rate?",
+        "How long can I finance for?",
+        "Can I apply for finance online?",
+        "What do I need to apply for finance?",
+        "Do you accept cash payments?",
+        "Can I pay by bank transfer or card?",
+        "Do you deliver purchased bikes?",
+        "How much is delivery for a new bike?",
+        "Is delivery insured?",
+        "How long does delivery take?",
+        "Can I test ride a bike before buying?",
+        "Do your bikes come with a warranty?",
+        "How long is the warranty?",
+        "What does the warranty cover?",
+        "Do you sell helmets or gear with the bikes?",
+        "Do you offer discounts for repeat customers?",
+        "Do you have any current offers or promotions?"
+      ],
+      "rentals": [
+        "Do you rent out motorbikes or scooters?",
+        "What models can I rent?",
+        "How much is it per week?",
+        "What's the minimum rental period?",
+        "Can I rent for just one week?",
+        "Do I need to pay a deposit?",
+        "How much is the deposit?",
+        "What documents do I need to rent?",
+        "Do I need a licence?",
+        "What type of licence do I need (CBT, A1, etc.)?",
+        "What's the minimum age to rent?",
+        "Is insurance included?",
+        "What's the insurance excess?",
+        "What if the bike gets damaged?",
+        "What if it's stolen?",
+        "Can I use the rental bike for Deliveroo or Uber Eats?",
+        "Are there mileage limits?",
+        "Do you collect and deliver rental bikes?",
+        "How much is delivery for rentals?",
+        "Can I extend my rental?",
+        "What happens if I return the bike early?",
+        "Can I cancel my booking?",
+        "When do I pay each week?",
+        "Do you offer long-term rentals?",
+        "Can I choose colour or model?",
+        "Do rentals include helmets or jackets?",
+        "Do you rent to new riders?",
+        "Do you require a credit check?"
+      ],
+      "servicing": [
+        "Do you service motorbikes?",
+        "What types of service do you offer?",
+        "How much is a basic service?",
+        "How much is a full service?",
+        "What's included in a basic service?",
+        "What's included in a major service?",
+        "How often should I service my bike?",
+        "Can I get a quote for a service?",
+        "Do you fix electric bikes?",
+        "Do you do oil changes?",
+        "Do you fit tyres?",
+        "Do you change brake pads or discs?",
+        "Do you fix chains and sprockets?",
+        "Do you do electrical repairs?",
+        "Do you do diagnostics?",
+        "How much is a diagnostic check?",
+        "Can I drop my bike off without booking?",
+        "Do you offer same-day service?",
+        "How long does a service take?",
+        "Can I wait while my bike is serviced?",
+        "Do you stamp the service book?",
+        "Do you update digital service records?",
+        "Can I bring my own parts?",
+        "Do you offer bike cleaning or detailing?",
+        "Do you collect bikes for service?",
+        "Is collection free?",
+        "Can you return my bike after repair?",
+        "What are your labour rates?"
+      ],
+      "mot": [
+        "Do you do MOTs?",
+        "Which branches do MOTs?",
+        "How much is a motorbike MOT?",
+        "How long does it take?",
+        "Can I wait while it's tested?",
+        "Can I book an MOT online?",
+        "Do you offer pre-MOT checks?",
+        "Do you do MOT repairs?",
+        "What happens if it fails?",
+        "Do you offer free retests?",
+        "Can you collect my bike for MOT?",
+        "Do you offer MOT plus service packages?"
+      ],
+      "delivery": [
+        "Do you collect and deliver bikes?",
+        "How much does delivery cost?",
+        "Do you deliver outside London?",
+        "Do you deliver to Scotland or Wales?",
+        "Is delivery insured?",
+        "How long does delivery take?",
+        "Is the £249.99 delivery price flat for everywhere?",
+        "Do you do same-day or express delivery?",
+        "Do you offer recovery for breakdowns?",
+        "What's the recovery cost?",
+        "Can you collect my bike from my house?",
+        "How do I book a pickup?",
+        "Can I track my delivery?",
+        "Who do I contact on delivery day?"
+      ],
+      "finance_payment": [
+        "Do you offer finance for bikes?",
+        "Who is the finance provider?",
+        "What's the interest rate?",
+        "What's the deposit amount?",
+        "Can I pay weekly or monthly?",
+        "Can I get 0% finance?",
+        "Do you do finance for used bikes?",
+        "Do I need a good credit score?",
+        "What documents are needed for finance?",
+        "Do you take credit or debit cards?",
+        "Do you accept cash?",
+        "Can I pay online or by phone?",
+        "Can I pay a deposit remotely?",
+        "Can I finance gear or accessories?"
+      ],
+      "accessories": [
+        "Do you sell helmets and jackets?",
+        "What brands do you sell?",
+        "How much are your helmets?",
+        "Do you have gloves and boots?",
+        "Do you sell locks or security chains?",
+        "Do you have top boxes or luggage?",
+        "Can I order online?",
+        "Do you offer click & collect?",
+        "How long does delivery take?",
+        "Which couriers do you use?",
+        "Do you deliver outside the UK?",
+        "What's your return policy?",
+        "Can I return a helmet if it doesn't fit?",
+        "Do you offer size exchanges?",
+        "Do you sell gift vouchers?"
+      ],
+      "loyalty": [
+        "What is NGN Club?",
+        "How do I join?",
+        "Is it free?",
+        "What benefits do I get?",
+        "How much discount do I get?",
+        "How do I earn credits?",
+        "How do I use my credits?",
+        "How long do credits last?",
+        "When will my credits appear?",
+        "Can I use credits online?",
+        "Can I use credits with other discounts?",
+        "How do I check my balance?",
+        "Can I leave the club anytime?"
+      ],
+      "warranty_returns": [
+        "What's your returns policy?",
+        "How long do I have to return something?",
+        "Can I return a used bike?",
+        "Can I return a helmet?",
+        "How do I request a refund?",
+        "How long do refunds take?",
+        "What's covered under warranty?",
+        "How do I make a warranty claim?",
+        "Do you repair bikes under warranty?",
+        "Do you offer extended warranties?"
+      ],
+      "support_complaints": [
+        "Who can I contact for help?",
+        "What's your customer service number?",
+        "What's your email address?",
+        "How long does it take to get a reply?",
+        "Who do I talk to about a complaint?",
+        "How do I report a problem with my bike?",
+        "How do I get a refund?",
+        "How do I claim on my warranty?",
+        "Do you have after-hours support?",
+        "Can someone call me back?",
+        "Can I speak to a manager?"
+      ],
+      "emergencies": [
+        "What if my bike breaks down?",
+        "Do you offer roadside recovery?",
+        "What should I do after an accident?",
+        "Who do I contact if the bike is stolen?",
+        "What happens if I lose the key?",
+        "Do you offer accident management?",
+        "How do I claim insurance after an accident?",
+        "What's your emergency phone number?"
+      ]
+    }
+  },
+  "faq_intents": {
+    "finance_agreement": [
+      {
+        "intent": "contract_overview",
+        "user_queries": [
+          "What is the finance contract?",
+          "Is this a credit agreement?",
+          "Do you charge interest?",
+          "How long is the finance plan?"
+        ],
+        "bot_answer": "Our motorcycle sale agreement is a 12-month interest-free purchase plan, not a regulated credit agreement under the Consumer Credit Act."
+      },
+      {
+        "intent": "payment_terms",
+        "user_queries": [
+          "How do I make payments?",
+          "Do you take card or only bank transfer?",
+          "When do I pay my instalments?",
+          "What happens if I pay late?"
+        ],
+        "bot_answer": "Payments are made by BACS transfer to Barclays Bank Plc, Neguinho Motors Ltd, A/C: 53113418 / 20-57-76. All documents and payments must be completed within 48 hours of contract signature. A late payment fee of £10 per day applies from Day 2 of missed payment, capped at £100 per instalment period. If payment is overdue by more than 7 days, we may repossess the vehicle."
+      },
+      {
+        "intent": "ownership_transfer",
+        "user_queries": [
+          "When do I own the bike?",
+          "Do I own the bike during finance?",
+          "Can I sell the bike before finishing payments?"
+        ],
+        "bot_answer": "Ownership transfers to you only after full payment is received and confirmed by Neguinho Motors."
+      },
+      {
+        "intent": "fines_and_fees",
+        "user_queries": [
+          "Who pays for parking or speeding fines?",
+          "Do I pay congestion or ULEZ charges?",
+          "What is the admin fee for PCNs?"
+        ],
+        "bot_answer": "You're responsible for any penalties, ULEZ, or congestion charges during your contract. A £25 admin fee applies per notice processed."
+      },
+      {
+        "intent": "repossession_policy",
+        "user_queries": [
+          "Can my bike be repossessed?",
+          "What happens if I stop paying?",
+          "How much is the repossession fee?"
+        ],
+        "bot_answer": "If payment is over 7 days late, we may repossess the vehicle. The repossession fee is £100, and any sums already paid will not be refunded except where required by law."
+      }
+    ],
+    "rental_agreement": [
+      {
+        "intent": "rental_overview",
+        "user_queries": [
+          "What kind of rental contract is this?",
+          "Do I own the bike after renting?",
+          "Is it a finance or credit deal?",
+          "How long can I rent a bike for?"
+        ],
+        "bot_answer": "Our rental agreement is a fixed-term hire for up to 5 years from the contract start date. It's a rental contract only - it doesn't confer title or an option to purchase, and no rent constitutes part-payment towards any price. This agreement is not a regulated agreement under the Consumer Credit Act 1974 and is not regulated by the Financial Conduct Authority (FCA)."
+      },
+      {
+        "intent": "payment_and_deposit",
+        "user_queries": [
+          "When do I pay rent?",
+          "How much is the deposit?",
+          "When do I get my deposit back?",
+          "Do you charge interest on rent?"
+        ],
+        "bot_answer": "Rent is paid monthly in advance by bank transfer. Your deposit is refunded within 14 days of return after inspection, minus authorised deductions. No interest or finance charges apply."
+      },
+      {
+        "intent": "termination_notice",
+        "user_queries": [
+          "What is the minimum hire period?",
+          "Can I end my rental early?",
+          "Will I lose my deposit if I return the bike early?"
+        ],
+        "bot_answer": "There's a minimum six-week hire period. You can end it later with seven days' written notice. Early return before six weeks forfeits the deposit."
+      },
+      {
+        "intent": "late_payment_and_fines",
+        "user_queries": [
+          "What if I miss a rental payment?",
+          "How much are late fees?",
+          "Who pays traffic fines or ULEZ charges?"
+        ],
+        "bot_answer": "Late payment fee is £10 per day from Day 2 of missed payment, capped at £100 per monthly rental period. If rent is overdue by more than 3 days, we may terminate the agreement and repossess the vehicle. You're responsible for all offences, penalties, fines, congestion/ULEZ charges, bus lane charges, tolls, and similar liabilities. A £25 admin fee applies per notice processed."
+      },
+      {
+        "intent": "insurance_and_responsibility",
+        "user_queries": [
+          "Do you provide insurance?",
+          "What insurance do I need for rental?",
+          "What happens if I crash or damage the bike?"
+        ],
+        "bot_answer": "You must maintain comprehensive insurance for the entire rental period. In case of an accident, report it immediately – we'll handle repairs or claims through the proper channels."
+      }
+    ]
+  },
+  "fallback_strategy": {
+    "general_principle": "Never say 'I don't know.' Always acknowledge, redirect, and collect leads (name, bike model, contact).",
+    "redirection_scenarios": {
+      "general_information_not_available": {
+        "redirect_to": "Customer service team",
+        "contact_methods": ["phone: 0208 314 1498", "WhatsApp", "email: enquiries@neguinhomotors.co.uk"],
+        "bot_response": "That isn't listed on my system at the moment, but our customer service team can confirm that for you right away. You can reach them on 0208 314 1498, by WhatsApp, or by email at enquiries@neguinhomotors.co.uk. Would you like me to pass your name and question over to them now?"
+      },
+      "prices_estimates_quotes": {
+        "redirect_to": "Service desk",
+        "contact_methods": ["phone: 0208 314 1498", "WhatsApp"],
+        "bot_response": "Prices can vary depending on the model and condition, so I'd rather you get an accurate quote. Please contact our service desk on 0208 314 1498 or message us via WhatsApp – they'll confirm the exact cost and availability."
+      },
+      "technical_repair_questions": {
+        "redirect_to": "Mechanics",
+        "contact_methods": ["email: enquiries@neguinhomotors.co.uk", "WhatsApp"],
+        "bot_response": "That's something one of our mechanics will need to check. Could you send your bike make and model to enquiries@neguinhomotors.co.uk or via WhatsApp? They'll come back with a proper answer."
+      },
+      "finance_deposit_payment": {
+        "redirect_to": "Sales team",
+        "contact_methods": ["email: enquiries@neguinhomotors.co.uk", "phone: 0208 314 1498"],
+        "bot_response": "Finance details depend on the lender and your profile, so our sales team handle those personally. If you email enquiries@neguinhomotors.co.uk or call 0208 314 1498, they'll walk you through the options."
+      },
+      "rentals_hire_details": {
+        "redirect_to": "Hire department",
+        "contact_methods": ["WhatsApp", "phone: 0208 314 1498", "email: enquiries@neguinhomotors.co.uk"],
+        "bot_response": "Rental terms sometimes change, so the hire department can confirm deposits and insurance in minutes. You can WhatsApp or ring 0208 314 1498, or drop an email to enquiries@neguinhomotors.co.uk – just mention you're asking about bike hire."
+      },
+      "warranty_returns_complaints": {
+        "redirect_to": "Customer care team",
+        "contact_methods": ["email: enquiries@neguinhomotors.co.uk"],
+        "bot_response": "That needs a member of our customer care team to look at directly. Please email enquiries@neguinhomotors.co.uk with your bike details and what's happened – they'll get back to you promptly. Or, if you prefer, I can pass this to them for you right now."
+      },
+      "bookings_cannot_confirm": {
+        "redirect_to": "Booking team",
+        "contact_methods": ["phone"],
+        "bot_response": "I can note your preferred day and time, then our team will confirm it by text or call. What's the best number to reach you on?"
+      },
+      "delivery_outside_standard_range": {
+        "redirect_to": "Logistics team",
+        "contact_methods": ["email: enquiries@neguinhomotors.co.uk", "WhatsApp"],
+        "bot_response": "Deliveries beyond our regular area are handled case-by-case. Could you send your postcode to enquiries@neguinhomotors.co.uk or WhatsApp us? The logistics team will quote you directly."
+      },
+      "loyalty_ngn_club_questions": {
+        "redirect_to": "NGN Club team",
+        "contact_methods": ["email: enquiries@neguinhomotors.co.uk", "WhatsApp"],
+        "bot_response": "The NGN Club team manage memberships manually. Please message enquiries@neguinhomotors.co.uk or WhatsApp us – they'll confirm your balance or benefits."
+      }
+    },
+    "automatic_redirect_triggers": [
+      "Question concerns price, finance, warranty, insurance, or deposits not listed",
+      "Customer is unhappy or complaining",
+      "Enquiry involves personal data or documents",
+      "Customer asks for confirmation, quote, or policy wording"
+    ],
+    "lead_capture_fields": [
+      "name",
+      "phone_or_whatsapp",
+      "bike_make_model_if_relevant",
+      "nature_of_enquiry"
+    ],
+    "closing_statements": [
+      "Thanks for checking with me! The right person will get back to you shortly.",
+      "You're in good hands – our team will confirm everything for you soon.",
+      "I've passed your message on. If you'd like faster help, ring or WhatsApp 0208 314 1498 anytime Monday to Saturday, 9 a.m.–6 p.m."
+    ]
+  },
+  "interview_questionnaire_structure": {
+    "purpose": "Master questionnaire for interviewing business owner/senior staff to gather all necessary data",
+    "categories": [
+      "Business Identity & Background",
+      "Branches & Contacts",
+      "General Operations",
+      "Sales - New & Used Motorbikes",
+      "Motorcycle Rentals / Hire",
+      "Servicing & Repairs",
+      "MOT Testing",
+      "Collection, Delivery & Recovery",
+      "Finance & Payments",
+      "Accessories & Shop",
+      "Loyalty Programme (NGN Club)",
+      "Warranty, Returns & Refunds",
+      "Customer Support & Complaints",
+      "Marketing & Promotions",
+      "Chatbot Behaviour & Policy",
+      "Emergencies & Edge Cases",
+      "Management & Data",
+      "Technical / Operational",
+      "Internal Notes"
+    ],
+    "note": "Full questionnaire available in separate document - this structure shows the data domains to capture"
+  },
+  "extensibility": {
+    "notes": [
+      "This dataset is designed to be easily extended with new services, branches, or policies",
+      "Add new entries to arrays (e.g., branches[], services.rentals.weekly_prices[])",
+      "Update metadata.last_updated when making changes",
+      "For RAG: Each top-level section can be chunked independently",
+      "For LLM training: Use faq_intents and customer_questions sections",
+      "For chatbot: Use services, policies, and fallback_strategy sections"
+    ],
+    "recommended_updates": [
+      "Add specific prices when available from business",
+      "Update branch opening hours if they change",
+      "Add new service types as they're introduced",
+      "Expand customer_questions with real queries from chatbot logs",
+      "Update fallback_strategy based on actual chatbot performance"
+    ]
+  }
+}
+

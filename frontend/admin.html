@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            margin-bottom: 2rem;
+            color: #2c3e50;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+        
+        .tab.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .section {
+            margin-bottom: 2rem;
+        }
+        
+        .section h2 {
+            margin-bottom: 1rem;
+            color: #34495e;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        button {
+            padding: 0.75rem 1.5rem;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: #ecf0f1;
+            padding: 1.5rem;
+            border-radius: 4px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 0.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chatbot Admin Panel</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
+            <button class="tab" onclick="switchTab('models')">Models</button>
+            <button class="tab" onclick="switchTab('rag')">RAG</button>
+            <button class="tab" onclick="switchTab('memory')">Memory</button>
+            <button class="tab" onclick="switchTab('config')">Configuration</button>
+        </div>
+        
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="section">
+                <h2>Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalUsers">-</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalChats">-</div>
+                        <div class="stat-label">Total Chats</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalMessages">-</div>
+                        <div class="stat-label">Total Messages</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="ragChunks">-</div>
+                        <div class="stat-label">RAG Chunks</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Models Tab -->
+        <div id="models" class="tab-content">
+            <div class="section">
+                <h2>Model Management</h2>
+                <div class="form-group">
+                    <label>Current Model</label>
+                    <div id="currentModel">Loading...</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Switch Model</label>
+                    <select id="modelSelect">
+                        <option>Loading models...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Provider</label>
+                    <select id="providerSelect">
+                        <option value="ollama">Ollama</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="m4">M4</option>
+                    </select>
+                </div>
+                
+                <button onclick="switchModel()">Switch Model</button>
+                <button onclick="loadModels()" style="margin-left: 1rem; background: #27ae60;">Refresh Models</button>
+            </div>
+        </div>
+        
+        <!-- RAG Tab -->
+        <div id="rag" class="tab-content">
+            <div class="section">
+                <h2>RAG Management</h2>
+                <div class="form-group">
+                    <label>Knowledge Base Status</label>
+                    <div id="ragStatus">Loading...</div>
+                </div>
+                
+                <button onclick="loadKnowledgeBase()">Reload Knowledge Base</button>
+                <button onclick="getRAGStats()" style="margin-left: 1rem; background: #27ae60;">Refresh Stats</button>
+            </div>
+        </div>
+        
+        <!-- Memory Tab -->
+        <div id="memory" class="tab-content">
+            <div class="section">
+                <h2>Memory Management</h2>
+                
+                <div class="form-group">
+                    <label>Clear Chat Memory Only</label>
+                    <input type="text" id="clearMemoryChatId" placeholder="Enter chat_id to clear memory">
+                    <button onclick="clearMemory()" style="margin-top: 0.5rem; background: #e74c3c;">Clear Memory</button>
+                    <small style="display: block; margin-top: 0.25rem; color: #666;">
+                        Clears conversation context only. Chat history remains.
+                    </small>
+                </div>
+                
+                <div class="form-group" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
+                    <label>Clear ALL Chat Data</label>
+                    <input type="text" id="clearAllChatId" placeholder="Enter chat_id to clear everything">
+                    <button onclick="clearAllChat()" style="margin-top: 0.5rem; background: #c0392b; color: white;">Clear All Data</button>
+                    <small style="display: block; margin-top: 0.25rem; color: #c0392b;">
+                        ⚠️ WARNING: This will delete ALL messages, memory, and token usage for this chat. This cannot be undone!
+                    </small>
+                </div>
+                
+                <div class="form-group" style="margin-top: 2rem;">
+                    <label>How to Get Chat ID:</label>
+                    <ol style="margin-left: 1.5rem; margin-top: 0.5rem; color: #666;">
+                        <li>In the chat interface, the Chat ID is shown in the header</li>
+                        <li>Click "Copy" button next to Chat ID to copy it</li>
+                        <li>Or check the chat list sidebar - click on chat ID to copy</li>
+                        <li>Or use API: <code>GET /api/v1/chat/chats/{user_id}</code></li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Config Tab -->
+        <div id="config" class="tab-content">
+            <div class="section">
+                <h2>LLM Configuration</h2>
+                <div class="form-group">
+                    <label>Max Tokens (Response Length)</label>
+                    <input type="number" id="maxTokens" min="100" max="4000" step="100" value="2000">
+                    <small style="display: block; margin-top: 0.25rem; color: #666;">Maximum tokens in response (100-4000)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Temperature</label>
+                    <input type="number" id="temperature" min="0" max="2" step="0.1" value="0.7">
+                    <small style="display: block; margin-top: 0.25rem; color: #666;">Creativity level (0.0-2.0, lower = more focused)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Top P</label>
+                    <input type="number" id="topP" min="0" max="1" step="0.05" value="0.9">
+                    <small style="display: block; margin-top: 0.25rem; color: #666;">Nucleus sampling (0.0-1.0)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Top K</label>
+                    <input type="number" id="topK" min="1" max="100" step="1" value="40">
+                    <small style="display: block; margin-top: 0.25rem; color: #666;">Top K sampling (1-100)</small>
+                </div>
+                
+                <button onclick="updateLLMConfig()">Update Configuration</button>
+                <button onclick="loadLLMConfig()" style="margin-left: 1rem; background: #27ae60;">Load Current</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Use relative URL since frontend is served from same server
+        const API_BASE = '/api/v1';
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'models') loadModels();
+            if (tabName === 'rag') getRAGStats();
+            if (tabName === 'memory') loadLLMConfig();
+            if (tabName === 'config') loadLLMConfig();
+        }
+        
+        async function loadModels() {
+            try {
+                const response = await fetch(`${API_BASE}/models/available`);
+                const data = await response.json();
+                
+                const select = document.getElementById('modelSelect');
+                select.innerHTML = '';
+                
+                data.models.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.name;
+                    option.textContent = `${model.name} (${model.provider})`;
+                    select.appendChild(option);
+                });
+                
+                const currentResponse = await fetch(`${API_BASE}/models/current`);
+                const current = await currentResponse.json();
+                document.getElementById('currentModel').textContent = 
+                    `${current.model} (${current.provider})`;
+            } catch (error) {
+                console.error('Error loading models:', error);
+            }
+        }
+        
+        async function switchModel() {
+            const provider = document.getElementById('providerSelect').value;
+            const model = document.getElementById('modelSelect').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/models/switch`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({provider, model})
+                });
+                
+                const data = await response.json();
+                alert(`Model switched to ${data.model} (${data.provider})`);
+                loadModels();
+            } catch (error) {
+                console.error('Error switching model:', error);
+                alert('Error switching model');
+            }
+        }
+        
+        async function getRAGStats() {
+            try {
+                const response = await fetch(`${API_BASE}/rag/stats`);
+                const data = await response.json();
+                
+                document.getElementById('ragStatus').innerHTML = 
+                    `<strong>Total Chunks:</strong> ${data.total_chunks}<br>
+                     <strong>Collection:</strong> ${data.collection_name}<br>
+                     <strong>Embedding Model:</strong> ${data.embedding_model}`;
+                
+                document.getElementById('ragChunks').textContent = data.total_chunks || 0;
+            } catch (error) {
+                console.error('Error getting RAG stats:', error);
+            }
+        }
+        
+        async function loadKnowledgeBase() {
+            try {
+                const response = await fetch(`${API_BASE}/rag/load`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({kb_path: 'rag_knowledge_base.json'})
+                });
+                
+                const data = await response.json();
+                alert(`Knowledge base ${data.status}`);
+                getRAGStats();
+            } catch (error) {
+                console.error('Error loading knowledge base:', error);
+                alert('Error loading knowledge base');
+            }
+        }
+        
+        async function clearMemory() {
+            const chatId = document.getElementById('clearMemoryChatId').value.trim();
+            if (!chatId) {
+                alert('Please enter a chat_id');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to clear memory for chat ${chatId}?\n\nThis will only clear conversation context. Messages will remain.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/chat/memory/clear/${chatId}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert('Memory cleared successfully');
+                    document.getElementById('clearMemoryChatId').value = '';
+                } else {
+                    alert('Error clearing memory');
+                }
+            } catch (error) {
+                console.error('Error clearing memory:', error);
+                alert('Error clearing memory');
+            }
+        }
+        
+        async function clearAllChat() {
+            const chatId = document.getElementById('clearAllChatId').value.trim();
+            if (!chatId) {
+                alert('Please enter a chat_id');
+                return;
+            }
+            
+            if (!confirm(`⚠️ WARNING: Are you absolutely sure you want to delete ALL data for chat ${chatId}?\n\nThis will delete:\n- All messages\n- Conversation memory\n- Token usage records\n\nThis action CANNOT be undone!`)) {
+                return;
+            }
+            
+            // Double confirmation
+            if (!confirm(`Final confirmation: Delete ALL data for chat ${chatId}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/chat/clear/${chatId}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert(`All data cleared successfully!\n\nDeleted:\n- Messages: ${data.deleted.messages}\n- Memory: ${data.deleted.memory}\n- Token Usage: ${data.deleted.token_usage}`);
+                    document.getElementById('clearAllChatId').value = '';
+                } else {
+                    alert('Error clearing chat');
+                }
+            } catch (error) {
+                console.error('Error clearing chat:', error);
+                alert('Error clearing chat');
+            }
+        }
+        
+        async function loadLLMConfig() {
+            try {
+                const response = await fetch(`${API_BASE}/models/config`);
+                const data = await response.json();
+                
+                document.getElementById('maxTokens').value = data.max_tokens || 2000;
+                document.getElementById('temperature').value = data.temperature || 0.7;
+                document.getElementById('topP').value = data.top_p || 0.9;
+                document.getElementById('topK').value = data.top_k || 40;
+            } catch (error) {
+                console.error('Error loading LLM config:', error);
+            }
+        }
+        
+        async function updateLLMConfig() {
+            const maxTokens = parseInt(document.getElementById('maxTokens').value);
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const topP = parseFloat(document.getElementById('topP').value);
+            const topK = parseInt(document.getElementById('topK').value);
+            
+            try {
+                const response = await fetch(`${API_BASE}/models/config`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        max_tokens: maxTokens,
+                        temperature: temperature,
+                        top_p: topP,
+                        top_k: topK
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert('Configuration updated successfully');
+                } else {
+                    alert('Error updating configuration');
+                }
+            } catch (error) {
+                console.error('Error updating LLM config:', error);
+                alert('Error updating configuration');
+            }
+        }
+        
+        // Load initial data
+        loadModels();
+        getRAGStats();
+        loadLLMConfig();
+    </script>
+</body>
+</html>
+
