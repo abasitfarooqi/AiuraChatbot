@@ -1,0 +1,90 @@
+2025-11-19 03:54:03.273 | INFO     | backend.utils.unified_config_manager:load_config:30 - Loaded unified config from config/unified_config.json
+/Users/abdulbasit/Projects/HybridApps/AiuraChatbot/venv/lib/python3.11/site-packages/pydantic/_internal/_fields.py:149: UserWarning: Field "model_used" has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+/Users/abdulbasit/Projects/HybridApps/AiuraChatbot/venv/lib/python3.11/site-packages/pydantic/_internal/_fields.py:149: UserWarning: Field "model_name" has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+INFO:     Started server process [11025]
+INFO:     Waiting for application startup.
+2025-11-19 03:54:05 | INFO     | backend.app.main:startup_event - Starting up application...
+2025-11-19 03:54:05 | INFO     | backend.app.main:startup_event - Database initialized
+2025-11-19 03:54:05 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:54:05 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-19 03:54:05 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
+2025-11-19 03:54:05 | INFO     | backend.services.rag_service:load_knowledge_base - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:54:05 | INFO     | backend.app.main:startup_event - Knowledge base loaded
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     46.183.110.17:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     46.183.110.17:0 - "GET / HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /api/v1/chat/chats/user_m0loia59x HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /api/v1/config/unified HTTP/1.1" 200 OK
+2025-11-19 03:57:08 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:57:08 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-19 03:57:08 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
+2025-11-19 03:57:08 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:57:08 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-19 03:57:08 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:57:08 | INFO     | backend.services.chatbot_service:_load_chatbot_config - Chatbot service configuration loaded from unified config
+Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
+INFO:     46.183.110.17:0 - "POST /api/v1/chat/message HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /api/v1/chat/chats/user_m0loia59x HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /admin HTTP/1.1" 200 OK
+2025-11-19 03:58:13 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:58:13 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-19 03:58:13 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     46.183.110.17:0 - "GET /api/v1/models/available HTTP/1.1" 200 OK
+2025-11-19 03:58:13 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:58:13 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-19 03:58:13 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
+INFO:     46.183.110.17:0 - "GET /api/v1/rag/stats HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /api/v1/models/config HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /api/v1/database/stats HTTP/1.1" 200 OK
+2025-11-19 03:58:13 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:58:13 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-19 03:58:13 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     46.183.110.17:0 - "GET /api/v1/models/current HTTP/1.1" 200 OK
+2025-11-19 03:58:14 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:58:14 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-19 03:58:14 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
+INFO:     46.183.110.17:0 - "GET /api/v1/rag/stats HTTP/1.1" 200 OK
+2025-11-19 03:58:14 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:58:14 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-19 03:58:14 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     46.183.110.17:0 - "GET /api/v1/models/current HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /admin HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /api/v1/config/unified HTTP/1.1" 200 OK
+2025-11-19 03:58:40 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:58:40 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-19 03:58:41 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
+INFO:     46.183.110.17:0 - "GET /api/v1/rag/stats HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /api/v1/config/knowledge-base HTTP/1.1" 200 OK
+2025-11-19 03:58:42 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:58:42 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-19 03:58:42 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
+INFO:     46.183.110.17:0 - "GET /api/v1/rag/chromadb/info HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /api/v1/database/stats HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /api/v1/database/stats HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /api/v1/config/models/offline HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /standalone-widget.html HTTP/1.1" 404 Not Found
+INFO:     46.183.110.17:0 - "GET /frontend/standalone-widget.html HTTP/1.1" 200 OK

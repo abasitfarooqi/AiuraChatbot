@@ -1,3 +1,17 @@
+# AiuraChatbot
+
+## 🚀 Quick Start - One Command
+
+```bash
+./scripts/manage.sh expose
+```
+
+This starts the server + Cloudflare tunnel and gives you a public URL ready for Laravel or any frontend!
+
+**See `QUICK_START.md` for full guide.**
+
+---
+
 # AiuraChatbot - Neguinho Motors Chatbot System
 
 A production-ready, intelligent chatbot system for Neguinho Motors with RAG (Retrieval-Augmented Generation), LLM integration, multi-turn conversation memory, and comprehensive management capabilities.

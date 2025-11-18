@@ -1,416 +1,605 @@
-# Laravel Integration Guide for Neguinho Motors Chatbot
+# 🔗 Laravel Integration Guide
 
-This guide explains how to integrate the Neguinho Motors chatbot widget into your Laravel website.
+## Quick Setup (5 Minutes)
 
-> **📚 For comprehensive tunnel options (Cloudflare Tunnel, localtunnel, ngrok), see [EXPOSE_TO_LARAVEL.md](./EXPOSE_TO_LARAVEL.md)**
+### Step 1: Start Chatbot Backend
 
-## Quick Start Options
-
-1. **Cloudflare Tunnel** (Recommended - Free & Unlimited) - See [EXPOSE_TO_LARAVEL.md](./EXPOSE_TO_LARAVEL.md)
-2. **localtunnel** (Free & Unlimited) - See [EXPOSE_TO_LARAVEL.md](./EXPOSE_TO_LARAVEL.md)
-3. **ngrok** (Free tier available) - See below or [EXPOSE_TO_LARAVEL.md](./EXPOSE_TO_LARAVEL.md)
-
-## Prerequisites
-
-1. **Chatbot Server Running**: The FastAPI chatbot server should be running on `http://localhost:8000`
-2. **ngrok Installed**: Install ngrok from https://ngrok.com/
-3. **Laravel Application**: Your Laravel website should be set up
-
-## Step 1: Start ngrok Tunnel
-
-1. Start your chatbot server:
 ```bash
 cd /path/to/AiuraChatbot
-source venv/bin/activate
-uvicorn backend.app.main:app --host 0.0.0.0 --port 8000
+./scripts/manage.sh expose
 ```
 
-2. In a new terminal, start ngrok:
-```bash
-ngrok http 8000
+Copy the **Public URL** (e.g., `https://abc123.trycloudflare.com`)
+
+### Step 2: Configure Laravel
+
+**Add to `.env`:**
+```env
+CHATBOT_API_URL=https://abc123.trycloudflare.com
+CHATBOT_API_BASE=https://abc123.trycloudflare.com/api/v1
 ```
 
-3. Copy the ngrok URL (e.g., `https://abc123.ngrok-free.app`)
+**Create config file `config/chatbot.php`:**
+```php
+<?php
 
-## Step 2: Update CORS Settings (Optional)
-
-The chatbot already allows all origins by default, but you can restrict it in `backend/config/settings.py`:
-
-```python
-cors_origins: List[str] = [
-    "https://your-laravel-domain.com",
-    "https://*.ngrok.io",
-    "https://*.ngrok-free.app",
-]
+return [
+    'api_url' => env('CHATBOT_API_URL'),
+    'api_base' => env('CHATBOT_API_BASE'),
+    'timeout' => env('CHATBOT_TIMEOUT', 30),
+];
 ```
 
-## Step 3: Create Laravel Blade Template
+### Step 3: Create Service
 
-Create a new Blade template file: `resources/views/components/chatbot-widget.blade.php`
+**`app/Services/ChatbotService.php`:**
+```php
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+
+class ChatbotService
+{
+    protected $apiBase;
+    protected $timeout;
+
+    public function __construct()
+    {
+        $this->apiBase = config('chatbot.api_base');
+        $this->timeout = config('chatbot.timeout', 30);
+    }
+
+    /**
+     * Send a message to the chatbot
+     */
+    public function sendMessage(string $userId, string $message, ?string $chatId = null, string $vendorId = 'default'): ?array
+    {
+        try {
+            $response = Http::timeout($this->timeout)
+                ->post("{$this->apiBase}/chat/message", [
+                    'user_id' => $userId,
+                    'message' => $message,
+                    'chat_id' => $chatId,
+                    'vendor_id' => $vendorId,
+                ]);
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            Log::error('Chatbot API Error', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Chatbot Service Exception', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Get chat history
+     */
+    public function getChatHistory(string $chatId, int $limit = 50): ?array
+    {
+        try {
+            $response = Http::timeout($this->timeout)
+                ->get("{$this->apiBase}/chat/history/{$chatId}", [
+                    'limit' => $limit,
+                ]);
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Chatbot History Error', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /**
+     * Get all chats for a user
+     */
+    public function getUserChats(string $userId): ?array
+    {
+        try {
+            $response = Http::timeout($this->timeout)
+                ->get("{$this->apiBase}/chat/chats/{$userId}");
+
+            if ($response->successful()) {
+                return $response->json();
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Chatbot Chats Error', ['error' => $e->getMessage()]);
+            return null;
+        }
+    }
+
+    /**
+     * Delete a chat
+     */
+    public function deleteChat(string $chatId): bool
+    {
+        try {
+            $response = Http::timeout($this->timeout)
+                ->delete("{$this->apiBase}/chat/delete/{$chatId}");
+
+            return $response->successful();
+        } catch (\Exception $e) {
+            Log::error('Chatbot Delete Error', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    /**
+     * Check chatbot health
+     */
+    public function healthCheck(): bool
+    {
+        try {
+            $url = config('chatbot.api_url');
+            $response = Http::timeout(5)->get("{$url}/health");
+            return $response->successful();
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+}
+```
+
+### Step 4: Create Controller
+
+**`app/Http/Controllers/ChatbotController.php`:**
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Services\ChatbotService;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Validator;
+
+class ChatbotController extends Controller
+{
+    protected $chatbotService;
+
+    public function __construct(ChatbotService $chatbotService)
+    {
+        $this->chatbotService = $chatbotService;
+    }
+
+    /**
+     * Send a message to the chatbot
+     */
+    public function sendMessage(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'message' => 'required|string|max:1000',
+            'user_id' => 'required|string|max:100',
+            'chat_id' => 'nullable|string|max:100',
+            'vendor_id' => 'nullable|string|max:50',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $result = $this->chatbotService->sendMessage(
+            $request->user_id,
+            $request->message,
+            $request->chat_id,
+            $request->vendor_id ?? 'default'
+        );
+
+        if ($result) {
+            return response()->json($result);
+        }
+
+        return response()->json([
+            'error' => 'Failed to get response from chatbot',
+            'message' => 'The chatbot service is temporarily unavailable. Please try again later.'
+        ], 503);
+    }
+
+    /**
+     * Get chat history
+     */
+    public function getHistory(Request $request, string $chatId): JsonResponse
+    {
+        $limit = $request->get('limit', 50);
+        $history = $this->chatbotService->getChatHistory($chatId, $limit);
+
+        if ($history) {
+            return response()->json($history);
+        }
+
+        return response()->json([
+            'error' => 'Chat not found'
+        ], 404);
+    }
+
+    /**
+     * Get all chats for a user
+     */
+    public function getUserChats(string $userId): JsonResponse
+    {
+        $chats = $this->chatbotService->getUserChats($userId);
+
+        if ($chats) {
+            return response()->json($chats);
+        }
+
+        return response()->json([
+            'error' => 'User not found'
+        ], 404);
+    }
+
+    /**
+     * Delete a chat
+     */
+    public function deleteChat(string $chatId): JsonResponse
+    {
+        $success = $this->chatbotService->deleteChat($chatId);
+
+        if ($success) {
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Chat deleted successfully'
+            ]);
+        }
+
+        return response()->json([
+            'error' => 'Failed to delete chat'
+        ], 500);
+    }
+
+    /**
+     * Health check
+     */
+    public function health(): JsonResponse
+    {
+        $healthy = $this->chatbotService->healthCheck();
+
+        return response()->json([
+            'status' => $healthy ? 'healthy' : 'unhealthy',
+            'service' => 'chatbot'
+        ], $healthy ? 200 : 503);
+    }
+}
+```
+
+### Step 5: Add Routes
+
+**`routes/api.php`:**
+```php
+use App\Http\Controllers\ChatbotController;
+
+Route::prefix('chatbot')->group(function () {
+    Route::post('/message', [ChatbotController::class, 'sendMessage']);
+    Route::get('/history/{chatId}', [ChatbotController::class, 'getHistory']);
+    Route::get('/chats/{userId}', [ChatbotController::class, 'getUserChats']);
+    Route::delete('/delete/{chatId}', [ChatbotController::class, 'deleteChat']);
+    Route::get('/health', [ChatbotController::class, 'health']);
+});
+```
+
+**Or for web routes `routes/web.php`:**
+```php
+Route::prefix('api/chatbot')->group(function () {
+    Route::post('/message', [ChatbotController::class, 'sendMessage']);
+    Route::get('/history/{chatId}', [ChatbotController::class, 'getHistory']);
+    Route::get('/chats/{userId}', [ChatbotController::class, 'getUserChats']);
+    Route::delete('/delete/{chatId}', [ChatbotController::class, 'deleteChat']);
+    Route::get('/health', [ChatbotController::class, 'health']);
+});
+```
+
+---
+
+## Frontend Usage
+
+### Blade Template Example
 
 ```blade
-<!-- Neguinho Motors Chatbot Widget -->
-<div id="chatbotWidgetContainer"></div>
+<div id="chat-container">
+    <div id="messages"></div>
+    <form id="chat-form">
+        <input type="text" id="message-input" placeholder="Type your message...">
+        <button type="submit">Send</button>
+    </form>
+</div>
 
 <script>
-    // Set your ngrok URL here
-    window.CHATBOT_API_URL = '{{ env("CHATBOT_API_URL", "https://your-ngrok-url.ngrok-free.app/api/v1") }}';
+const CHATBOT_API = '{{ config('chatbot.api_base') }}';
+const USER_ID = '{{ auth()->id() }}';
+let currentChatId = null;
+
+document.getElementById('chat-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const message = document.getElementById('message-input').value;
     
-    // Load widget script
-    (function() {
-        const script = document.createElement('script');
-        script.src = '{{ env("CHATBOT_API_URL", "https://your-ngrok-url.ngrok-free.app") }}/static/widget.js';
-        script.async = true;
-        document.head.appendChild(script);
-        
-        // Load widget styles
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = '{{ env("CHATBOT_API_URL", "https://your-ngrok-url.ngrok-free.app") }}/static/widget.css';
-        document.head.appendChild(link);
-    })();
+    const response = await fetch('/api/chatbot/message', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            user_id: USER_ID,
+            message: message,
+            chat_id: currentChatId
+        })
+    });
+    
+    const data = await response.json();
+    
+    if (data.chat_id) {
+        currentChatId = data.chat_id;
+    }
+    
+    // Display response
+    document.getElementById('messages').innerHTML += 
+        `<div>You: ${message}</div>` +
+        `<div>Bot: ${data.response}</div>`;
+    
+    document.getElementById('message-input').value = '';
+});
 </script>
 ```
 
-## Step 4: Create Widget JavaScript File
+### Vue.js Example
 
-Create `frontend/widget.js`:
+```vue
+<template>
+  <div class="chat-container">
+    <div class="messages">
+      <div v-for="msg in messages" :key="msg.id" :class="msg.role">
+        {{ msg.content }}
+      </div>
+    </div>
+    <form @submit.prevent="sendMessage">
+      <input v-model="inputMessage" placeholder="Type your message...">
+      <button type="submit">Send</button>
+    </form>
+  </div>
+</template>
 
-```javascript
-// Neguinho Motors Chatbot Widget
-(function() {
-    const CHATBOT_API_URL = window.CHATBOT_API_URL || 'http://localhost:8000/api/v1';
-    
-    // Create widget HTML
-    const widgetHTML = `
-        <div id="chatbotWidget" class="chatbot-widget">
-            <div class="chatbot-header" onclick="window.toggleChatbotWidget()">
-                <h3>Neguinho Motors Chatbot</h3>
-                <button class="minimize-btn" onclick="event.stopPropagation(); window.toggleChatbotWidget();">−</button>
-            </div>
-            <div class="chatbot-messages" id="chatbotMessages">
-                <div class="message assistant">
-                    Hello! I'm the Neguinho Motors chatbot. How can I help you today?
-                </div>
-            </div>
-            <div class="chatbot-input-container">
-                <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Type your message..." />
-                <button class="chatbot-send" id="chatbotSend" onclick="window.sendChatbotMessage()">Send</button>
-            </div>
-        </div>
-    `;
-    
-    // Inject widget into page
-    document.body.insertAdjacentHTML('beforeend', widgetHTML);
-    
-    // Load styles
-    const style = document.createElement('style');
-    style.textContent = `
-        .chatbot-widget {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 380px;
-            height: 600px;
-            background: white;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            z-index: 10000;
-            border: 1px solid #e0e0e0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-        .chatbot-widget.minimized {
-            height: 60px;
-            width: 300px;
-        }
-        .chatbot-widget.minimized .chatbot-messages,
-        .chatbot-widget.minimized .chatbot-input-container {
-            display: none;
-        }
-        .chatbot-header {
-            background: #2c3e50;
-            color: white;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-        .chatbot-header h3 {
-            margin: 0;
-            font-size: 1rem;
-        }
-        .minimize-btn {
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-        .chatbot-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            background: #f9f9f9;
-        }
-        .message {
-            max-width: 80%;
-            padding: 0.75rem 1rem;
-            word-wrap: break-word;
-        }
-        .message.user {
-            align-self: flex-end;
-            background: #3498db;
-            color: white;
-        }
-        .message.assistant {
-            align-self: flex-start;
-            background: white;
-            color: #2c3e50;
-            border: 1px solid #e0e0e0;
-        }
-        .chatbot-input-container {
-            padding: 1rem;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            gap: 0.5rem;
-            background: white;
-        }
-        .chatbot-input {
-            flex: 1;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            font-size: 0.9rem;
-        }
-        .chatbot-send {
-            padding: 0.75rem 1.5rem;
-            background: #3498db;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .chatbot-send:hover {
-            background: #2980b9;
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Widget state
-    let isMinimized = false;
-    let userId = localStorage.getItem('chatbot_widget_userId');
-    if (!userId) {
-        userId = 'user_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('chatbot_widget_userId', userId);
+<script>
+export default {
+  data() {
+    return {
+      messages: [],
+      inputMessage: '',
+      chatId: null,
+      userId: 'user_001'
     }
-    let currentChatId = localStorage.getItem('chatbot_widget_currentChatId');
-    
-    // Functions
-    window.toggleChatbotWidget = function() {
-        const widget = document.getElementById('chatbotWidget');
-        isMinimized = !isMinimized;
-        widget.classList.toggle('minimized', isMinimized);
-    };
-    
-    function generateChatId() {
-        return 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    }
-    
-    window.sendChatbotMessage = async function() {
-        const input = document.getElementById('chatbotInput');
-        const message = input.value.trim();
-        if (!message) return;
-        
-        if (!currentChatId) {
-            currentChatId = generateChatId();
-        }
-        
-        addMessage('user', message);
-        input.value = '';
-        
-        const sendButton = document.getElementById('chatbotSend');
-        sendButton.disabled = true;
-        sendButton.textContent = 'Sending...';
-        
-        try {
-            const response = await fetch(`${CHATBOT_API_URL}/chat/message`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    user_id: userId,
-                    chat_id: currentChatId,
-                    message: message
-                })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            if (data.chat_id) {
-                currentChatId = data.chat_id;
-                localStorage.setItem('chatbot_widget_currentChatId', currentChatId);
-            }
-            
-            addMessage('assistant', data.response);
-            
-            if (data.suggestions && data.suggestions.length > 0) {
-                addSuggestions(data.suggestions);
-            }
-            
-        } catch (error) {
-            console.error('Error:', error);
-            addMessage('assistant', `Sorry, I encountered an error: ${error.message}`);
-        } finally {
-            sendButton.disabled = false;
-            sendButton.textContent = 'Send';
-        }
-    };
-    
-    function addMessage(role, content) {
-        const container = document.getElementById('chatbotMessages');
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${role}`;
-        messageDiv.innerHTML = content.replace(/\n/g, '<br>');
-        container.appendChild(messageDiv);
-        container.scrollTop = container.scrollHeight;
-    }
-    
-    function addSuggestions(suggestions) {
-        const container = document.getElementById('chatbotMessages');
-        const suggestionsDiv = document.createElement('div');
-        suggestionsDiv.style.marginTop = '1rem';
-        suggestionsDiv.style.padding = '0.75rem';
-        suggestionsDiv.style.background = 'rgba(52, 152, 219, 0.1)';
-        suggestionsDiv.style.borderLeft = '3px solid #3498db';
-        
-        const title = document.createElement('div');
-        title.style.fontSize = '0.85rem';
-        title.style.fontWeight = 'bold';
-        title.style.marginBottom = '0.5rem';
-        title.style.color = '#3498db';
-        title.textContent = 'You might also ask:';
-        suggestionsDiv.appendChild(title);
-        
-        suggestions.forEach(suggestion => {
-            const btn = document.createElement('button');
-            btn.textContent = suggestion;
-            btn.style.display = 'block';
-            btn.style.width = '100%';
-            btn.style.marginBottom = '0.5rem';
-            btn.style.padding = '0.5rem';
-            btn.style.background = 'white';
-            btn.style.border = '1px solid #3498db';
-            btn.style.cursor = 'pointer';
-            btn.style.textAlign = 'left';
-            btn.onclick = () => {
-                document.getElementById('chatbotInput').value = suggestion;
-                window.sendChatbotMessage();
-            };
-            suggestionsDiv.appendChild(btn);
+  },
+  methods: {
+    async sendMessage() {
+      if (!this.inputMessage.trim()) return;
+      
+      // Add user message
+      this.messages.push({
+        id: Date.now(),
+        role: 'user',
+        content: this.inputMessage
+      });
+      
+      try {
+        const response = await axios.post('/api/chatbot/message', {
+          user_id: this.userId,
+          message: this.inputMessage,
+          chat_id: this.chatId
         });
         
-        container.appendChild(suggestionsDiv);
-        container.scrollTop = container.scrollHeight;
-    }
-    
-    // Enter key support
-    document.getElementById('chatbotInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            window.sendChatbotMessage();
+        if (response.data.chat_id) {
+          this.chatId = response.data.chat_id;
         }
-    });
-})();
+        
+        // Add bot response
+        this.messages.push({
+          id: Date.now() + 1,
+          role: 'assistant',
+          content: response.data.response
+        });
+        
+        this.inputMessage = '';
+      } catch (error) {
+        console.error('Chatbot error:', error);
+        alert('Failed to send message. Please try again.');
+      }
+    }
+  }
+}
+</script>
 ```
 
-## Step 5: Add Widget to Laravel Layout
+### React Example
 
-In your main layout file (e.g., `resources/views/layouts/app.blade.php`), add before `</body>`:
+```jsx
+import React, { useState } from 'react';
+import axios from 'axios';
 
-```blade
-@include('components.chatbot-widget')
+function Chatbot() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [chatId, setChatId] = useState(null);
+  const userId = 'user_001';
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    // Add user message
+    const userMsg = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMsg]);
+
+    try {
+      const response = await axios.post('/api/chatbot/message', {
+        user_id: userId,
+        message: input,
+        chat_id: chatId
+      });
+
+      if (response.data.chat_id) {
+        setChatId(response.data.chat_id);
+      }
+
+      // Add bot response
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: response.data.response
+      }]);
+
+      setInput('');
+    } catch (error) {
+      console.error('Chatbot error:', error);
+      alert('Failed to send message');
+    }
+  };
+
+  return (
+    <div className="chat-container">
+      <div className="messages">
+        {messages.map((msg, idx) => (
+          <div key={idx} className={msg.role}>
+            {msg.content}
+          </div>
+        ))}
+      </div>
+      <form onSubmit={sendMessage}>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type your message..."
+        />
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  );
+}
+
+export default Chatbot;
 ```
 
-## Step 6: Configure Environment Variables
+---
 
-Add to your `.env` file:
+## Request/Response Examples
 
-```env
-CHATBOT_API_URL=https://your-ngrok-url.ngrok-free.app
+### Send Message Request
+```http
+POST /api/chatbot/message
+Content-Type: application/json
+
+{
+  "user_id": "user_001",
+  "message": "What is the rental price for Honda PCX 125?",
+  "chat_id": "chat_001",
+  "vendor_id": "default"
+}
 ```
 
-## Step 7: Serve Widget Files (Optional)
-
-If you want to serve the widget files from the chatbot server, add to `backend/app/main.py`:
-
-```python
-@app.get("/static/widget.js")
-async def serve_widget_js():
-    """Serve widget JavaScript."""
-    widget_path = Path(__file__).parent.parent.parent / "frontend" / "widget.js"
-    if widget_path.exists():
-        return FileResponse(str(widget_path), media_type="application/javascript")
-    return {"error": "Widget not found"}
-
-@app.get("/static/widget.css")
-async def serve_widget_css():
-    """Serve widget CSS."""
-    widget_path = Path(__file__).parent.parent.parent / "frontend" / "widget.css"
-    if widget_path.exists():
-        return FileResponse(str(widget_path), media_type="text/css")
-    return {"error": "Widget not found"}
+### Send Message Response
+```json
+{
+  "response": "Honda PCX 125 rental starts from £75 per week...",
+  "chat_id": "chat_001",
+  "message_id": "msg_123",
+  "tokens_used": 150,
+  "credits_used": 2,
+  "model_used": "mistral",
+  "retrieved_chunks": 3,
+  "is_domain_relevant": true,
+  "suggestions": [
+    "Tell me about finance options",
+    "What are your opening hours?"
+  ]
+}
 ```
 
-## Alternative: Simple iframe Embed
+---
 
-For a simpler approach, you can embed the widget using an iframe:
+## Error Handling
 
-```blade
-<!-- In your Laravel blade template -->
-<iframe 
-    src="{{ env('CHATBOT_API_URL', 'https://your-ngrok-url.ngrok-free.app') }}/frontend/widget.html"
-    width="380"
-    height="600"
-    style="position: fixed; bottom: 20px; right: 20px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 10000;"
-    allow="microphone"
-></iframe>
+The service returns `null` on errors. Always check:
+
+```php
+$result = $chatbotService->sendMessage($userId, $message);
+
+if ($result) {
+    // Success
+    $response = $result['response'];
+} else {
+    // Error - service unavailable or API error
+    // Log error or show user-friendly message
+}
 ```
+
+---
 
 ## Testing
 
-1. Start your chatbot server
-2. Start ngrok: `ngrok http 8000`
-3. Update `CHATBOT_API_URL` in Laravel `.env`
-4. Visit your Laravel website
-5. The chatbot widget should appear in the bottom-right corner
+### Test in Tinker
+```php
+php artisan tinker
 
-## API Endpoints
+$service = app(\App\Services\ChatbotService::class);
+$result = $service->sendMessage('test_user', 'Hello!');
+dd($result);
+```
 
-All endpoints are accessible via:
-- `https://your-ngrok-url.ngrok-free.app/api/v1/chat/message` (POST)
-- `https://your-ngrok-url.ngrok-free.app/api/v1/chat/chats/{user_id}` (GET)
-- `https://your-ngrok-url.ngrok-free.app/api/v1/chat/history/{chat_id}` (GET)
-- `https://your-ngrok-url.ngrok-free.app/api/v1/chat/clear/{chat_id}` (POST)
+### Test with cURL
+```bash
+curl -X POST http://your-laravel-app.test/api/chatbot/message \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "test_user",
+    "message": "What is the rental price?"
+  }'
+```
 
-## Notes
+---
 
-- The widget uses localStorage with prefix `chatbot_widget_` to avoid conflicts
-- Each user gets a unique `user_id` stored in localStorage
-- Chat history persists across page refreshes
-- The widget is responsive and works on mobile devices
-- CORS is configured to allow requests from any origin (can be restricted in production)
+## Best Practices
 
-## Alternative Tunnel Options
+1. **Cache Health Checks**: Don't check health on every request
+2. **Set Timeouts**: API calls can take 5-30 seconds
+3. **Handle Errors Gracefully**: Show user-friendly messages
+4. **Log Errors**: Monitor chatbot service availability
+5. **Reuse Chat IDs**: For conversation continuity
+6. **Validate Input**: Always validate user input before sending
 
-For better free and unlimited options, see **[EXPOSE_TO_LARAVEL.md](./EXPOSE_TO_LARAVEL.md)** which includes:
-- **Cloudflare Tunnel** (Best option - Free, Unlimited, Stable URLs)
-- **localtunnel** (Free, Unlimited, Quick Setup)
-- Helper scripts in `scripts/` directory
+---
 
+## Production Considerations
+
+1. **Add Authentication**: Protect your chatbot endpoints
+2. **Rate Limiting**: Prevent abuse
+3. **Queue Jobs**: For better performance, use Laravel queues
+4. **Monitoring**: Track API response times and errors
+5. **Fallback**: Handle chatbot unavailability gracefully
+
+---
+
+## Support
+
+- **API Docs**: `https://your-tunnel-url/docs`
+- **Health Check**: `https://your-tunnel-url/health`
+- **Full API Reference**: See `API_REFERENCE.md`
