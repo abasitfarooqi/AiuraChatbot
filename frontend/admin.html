@@ -155,16 +155,19 @@
             <button class="tab" onclick="switchTab('rag')">RAG</button>
             <button class="tab" onclick="switchTab('memory')">Memory</button>
             <button class="tab" onclick="switchTab('config')">LLM Config</button>
-            <button class="tab" onclick="switchTab('app-config')">App Config</button>
-            <button class="tab" onclick="switchTab('chatbot-service')">Chatbot Service</button>
+            <button class="tab" onclick="switchTab('unified-config')">Unified Config</button>
             <button class="tab" onclick="switchTab('knowledge-base')">Knowledge Base</button>
+            <button class="tab" onclick="switchTab('database')">Database</button>
             <button class="tab" onclick="switchTab('updates')">Updates</button>
         </div>
         
         <!-- Dashboard Tab -->
         <div id="dashboard" class="tab-content active">
             <div class="section">
-                <h2>Statistics</h2>
+                <h2>Dashboard Statistics</h2>
+                <button onclick="loadDashboardStats()" style="margin-bottom: 1.5rem; background: #27ae60;">Refresh All Stats</button>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Core Metrics</h3>
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-value" id="totalUsers">-</div>
@@ -181,6 +184,82 @@
                     <div class="stat-card">
                         <div class="stat-value" id="ragChunks">-</div>
                         <div class="stat-label">RAG Chunks</div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Usage & Activity</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalTokens">-</div>
+                        <div class="stat-label">Total Tokens</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalCredits">-</div>
+                        <div class="stat-label">Total Credits</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgMessagesPerChat">-</div>
+                        <div class="stat-label">Avg Messages/Chat</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgTokensPerUsage">-</div>
+                        <div class="stat-label">Avg Tokens/Usage</div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Recent Activity (24 Hours)</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="recentMessages24h">-</div>
+                        <div class="stat-label">Messages (24h)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="recentChats24h">-</div>
+                        <div class="stat-label">New Chats (24h)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="recentUsers24h">-</div>
+                        <div class="stat-label">New Users (24h)</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="messages7d">-</div>
+                        <div class="stat-label">Messages (7d)</div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">System Information</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div style="padding: 1rem; background: #f8f9fa; border: 1px solid #ddd;">
+                        <h4 style="margin-top: 0;">RAG System</h4>
+                        <div id="ragInfo" style="color: #666;">Loading...</div>
+                    </div>
+                    <div style="padding: 1rem; background: #f8f9fa; border: 1px solid #ddd;">
+                        <h4 style="margin-top: 0;">Current Model</h4>
+                        <div id="currentModelInfo" style="color: #666;">Loading...</div>
+                    </div>
+                    <div style="padding: 1rem; background: #f8f9fa; border: 1px solid #ddd;">
+                        <h4 style="margin-top: 0;">Database</h4>
+                        <div id="databaseInfo" style="color: #666;">Loading...</div>
+                    </div>
+                </div>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Additional Metrics</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="memoryRecords">-</div>
+                        <div class="stat-label">Memory Records</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="tokenUsageRecords">-</div>
+                        <div class="stat-label">Token Usage Records</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="modelConfigs">-</div>
+                        <div class="stat-label">Model Configs</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="chats7d">-</div>
+                        <div class="stat-label">Chats (7d)</div>
                     </div>
                 </div>
             </div>
@@ -298,36 +377,34 @@
             </div>
         </div>
         
-        <!-- App Config Tab -->
-        <div id="app-config" class="tab-content">
+        <!-- Unified Config Tab -->
+        <div id="unified-config" class="tab-content">
             <div class="section">
-                <h2>Application Configuration</h2>
+                <h2>Unified Configuration</h2>
+                <p style="margin-bottom: 1.5rem; color: #666;">
+                    This is the central configuration file for your chatbot. All settings including business info, 
+                    company details, prompts, chatbot service settings, and application config are managed here.
+                    <strong>Perfect for multi-vendor and multi-business use!</strong>
+                </p>
+                
                 <div class="form-group">
                     <label>Configuration JSON</label>
-                    <textarea id="appConfigJson" rows="20" style="font-family: monospace; font-size: 0.9rem;"></textarea>
-                    <small style="display: block; margin-top: 0.25rem; color: #666;">Edit application configuration. Changes are saved to config/app_config.json</small>
-                </div>
-                <button onclick="loadAppConfig()" style="background: #27ae60;">Load Config</button>
-                <button onclick="saveAppConfig()" style="margin-left: 1rem;">Save Config</button>
-                <button onclick="reloadAppConfig()" style="margin-left: 1rem; background: #3498db;">Reload from File</button>
-            </div>
-        </div>
-        
-        <!-- Chatbot Service Config Tab -->
-        <div id="chatbot-service" class="tab-content">
-            <div class="section">
-                <h2>Chatbot Service Configuration</h2>
-                <div class="form-group">
-                    <label>Configuration JSON</label>
-                    <textarea id="chatbotServiceConfigJson" rows="30" style="font-family: monospace; font-size: 0.9rem;"></textarea>
+                    <textarea id="unifiedConfigJson" rows="35" style="font-family: monospace; font-size: 0.9rem;"></textarea>
                     <small style="display: block; margin-top: 0.25rem; color: #666;">
-                        Edit chatbot service settings: greetings, topic detection, suggestions, response formatting, etc.
-                        Changes are saved to config/chatbot_service_config.json
+                        <strong>Key Sections:</strong><br>
+                        • <strong>business</strong> - Company name, services, branches<br>
+                        • <strong>contact</strong> - Phone, email, contact format<br>
+                        • <strong>prompts</strong> - System prompts (use variables like {company_name}, {contact_email})<br>
+                        • <strong>chatbot_service</strong> - Greetings, suggestions, topic detection, response formatting<br>
+                        • <strong>application</strong> - API settings, database, embedding, LLM config<br>
+                        <br>
+                        <strong>Variables available:</strong> {company_name}, {company_name_lower}, {contact_phone}, {contact_email}, {services_list}, {primary_service}, {contact_format}
                     </small>
                 </div>
-                <button onclick="loadChatbotServiceConfig()" style="background: #27ae60;">Load Config</button>
-                <button onclick="saveChatbotServiceConfig()" style="margin-left: 1rem;">Save Config</button>
-                <button onclick="validateChatbotServiceConfig()" style="margin-left: 1rem; background: #3498db;">Validate JSON</button>
+                <button onclick="loadUnifiedConfig()" style="background: #27ae60;">Load Config</button>
+                <button onclick="saveUnifiedConfig()" style="margin-left: 1rem;">Save Config</button>
+                <button onclick="validateUnifiedConfig()" style="margin-left: 1rem; background: #3498db;">Validate JSON</button>
+                <div id="unifiedConfigStatus" style="margin-top: 1rem; padding: 0.75rem; background: #ecf0f1; display: none;"></div>
             </div>
         </div>
         
@@ -336,13 +413,86 @@
             <div class="section">
                 <h2>Knowledge Base Editor</h2>
                 <div class="form-group">
+                    <label>Knowledge Base Status</label>
+                    <div id="kbStatus" style="padding: 0.75rem; background: #ecf0f1; margin-bottom: 1rem;">Loading...</div>
+                </div>
+                <div class="form-group">
                     <label>Knowledge Base JSON</label>
                     <textarea id="knowledgeBaseJson" rows="25" style="font-family: monospace; font-size: 0.9rem;"></textarea>
-                    <small style="display: block; margin-top: 0.25rem; color: #666;">Edit knowledge base chunks. Changes are saved and automatically reloaded into vector database.</small>
+                    <small style="display: block; margin-top: 0.25rem; color: #666;">Edit knowledge base chunks. Changes are saved and automatically reloaded into vector database (ChromaDB).</small>
                 </div>
                 <button onclick="loadKnowledgeBaseEditor()" style="background: #27ae60;">Load Knowledge Base</button>
                 <button onclick="saveKnowledgeBase()" style="margin-left: 1rem;">Save & Reload</button>
                 <button onclick="validateKnowledgeBase()" style="margin-left: 1rem; background: #3498db;">Validate JSON</button>
+                <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
+                    <h3>ChromaDB Management</h3>
+                    <div id="chromadbInfo" style="padding: 0.75rem; background: #ecf0f1; margin-bottom: 1rem;">Loading...</div>
+                    <button onclick="loadChromaDBInfo()" style="background: #27ae60;">Refresh ChromaDB Info</button>
+                    <button onclick="clearChromaDB()" style="margin-left: 1rem; background: #e74c3c; color: white;">Clear ChromaDB</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Database Tab -->
+        <div id="database" class="tab-content">
+            <div class="section">
+                <h2>Database Management</h2>
+                <p style="margin-bottom: 1.5rem; color: #666;">
+                    View and manage all database tables: users, chats, messages, memory, token usage, and model configs.
+                </p>
+                
+                <div class="form-group">
+                    <h3>Database Statistics</h3>
+                    <div id="dbStats" style="padding: 1rem; background: #f8f9fa; margin-bottom: 1rem;">Loading...</div>
+                    <button onclick="loadDatabaseStats()" style="background: #27ae60;">Refresh Stats</button>
+                </div>
+                
+                <div class="form-group" style="margin-top: 2rem;">
+                    <h3>Browse Tables</h3>
+                    <div style="margin-bottom: 1rem;">
+                        <label>Select Table</label>
+                        <select id="tableSelect" onchange="loadTableData()" style="width: 300px; padding: 0.75rem;">
+                            <option value="">-- Select a table --</option>
+                            <option value="users">Users</option>
+                            <option value="chats">Chats</option>
+                            <option value="messages">Messages</option>
+                            <option value="conversation_memory">Conversation Memory</option>
+                            <option value="token_usage">Token Usage</option>
+                            <option value="model_configs">Model Configs</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <input type="text" id="tableSearch" placeholder="Search in table..." style="width: 300px; padding: 0.75rem;" onkeyup="if(event.key === 'Enter') loadTableData()">
+                        <button onclick="loadTableData()" style="margin-left: 0.5rem;">Search</button>
+                        <button onclick="clearTableSearch()" style="margin-left: 0.5rem; background: #95a5a6;">Clear</button>
+                    </div>
+                    
+                    <div id="tableInfo" style="padding: 0.75rem; background: #ecf0f1; margin-bottom: 1rem; display: none;"></div>
+                    
+                    <div id="tableData" style="overflow-x: auto;">
+                        <p style="color: #666;">Select a table to view data</p>
+                    </div>
+                    
+                    <div id="tablePagination" style="margin-top: 1rem; display: none;">
+                        <button onclick="previousPage()" id="prevBtn" disabled>Previous</button>
+                        <span id="pageInfo" style="margin: 0 1rem;"></span>
+                        <button onclick="nextPage()" id="nextBtn" disabled>Next</button>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
+                    <h3>View Full Records</h3>
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                        <input type="text" id="viewUserId" placeholder="User ID" style="flex: 1; padding: 0.75rem;">
+                        <button onclick="viewUserFull()" style="background: #3498db;">View User</button>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <input type="text" id="viewChatId" placeholder="Chat ID" style="flex: 1; padding: 0.75rem;">
+                        <button onclick="viewChatFull()" style="background: #3498db;">View Chat</button>
+                    </div>
+                    <div id="fullRecordView" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; display: none; max-height: 500px; overflow-y: auto;"></div>
+                </div>
             </div>
         </div>
         
@@ -353,19 +503,28 @@
                 
                 <div class="form-group">
                     <h3>Offline Model Management</h3>
-                    <div id="offlineModelsList">Loading...</div>
+                    <p style="color: #666; margin-bottom: 1rem;">
+                        Manage embedding models for offline use. Models are cached locally and used when offline mode is enabled.
+                    </p>
+                    <div id="offlineModelsList" style="background: #f8f9fa; padding: 1rem; margin-bottom: 1rem;">Loading...</div>
                     <button onclick="loadOfflineModels()" style="background: #27ae60;">Refresh Models</button>
                 </div>
                 
                 <div class="form-group" style="margin-top: 2rem;">
                     <h3>Download Model for Offline Use</h3>
-                    <input type="text" id="modelToDownload" placeholder="e.g., sentence-transformers/all-MiniLM-L6-v2" style="width: 400px;">
+                    <input type="text" id="modelToDownload" placeholder="e.g., sentence-transformers/all-MiniLM-L6-v2" style="width: 400px; padding: 0.75rem;">
                     <button onclick="downloadModel()" style="margin-left: 1rem;">Download Model</button>
-                    <small style="display: block; margin-top: 0.25rem; color: #666;">Download Hugging Face models for offline use</small>
+                    <small style="display: block; margin-top: 0.25rem; color: #666;">
+                        Download Hugging Face embedding models for offline use. This may take several minutes depending on model size.
+                    </small>
+                    <div id="downloadStatus" style="margin-top: 0.5rem; padding: 0.5rem; display: none;"></div>
                 </div>
                 
-                <div class="form-group" style="margin-top: 2rem;">
+                <div class="form-group" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
                     <h3>System Prompts</h3>
+                    <p style="color: #666; margin-bottom: 1rem;">
+                        Edit system prompts used by the chatbot. Variables like {company_name} and {contact_email} are automatically replaced.
+                    </p>
                     <textarea id="systemPromptsJson" rows="15" style="font-family: monospace; font-size: 0.9rem;"></textarea>
                     <button onclick="loadSystemPrompts()" style="background: #27ae60;">Load Prompts</button>
                     <button onclick="saveSystemPrompts()" style="margin-left: 1rem;">Save Prompts</button>
@@ -385,13 +544,16 @@
             event.target.classList.add('active');
             document.getElementById(tabName).classList.add('active');
             
+            if (tabName === 'dashboard') loadDashboardStats();
             if (tabName === 'models') loadModels();
             if (tabName === 'rag') getRAGStats();
             if (tabName === 'memory') loadLLMConfig();
             if (tabName === 'config') loadLLMConfig();
-            if (tabName === 'app-config') loadAppConfig();
-            if (tabName === 'chatbot-service') loadChatbotServiceConfig();
+            if (tabName === 'unified-config') loadUnifiedConfig();
             if (tabName === 'knowledge-base') loadKnowledgeBaseEditor();
+            if (tabName === 'database') {
+                loadDatabaseStats();
+            }
             if (tabName === 'updates') {
                 loadOfflineModels();
                 loadSystemPrompts();
@@ -448,13 +610,86 @@
                 const data = await response.json();
                 
                 document.getElementById('ragStatus').innerHTML = 
-                    `<strong>Total Chunks:</strong> ${data.total_chunks}<br>
-                     <strong>Collection:</strong> ${data.collection_name}<br>
-                     <strong>Embedding Model:</strong> ${data.embedding_model}`;
+                    `<strong>Total Chunks:</strong> ${data.total_chunks || 0}<br>
+                     <strong>Collection:</strong> ${data.collection_name || 'N/A'}<br>
+                     <strong>Embedding Model:</strong> ${data.embedding_model || 'N/A'}`;
                 
                 document.getElementById('ragChunks').textContent = data.total_chunks || 0;
+                
+                // Update dashboard RAG info
+                if (document.getElementById('ragInfo')) {
+                    document.getElementById('ragInfo').innerHTML = 
+                        `<strong>Chunks:</strong> ${data.total_chunks || 0}<br>
+                         <strong>Collection:</strong> ${data.collection_name || 'N/A'}<br>
+                         <strong>Model:</strong> ${data.embedding_model || 'N/A'}`;
+                }
             } catch (error) {
                 console.error('Error getting RAG stats:', error);
+            }
+        }
+        
+        async function loadDashboardStats() {
+            try {
+                // Load database stats
+                const dbResponse = await fetch(`${API_BASE}/database/stats`);
+                if (!dbResponse.ok) {
+                    throw new Error(`HTTP ${dbResponse.status}: ${dbResponse.statusText}`);
+                }
+                const dbStats = await dbResponse.json();
+                
+                console.log('Database stats received:', dbStats);
+                
+                // Update core metrics
+                document.getElementById('totalUsers').textContent = dbStats.users || 0;
+                document.getElementById('totalChats').textContent = dbStats.chats || 0;
+                document.getElementById('totalMessages').textContent = dbStats.messages || 0;
+                
+                // Update usage metrics
+                document.getElementById('totalTokens').textContent = (dbStats.total_tokens || 0).toLocaleString();
+                document.getElementById('totalCredits').textContent = (dbStats.total_credits || 0).toLocaleString();
+                document.getElementById('avgMessagesPerChat').textContent = dbStats.avg_messages_per_chat || 0;
+                document.getElementById('avgTokensPerUsage').textContent = dbStats.avg_tokens_per_usage || 0;
+                
+                // Update recent activity
+                document.getElementById('recentMessages24h').textContent = dbStats.recent_messages_24h || 0;
+                document.getElementById('recentChats24h').textContent = dbStats.recent_chats_24h || 0;
+                document.getElementById('recentUsers24h').textContent = dbStats.recent_users_24h || 0;
+                document.getElementById('messages7d').textContent = dbStats.messages_7d || 0;
+                document.getElementById('chats7d').textContent = dbStats.chats_7d || 0;
+                
+                // Update additional metrics
+                document.getElementById('memoryRecords').textContent = dbStats.conversation_memory || 0;
+                document.getElementById('tokenUsageRecords').textContent = dbStats.token_usage || 0;
+                document.getElementById('modelConfigs').textContent = dbStats.model_configs || 0;
+                
+                // Update database info
+                document.getElementById('databaseInfo').innerHTML = 
+                    `<strong>Users:</strong> ${dbStats.users || 0}<br>
+                     <strong>Chats:</strong> ${dbStats.chats || 0}<br>
+                     <strong>Messages:</strong> ${dbStats.messages || 0}<br>
+                     ${dbStats.latest_message_time ? `<strong>Latest:</strong> ${new Date(dbStats.latest_message_time).toLocaleString()}` : ''}`;
+                
+                // Load RAG stats
+                await getRAGStats();
+                
+                // Load current model
+                try {
+                    const modelResponse = await fetch(`${API_BASE}/models/current`);
+                    const modelData = await modelResponse.json();
+                    document.getElementById('currentModelInfo').innerHTML = 
+                        `<strong>Provider:</strong> ${modelData.provider || 'N/A'}<br>
+                         <strong>Model:</strong> ${modelData.model || 'N/A'}`;
+                } catch (error) {
+                    document.getElementById('currentModelInfo').innerHTML = 'Error loading model info';
+                }
+                
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+                // Show error in console and update UI with error message
+                document.getElementById('totalUsers').textContent = 'Error';
+                document.getElementById('totalChats').textContent = 'Error';
+                document.getElementById('totalMessages').textContent = 'Error';
+                alert('Error loading dashboard statistics: ' + error.message);
             }
         }
         
@@ -636,12 +871,74 @@
         // Knowledge Base Editor Functions
         async function loadKnowledgeBaseEditor() {
             try {
+                // Load KB status
+                const statsResponse = await fetch(`${API_BASE}/rag/stats`);
+                const stats = await statsResponse.json();
+                document.getElementById('kbStatus').innerHTML = 
+                    `<strong>Total Chunks:</strong> ${stats.total_chunks || 0}<br>
+                     <strong>Collection:</strong> ${stats.collection_name || 'N/A'}<br>
+                     <strong>Embedding Model:</strong> ${stats.embedding_model || 'N/A'}`;
+                
+                // Load KB content
                 const response = await fetch(`${API_BASE}/config/knowledge-base`);
                 const data = await response.json();
                 document.getElementById('knowledgeBaseJson').value = JSON.stringify(data, null, 2);
+                
+                // Load ChromaDB info
+                loadChromaDBInfo();
             } catch (error) {
                 console.error('Error loading knowledge base:', error);
+                document.getElementById('kbStatus').innerHTML = `<span style="color: #e74c3c;">Error: ${error.message}</span>`;
                 alert('Error loading knowledge base');
+            }
+        }
+        
+        async function loadChromaDBInfo() {
+            try {
+                const response = await fetch(`${API_BASE}/rag/chromadb/info`);
+                const data = await response.json();
+                
+                let html = `<strong>Current Collection:</strong> ${data.current_collection.name}<br>`;
+                html += `<strong>Chunks:</strong> ${data.current_collection.count}<br>`;
+                html += `<strong>Path:</strong> ${data.current_collection.path}<br>`;
+                html += `<strong>Total Collections:</strong> ${data.total_collections}`;
+                
+                if (data.all_collections && data.all_collections.length > 0) {
+                    html += '<br><br><strong>All Collections:</strong><ul style="margin-top: 0.5rem;">';
+                    data.all_collections.forEach(col => {
+                        html += `<li>${col.name} (${col.count} chunks)</li>`;
+                    });
+                    html += '</ul>';
+                }
+                
+                document.getElementById('chromadbInfo').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading ChromaDB info:', error);
+                document.getElementById('chromadbInfo').innerHTML = `<span style="color: #e74c3c;">Error: ${error.message}</span>`;
+            }
+        }
+        
+        async function clearChromaDB() {
+            if (!confirm('⚠️ WARNING: This will delete ALL data from ChromaDB!\n\nThis will:\n• Delete all vector embeddings\n• Clear the entire collection\n• Require reloading the knowledge base\n\nAre you sure?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/rag/clear`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert('ChromaDB cleared successfully! Please reload the knowledge base.');
+                    loadChromaDBInfo();
+                    loadKnowledgeBaseEditor();
+                } else {
+                    alert('Error clearing ChromaDB');
+                }
+            } catch (error) {
+                console.error('Error clearing ChromaDB:', error);
+                alert('Error clearing ChromaDB: ' + error.message);
             }
         }
         
@@ -682,24 +979,28 @@
         // Offline Models Functions
         async function loadOfflineModels() {
             try {
+                document.getElementById('offlineModelsList').innerHTML = 'Loading...';
                 const response = await fetch(`${API_BASE}/config/models/offline`);
                 const data = await response.json();
                 
-                let html = '<table><tr><th>Model Name</th><th>Size</th><th>Path</th></tr>';
+                let html = `<div style="margin-bottom: 1rem;"><strong>Cache Directory:</strong> ${data.cache_dir || 'N/A'}</div>`;
+                html += '<table style="width: 100%;"><tr><th>Model Name</th><th>Status</th><th>Size</th><th>Path</th></tr>';
                 if (data.models && data.models.length > 0) {
                     data.models.forEach(model => {
-                        const sizeMB = (model.size / 1024 / 1024).toFixed(2);
-                        html += `<tr><td>${model.name}</td><td>${sizeMB} MB</td><td>${model.path}</td></tr>`;
+                        const status = model.cached ? '<span style="color: #27ae60;">✓ Cached</span>' : '<span style="color: #e74c3c;">✗ Not Cached</span>';
+                        const sizeMB = model.size_mb || '0';
+                        html += `<tr><td><strong>${model.name}</strong></td><td>${status}</td><td>${sizeMB} MB</td><td style="font-size: 0.85rem; color: #666;">${model.path}</td></tr>`;
                     });
                 } else {
-                    html += '<tr><td colspan="3">No models cached</td></tr>';
+                    html += '<tr><td colspan="4" style="text-align: center; padding: 2rem; color: #666;">No models cached. Download a model to enable offline mode.</td></tr>';
                 }
                 html += '</table>';
+                html += `<div style="margin-top: 1rem; color: #666; font-size: 0.9rem;">Total: ${data.count || 0} model(s)</div>`;
                 
                 document.getElementById('offlineModelsList').innerHTML = html;
             } catch (error) {
                 console.error('Error loading offline models:', error);
-                document.getElementById('offlineModelsList').textContent = 'Error loading models';
+                document.getElementById('offlineModelsList').innerHTML = `<div style="color: #e74c3c;">Error loading models: ${error.message}</div>`;
             }
         }
         
@@ -710,9 +1011,15 @@
                 return;
             }
             
-            if (!confirm(`Download model: ${modelName}?\n\nThis may take several minutes.`)) {
+            if (!confirm(`Download model: ${modelName}?\n\nThis may take several minutes depending on model size.`)) {
                 return;
             }
+            
+            const statusDiv = document.getElementById('downloadStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = '#fff3cd';
+            statusDiv.style.color = '#856404';
+            statusDiv.textContent = 'Downloading... This may take a few minutes. Please wait.';
             
             try {
                 const response = await fetch(`${API_BASE}/config/models/download`, {
@@ -723,14 +1030,21 @@
                 
                 const result = await response.json();
                 if (result.status === 'success') {
-                    alert('Model downloaded successfully!');
+                    statusDiv.style.background = '#d4edda';
+                    statusDiv.style.color = '#155724';
+                    statusDiv.textContent = '✓ Model downloaded successfully!';
+                    document.getElementById('modelToDownload').value = '';
                     loadOfflineModels();
                 } else {
-                    alert('Error: ' + result.detail);
+                    statusDiv.style.background = '#f8d7da';
+                    statusDiv.style.color = '#721c24';
+                    statusDiv.textContent = '✗ Error: ' + (result.detail || 'Download failed');
                 }
             } catch (error) {
                 console.error('Error downloading model:', error);
-                alert('Error downloading model');
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.textContent = '✗ Error downloading model: ' + error.message;
             }
         }
         
@@ -779,6 +1093,82 @@
             }
         }
         
+        // Unified Config Functions
+        async function loadUnifiedConfig() {
+            try {
+                const response = await fetch(`${API_BASE}/config/unified`);
+                const data = await response.json();
+                document.getElementById('unifiedConfigJson').value = JSON.stringify(data, null, 2);
+                const statusDiv = document.getElementById('unifiedConfigStatus');
+                statusDiv.style.display = 'block';
+                statusDiv.style.background = '#d4edda';
+                statusDiv.style.color = '#155724';
+                statusDiv.textContent = '✓ Configuration loaded successfully';
+            } catch (error) {
+                console.error('Error loading unified config:', error);
+                alert('Error loading unified config');
+                const statusDiv = document.getElementById('unifiedConfigStatus');
+                statusDiv.style.display = 'block';
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.textContent = '✗ Error loading configuration';
+            }
+        }
+        
+        async function saveUnifiedConfig() {
+            try {
+                const jsonText = document.getElementById('unifiedConfigJson').value;
+                const config = JSON.parse(jsonText);
+                
+                const response = await fetch(`${API_BASE}/config/unified`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(config)
+                });
+                
+                const result = await response.json();
+                const statusDiv = document.getElementById('unifiedConfigStatus');
+                statusDiv.style.display = 'block';
+                
+                if (result.status === 'success') {
+                    statusDiv.style.background = '#d4edda';
+                    statusDiv.style.color = '#155724';
+                    statusDiv.textContent = '✓ Configuration saved successfully! Restart server for full effect.';
+                } else {
+                    statusDiv.style.background = '#f8d7da';
+                    statusDiv.style.color = '#721c24';
+                    statusDiv.textContent = '✗ Error: ' + (result.detail || 'Save failed');
+                }
+            } catch (error) {
+                console.error('Error saving unified config:', error);
+                const statusDiv = document.getElementById('unifiedConfigStatus');
+                statusDiv.style.display = 'block';
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.textContent = '✗ Error: Invalid JSON or save failed - ' + error.message;
+            }
+        }
+        
+        function validateUnifiedConfig() {
+            try {
+                const jsonText = document.getElementById('unifiedConfigJson').value;
+                const config = JSON.parse(jsonText);
+                
+                // Basic validation
+                const required = ['business', 'contact', 'prompts', 'chatbot_service', 'application'];
+                const missing = required.filter(key => !config[key]);
+                
+                if (missing.length > 0) {
+                    alert('Missing required sections: ' + missing.join(', '));
+                    return;
+                }
+                
+                alert('✓ JSON is valid! All required sections present.');
+            } catch (error) {
+                alert('✗ Invalid JSON: ' + error.message);
+            }
+        }
+        
         // System Prompts Functions
         async function loadSystemPrompts() {
             try {
@@ -814,10 +1204,207 @@
             }
         }
         
+        // Database Management Functions
+        let currentTable = '';
+        let currentPage = 0;
+        let pageSize = 50;
+        let currentSearch = '';
+        let totalRecords = 0;
+        
+        async function loadDatabaseStats() {
+            try {
+                const response = await fetch(`${API_BASE}/database/stats`);
+                const stats = await response.json();
+                
+                let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">';
+                html += `<div><strong>Users:</strong> ${stats.users}</div>`;
+                html += `<div><strong>Chats:</strong> ${stats.chats}</div>`;
+                html += `<div><strong>Messages:</strong> ${stats.messages}</div>`;
+                html += `<div><strong>Memory Records:</strong> ${stats.conversation_memory}</div>`;
+                html += `<div><strong>Token Usage:</strong> ${stats.token_usage}</div>`;
+                html += `<div><strong>Model Configs:</strong> ${stats.model_configs}</div>`;
+                html += `<div><strong>Total Tokens:</strong> ${stats.total_tokens.toLocaleString()}</div>`;
+                html += `<div><strong>Total Credits:</strong> ${stats.total_credits.toLocaleString()}</div>`;
+                html += '</div>';
+                
+                document.getElementById('dbStats').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading database stats:', error);
+                document.getElementById('dbStats').innerHTML = `<span style="color: #e74c3c;">Error: ${error.message}</span>`;
+            }
+        }
+        
+        async function loadTableData() {
+            const tableName = document.getElementById('tableSelect').value;
+            if (!tableName) {
+                document.getElementById('tableData').innerHTML = '<p style="color: #666;">Select a table to view data</p>';
+                return;
+            }
+            
+            // Reset page if table changed
+            if (currentTable !== tableName) {
+                currentPage = 0;
+            }
+            currentTable = tableName;
+            currentSearch = document.getElementById('tableSearch').value.trim();
+            
+            try {
+                document.getElementById('tableData').innerHTML = 'Loading...';
+                
+                let url = `${API_BASE}/database/table/${tableName}?limit=${pageSize}&offset=${currentPage * pageSize}`;
+                if (currentSearch) {
+                    url += `&search=${encodeURIComponent(currentSearch)}`;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                totalRecords = data.total;
+                
+                // Update table info
+                document.getElementById('tableInfo').style.display = 'block';
+                document.getElementById('tableInfo').innerHTML = 
+                    `<strong>Total Records:</strong> ${totalRecords} | <strong>Showing:</strong> ${data.offset + 1}-${Math.min(data.offset + data.limit, totalRecords)} of ${totalRecords}`;
+                
+                // Display data in table
+                if (data.data && data.data.length > 0) {
+                    let html = '<table style="width: 100%; margin-top: 1rem; border-collapse: collapse;"><tr>';
+                    data.columns.forEach(col => {
+                        html += `<th style="text-align: left; padding: 0.5rem; background: #34495e; color: white; border: 1px solid #2c3e50;">${col}</th>`;
+                    });
+                    html += '</tr>';
+                    
+                    data.data.forEach((row, idx) => {
+                        html += `<tr style="background: ${idx % 2 === 0 ? '#fff' : '#f8f9fa'};">`;
+                        data.columns.forEach(col => {
+                            let value = row[col];
+                            if (value === null || value === undefined) value = '-';
+                            else if (typeof value === 'object') value = JSON.stringify(value).substring(0, 100);
+                            else if (typeof value === 'string' && value.length > 100) value = value.substring(0, 100) + '...';
+                            html += `<td style="padding: 0.5rem; border: 1px solid #ddd; font-size: 0.9rem;">${value}</td>`;
+                        });
+                        html += '</tr>';
+                    });
+                    html += '</table>';
+                    
+                    document.getElementById('tableData').innerHTML = html;
+                    
+                    // Update pagination
+                    updatePagination();
+                } else {
+                    document.getElementById('tableData').innerHTML = '<p style="color: #666; padding: 2rem; text-align: center;">No records found</p>';
+                    document.getElementById('tablePagination').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error loading table data:', error);
+                document.getElementById('tableData').innerHTML = `<span style="color: #e74c3c;">Error: ${error.message}</span>`;
+            }
+        }
+        
+        function updatePagination() {
+            const totalPages = Math.ceil(totalRecords / pageSize);
+            document.getElementById('pageInfo').textContent = `Page ${currentPage + 1} of ${totalPages}`;
+            document.getElementById('prevBtn').disabled = currentPage === 0;
+            document.getElementById('nextBtn').disabled = currentPage >= totalPages - 1;
+            document.getElementById('tablePagination').style.display = 'flex';
+        }
+        
+        function previousPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                loadTableData();
+            }
+        }
+        
+        function nextPage() {
+            const totalPages = Math.ceil(totalRecords / pageSize);
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                loadTableData();
+            }
+        }
+        
+        function clearTableSearch() {
+            document.getElementById('tableSearch').value = '';
+            currentSearch = '';
+            currentPage = 0;
+            loadTableData();
+        }
+        
+        async function viewUserFull() {
+            const userId = document.getElementById('viewUserId').value.trim();
+            if (!userId) {
+                alert('Please enter a User ID');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/database/user/${userId}/full`);
+                const data = await response.json();
+                
+                let html = '<h4>User Details</h4>';
+                html += `<pre style="background: white; padding: 1rem; overflow-x: auto; border: 1px solid #ddd;">${JSON.stringify(data, null, 2)}</pre>`;
+                
+                document.getElementById('fullRecordView').innerHTML = html;
+                document.getElementById('fullRecordView').style.display = 'block';
+            } catch (error) {
+                document.getElementById('fullRecordView').innerHTML = `<span style="color: #e74c3c;">Error: ${error.message}</span>`;
+                document.getElementById('fullRecordView').style.display = 'block';
+            }
+        }
+        
+        async function viewChatFull() {
+            const chatId = document.getElementById('viewChatId').value.trim();
+            if (!chatId) {
+                alert('Please enter a Chat ID');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/database/chat/${chatId}/full`);
+                const data = await response.json();
+                
+                let html = '<h4>Chat Details</h4>';
+                html += `<pre style="background: white; padding: 1rem; overflow-x: auto; border: 1px solid #ddd;">${JSON.stringify(data, null, 2)}</pre>`;
+                
+                document.getElementById('fullRecordView').innerHTML = html;
+                document.getElementById('fullRecordView').style.display = 'block';
+            } catch (error) {
+                document.getElementById('fullRecordView').innerHTML = `<span style="color: #e74c3c;">Error: ${error.message}</span>`;
+                document.getElementById('fullRecordView').style.display = 'block';
+            }
+        }
+        
         // Load initial data
         loadModels();
         getRAGStats();
         loadLLMConfig();
+        
+        // Auto-load dashboard if active on page load
+        if (document.getElementById('dashboard').classList.contains('active')) {
+            loadDashboardStats();
+        }
+        
+        // Auto-load unified config if tab is active on page load
+        if (document.getElementById('unified-config').classList.contains('active')) {
+            loadUnifiedConfig();
+        }
+        
+        // Auto-load knowledge base if tab is active on page load
+        if (document.getElementById('knowledge-base').classList.contains('active')) {
+            loadKnowledgeBaseEditor();
+        }
+        
+        // Auto-load database if tab is active on page load
+        if (document.getElementById('database').classList.contains('active')) {
+            loadDatabaseStats();
+        }
+        
+        // Auto-load updates if tab is active on page load
+        if (document.getElementById('updates').classList.contains('active')) {
+            loadOfflineModels();
+            loadSystemPrompts();
+        }
     </script>
 </body>
 </html>

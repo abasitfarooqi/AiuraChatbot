@@ -1,0 +1,348 @@
+{
+  "metadata": {
+    "version": "3.0.0",
+    "last_updated": "2025-01-27",
+    "description": "Unified configuration for multi-vendor, multi-business chatbot",
+    "vendor_id": "default",
+    "business_type": "motorcycle_dealership"
+  },
+  "business": {
+    "company_name": "Neguinho Motors Ltd",
+    "company_number": "11600635",
+    "trading_names": ["NGN Motors", "Neguinho Motors", "NGN"],
+    "registered_address": "9-13 Catford Hill, London, SE6 4NU",
+    "business_description": "London-based motorcycle business specialising in Honda & Yamaha scooters and motorcycles",
+    "core_activities": [
+      "Motorcycle rentals (short & long term)",
+      "New and used motorcycle sales",
+      "Servicing and repairs",
+      "MOT testing",
+      "Nationwide vehicle delivery",
+      "Accident management support",
+      "Online/offline accessories shop"
+    ],
+    "services_list": [
+      "bike rentals",
+      "bike sales",
+      "finance",
+      "servicing",
+      "MOT testing",
+      "delivery",
+      "accessories",
+      "motorbike maintenance/repairs"
+    ]
+  },
+  "contact": {
+    "primary_phone": "0208 314 1498",
+    "primary_email": "enquiries@neguinhomotors.co.uk",
+    "customer_service_email": "customerservice@neguinhomotors.co.uk",
+    "whatsapp_available": true,
+    "contact_format": "Contact: {phone} or {email}"
+  },
+  "branches": [
+    {
+      "name": "Catford",
+      "address": "9-13 Unit 1179 Catford Hill, London SE6 4NU",
+      "phone": "0208 314 1498",
+      "postcode": "SE6 4NU",
+      "opening_hours": {
+        "monday": "09:00-18:00",
+        "tuesday": "09:00-18:00",
+        "wednesday": "09:00-18:00",
+        "thursday": "09:00-18:00",
+        "friday": "09:00-18:00",
+        "saturday": "09:00-18:00",
+        "sunday": "closed"
+      },
+      "services": ["sales", "rentals", "servicing", "repairs", "MOT", "delivery"],
+      "parking_available": true
+    },
+    {
+      "name": "Tooting",
+      "address": "4A Penwortham Road, London SW16 6RE",
+      "phone": "0203 409 5478",
+      "postcode": "SW16 6RE",
+      "opening_hours": {
+        "monday": "09:00-18:00",
+        "tuesday": "09:00-18:00",
+        "wednesday": "09:00-18:00",
+        "thursday": "09:00-18:00",
+        "friday": "09:00-18:00",
+        "saturday": "09:00-18:00",
+        "sunday": "closed"
+      },
+      "services": ["sales", "rentals", "servicing", "repairs", "MOT", "delivery"],
+      "parking_available": true
+    },
+    {
+      "name": "Sutton",
+      "address": "329 High St, Sutton SM1 1LW",
+      "phone": "0208 412 9275",
+      "postcode": "SM1 1LW",
+      "opening_hours": {
+        "monday": "09:00-18:00",
+        "tuesday": "09:00-18:00",
+        "wednesday": "09:00-18:00",
+        "thursday": "09:00-18:00",
+        "friday": "09:00-18:00",
+        "saturday": "09:00-18:00",
+        "sunday": "closed"
+      },
+      "services": ["sales", "rentals", "servicing", "repairs", "MOT", "delivery"],
+      "parking_available": true
+    }
+  ],
+  "application": {
+    "environment": "development",
+    "debug": true,
+    "app_name": "AiuraChatbot",
+    "app_version": "1.0.0",
+    "api_host": "0.0.0.0",
+    "api_port": 8000,
+    "api_prefix": "/api/v1"
+  },
+  "database": {
+    "database_url": "sqlite:///./data/chatbot.db",
+    "database_echo": false
+  },
+  "vector_database": {
+    "chroma_db_path": "./data/chroma_db",
+    "chroma_collection_name": "{company_name_lower}_kb"
+  },
+  "embedding": {
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "device": "cpu",
+    "batch_size": 32,
+    "cache_dir": "./models/embeddings",
+    "offline_mode": true
+  },
+  "llm": {
+    "provider": "ollama",
+    "model": "mistral",
+    "base_url": "http://localhost:11434",
+    "temperature": 0.7,
+    "max_tokens": 4000,
+    "top_p": 0.9,
+    "top_k": 40,
+    "offline_mode": true
+  },
+  "openai": {
+    "api_key": null,
+    "model": "gpt-4-turbo-preview",
+    "enabled": false
+  },
+  "rag": {
+    "top_k": 5,
+    "similarity_threshold": 0.2,
+    "enable_filtering": true,
+    "enable_reranking": false,
+    "knowledge_base_path": "./rag_knowledge_base.json"
+  },
+  "memory": {
+    "enabled": true,
+    "max_turns": 20,
+    "summary_enabled": false,
+    "summary_threshold": 15
+  },
+  "domain_restriction": {
+    "enabled": true,
+    "auto_generate_keywords": true,
+    "keywords": []
+  },
+  "credits": {
+    "token_tracking_enabled": true,
+    "credit_system_enabled": true,
+    "default_user_credits": 1000,
+    "credit_cost_per_message": 10
+  },
+  "multi_vendor": {
+    "enabled": false,
+    "default_vendor_id": "default"
+  },
+  "logging": {
+    "log_level": "INFO",
+    "log_file": "./logs/chatbot.log",
+    "log_rotation": "10 MB",
+    "log_retention": "30 days"
+  },
+  "cors": {
+    "origins": ["*"],
+    "credentials": true
+  },
+  "security": {
+    "secret_key": "your-secret-key-change-in-production",
+    "access_token_expire_minutes": 1440
+  },
+  "frontend": {
+    "frontend_url": "http://localhost:5173"
+  },
+  "prompts": {
+    "main_system_prompt": "You are the {company_name} chatbot assistant. You help customers with {services_list}.\n\nCRITICAL RULES - STRICTLY ENFORCE:\n1. ONLY use information provided in the INFORMATION section below\n2. NEVER make up, guess, or hallucinate any information\n3. NEVER use knowledge from outside the provided information\n4. If information is not in the provided context, say: \"{fallback_message}\"\n5. ONLY answer questions about {company_name} services\n6. For out-of-domain queries, say: \"{out_of_domain_message}\"\n\nRESPONSE FORMAT:\n- Use ONLY facts from the provided INFORMATION section\n- If a detail is not mentioned in the information, do NOT invent it\n- Be accurate and precise\n- Format responses with proper line breaks and structure",
+    "greeting_prompt": "The user just said: \"{message}\"\n\nRespond with a friendly greeting and offer to help with {company_name} services ({services_list}).\n\nKeep it brief and welcoming. Do not mention any specific information unless asked.",
+    "query_prompt": "CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.\n\nINFORMATION FROM KNOWLEDGE BASE:\n{context_text}\n\nQUESTION: {message}\n\nINSTRUCTIONS:\n- Use ONLY facts from the INFORMATION section above\n- If the answer is not in the information, say: \"{fallback_message}\"\n- DO NOT make up, guess, or invent any information\n- DO NOT use knowledge from outside the provided information\n- Format your answer with proper line breaks and structure\n\nANSWER (based ONLY on the information above):",
+    "fallback_message": "I don't have that information in my knowledge base. Please contact us at {contact_email} or {contact_phone} for more details.",
+    "out_of_domain_message": "I can only assist with {services_list} related to {company_name}. How can I help you with our services?",
+    "error_message": "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at {contact_email}"
+  },
+  "chatbot_service": {
+    "greetings": {
+      "simple_greetings": ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "greetings"],
+      "initial_suggestions": [
+        "What services do you offer?",
+        "Tell me about {primary_service}",
+        "What are your opening hours?",
+        "Where are your branches located?"
+      ]
+    },
+    "topic_detection": {
+      "topic_keywords": {
+        "rental": ["rental", "rent", "hire", "leasing", "weekly", "monthly rental"],
+        "sale": ["sale", "buy", "purchase", "price", "cost", "for sale"],
+        "finance": ["finance", "emi", "payment plan", "installment", "credit", "loan"],
+        "servicing": ["service", "servicing", "repair", "maintenance", "fix"],
+        "mot": ["mot", "test", "certificate"],
+        "delivery": ["delivery", "deliver", "transport", "shipping"],
+        "accessories": ["accessories", "accessory", "helmet", "gear", "equipment"],
+        "accident": ["accident", "crash", "claim", "insurance"],
+        "branch": ["branch", "location", "address", "where"],
+        "opening": ["opening", "hours", "time", "when open"]
+      },
+      "service_topics": ["rental", "sale", "finance", "servicing", "mot", "delivery", "accessories", "accident"]
+    },
+    "question_analysis": {
+      "complete_question_indicators": [
+        {"indicator": "what", "keywords": ["service", "price", "cost", "bike", "model", "opening", "hours", "branch", "location"]},
+        {"indicator": "how", "keywords": ["much", "long", "many", "do", "can"]},
+        {"indicator": "where", "keywords": ["are", "is", "do", "can"]},
+        {"indicator": "when", "keywords": ["are", "is", "do", "can"]},
+        {"indicator": "do you", "keywords": ["offer", "have", "sell", "rent", "provide"]},
+        {"indicator": "tell me", "keywords": ["about", "more"]},
+        {"indicator": "can i", "keywords": ["rent", "buy", "get", "test"]},
+        {"indicator": "rental", "keywords": ["price", "bike", "cost", "period", "term"]},
+        {"indicator": "finance", "keywords": ["option", "rate", "term", "deposit", "available"]},
+        {"indicator": "sale", "keywords": ["bike", "price", "available", "model"]}
+      ],
+      "min_words_for_complete": 4,
+      "min_words_for_question_structure": 5,
+      "max_short_question_words": 2
+    },
+    "suggestions": {
+      "service_suggestions": {
+        "rental": {
+          "primary": [
+            "What are the rental prices for each bike?",
+            "What documents do I need for rental?",
+            "What is the minimum rental period?"
+          ],
+          "cross_sell": "We also offer bike sales and finance - would you like to know more?"
+        },
+        "sale": {
+          "primary": [
+            "What bikes are available for sale?",
+            "Do you offer finance options?",
+            "Can I test ride a bike?"
+          ],
+          "cross_sell": "We also offer rentals and servicing - interested?"
+        },
+        "finance": {
+          "primary": [
+            "What is the interest rate?",
+            "How long is the finance term?",
+            "What deposit is required?"
+          ],
+          "cross_sell": "We also offer bike sales and rentals - want to know more?"
+        },
+        "servicing": {
+          "primary": [
+            "What services do you offer?",
+            "How much does a service cost?",
+            "Do you collect bikes for service?"
+          ],
+          "cross_sell": "We also offer MOT testing and repairs - need more info?"
+        },
+        "mot": {
+          "primary": [
+            "How much does an MOT cost?",
+            "How long does an MOT take?",
+            "Do you offer pre-MOT checks?"
+          ],
+          "cross_sell": "We also offer servicing and repairs - want details?"
+        },
+        "delivery": {
+          "primary": [
+            "How much does delivery cost?",
+            "How long does delivery take?",
+            "Do you deliver nationwide?"
+          ],
+          "cross_sell": "We also offer bike sales and rentals - interested?"
+        }
+      },
+      "all_services": {
+        "rental": "Tell me about bike rental options",
+        "sale": "What bikes do you have for sale?",
+        "finance": "Do you offer finance options?",
+        "servicing": "What servicing do you offer?",
+        "mot": "Do you do MOT testing?",
+        "delivery": "Do you offer delivery service?",
+        "accessories": "What accessories do you sell?",
+        "accident": "Do you offer accident management?"
+      },
+      "default_suggestions": [
+        "What services do you offer?",
+        "Tell me about {primary_service}",
+        "What are your opening hours?",
+        "Where are your branches located?"
+      ],
+      "multi_service_message": "We also offer other services - would you like to know more?",
+      "max_suggestions": 5,
+      "min_services_for_cross_sell": 2,
+      "min_messages_for_cross_sell": 3
+    },
+    "intelligent_suggestions": {
+      "enabled": true,
+      "min_questions_for_analysis": 4,
+      "rental_follow_ups": {
+        "deposit": "What deposit is required for rental?",
+        "insurance": "What insurance do I need for rental?",
+        "delivery": "Do you deliver rental bikes?"
+      },
+      "sale_follow_ups": {
+        "finance": "Do you offer finance for bike purchases?",
+        "test_ride": "Can I test ride before buying?",
+        "warranty": "What warranty do you offer on bikes?"
+      },
+      "finance_follow_ups": {
+        "interest_rate": "What is the interest rate?",
+        "term": "How long is the finance term?",
+        "deposit": "What deposit is required for finance?"
+      },
+      "servicing_follow_ups": {
+        "cost": "How much does a service cost?",
+        "collect": "Do you collect bikes for service?",
+        "mot": "Do you also do MOT testing?"
+      },
+      "multi_service_follow_ups": {
+        "delivery": "Do you offer delivery service?",
+        "accessories": "What accessories do you sell?",
+        "accident": "Do you offer accident management?"
+      }
+    },
+    "response_formatting": {
+      "add_contact_info": true,
+      "contact_keywords": ["service", "rental", "sale", "finance", "opening", "branch", "contact", "help"],
+      "min_response_length_for_contact": 50,
+      "contact_info": "{contact_format}",
+      "default_empty_response": "I'm here to help! How can I assist you today?"
+    },
+    "context_management": {
+      "max_context_messages": 10,
+      "max_recent_messages_for_query": 6,
+      "max_user_messages_for_context": 4
+    },
+    "validation": {
+      "enable_response_validation": true,
+      "fallback_message": "I don't have that information in my knowledge base. Please contact us at {contact_email} or {contact_phone} for more details."
+    }
+  }
+}
+

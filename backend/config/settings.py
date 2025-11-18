@@ -1,22 +1,22 @@
 """
 Application settings and configuration management.
-Settings are loaded from JSON config files first, then environment variables.
-JSON config takes priority for offline/local operation.
+Settings are loaded from unified JSON config first, then environment variables.
+Unified config takes priority for offline/local operation.
 """
 from pydantic_settings import BaseSettings
 from typing import List, Optional
 from functools import lru_cache
-from backend.utils.config_manager import get_config_manager
+from backend.utils.unified_config_manager import get_unified_config_manager
 
 
 class Settings(BaseSettings):
-    """Application settings loaded from JSON config or environment variables."""
+    """Application settings loaded from unified JSON config or environment variables."""
     
     def __init__(self, **kwargs):
-        """Initialize settings from JSON config first, then env vars."""
-        # Load JSON config
-        config_manager = get_config_manager()
-        config = config_manager.load_app_config()
+        """Initialize settings from unified config first, then env vars."""
+        # Load unified config
+        config_manager = get_unified_config_manager()
+        config = config_manager.load_config()
         
         # Set defaults from JSON config
         app_config = config.get("application", {})
@@ -48,7 +48,13 @@ class Settings(BaseSettings):
         kwargs.setdefault("database_echo", db_config.get("database_echo", False))
         
         kwargs.setdefault("chroma_db_path", vec_config.get("chroma_db_path", "./data/chroma_db"))
-        kwargs.setdefault("chroma_collection_name", vec_config.get("chroma_collection_name", "neguinho_motors_kb"))
+        # Resolve collection name variable if present
+        collection_name = vec_config.get("chroma_collection_name", "chatbot_kb")
+        if "{company_name_lower}" in collection_name:
+            business = config.get("business", {})
+            company_lower = business.get("company_name", "company").lower().replace(" ", "_").replace(".", "")
+            collection_name = collection_name.replace("{company_name_lower}", company_lower)
+        kwargs.setdefault("chroma_collection_name", collection_name)
         
         kwargs.setdefault("embedding_model", emb_config.get("model", "sentence-transformers/all-MiniLM-L6-v2"))
         kwargs.setdefault("embedding_device", emb_config.get("device", "cpu"))

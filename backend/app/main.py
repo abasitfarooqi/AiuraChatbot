@@ -29,10 +29,20 @@ logger.add(
 )
 
 # Create FastAPI app
+# Get company name for description
+try:
+    from backend.utils.unified_config_manager import get_unified_config_manager
+    config_manager = get_unified_config_manager()
+    unified_config = config_manager.load_config()
+    company_name = unified_config.get("business", {}).get("company_name", "Chatbot")
+    app_description = f"{company_name} Chatbot API with RAG + LLM"
+except:
+    app_description = "Chatbot API with RAG + LLM"
+
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
-    description="Neguinho Motors Chatbot API with RAG + LLM"
+    description=app_description
 )
 
 # CORS middleware - Allow all origins for widget embedding (including ngrok)

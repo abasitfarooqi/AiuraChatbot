@@ -72,14 +72,24 @@ class OfflineModelManager:
             SentenceTransformer model or None
         """
         try:
+            # Check direct path first
             local_path = self.embeddings_dir / model_name.replace("/", "_")
             
-            if local_path.exists():
+            # Also check nested embeddings directory
+            nested_path = self.embeddings_dir / "embeddings" / model_name.replace("/", "_")
+            
+            # Try direct path first
+            if local_path.exists() and (any(local_path.glob("*.json")) or any(local_path.glob("*.bin")) or any(local_path.glob("*.pt"))):
                 logger.info(f"Loading embedding model from local cache: {local_path}")
                 model = SentenceTransformer(str(local_path), device='cpu')
                 return model
+            # Try nested path
+            elif nested_path.exists() and (any(nested_path.glob("*.json")) or any(nested_path.glob("*.bin")) or any(nested_path.glob("*.pt"))):
+                logger.info(f"Loading embedding model from nested cache: {nested_path}")
+                model = SentenceTransformer(str(nested_path), device='cpu')
+                return model
             else:
-                logger.warning(f"Model not found in cache: {local_path}")
+                logger.warning(f"Model not found in cache: {local_path} or {nested_path}")
                 # Try to load from Hugging Face cache
                 os.environ['TRANSFORMERS_CACHE'] = str(self.embeddings_dir)
                 os.environ['HF_HOME'] = str(self.embeddings_dir)
@@ -101,13 +111,31 @@ class OfflineModelManager:
     
     def get_model_info(self, model_name: str) -> Dict[str, Any]:
         """Get information about a cached model."""
+        # Check direct path first
         local_path = self.embeddings_dir / model_name.replace("/", "_")
+        
+        # Also check nested embeddings directory
+        nested_path = self.embeddings_dir / "embeddings" / model_name.replace("/", "_")
+        
+        # Determine which path exists
+        if local_path.exists() and (any(local_path.glob("*.json")) or any(local_path.glob("*.bin")) or any(local_path.glob("*.pt"))):
+            cached = True
+            path = local_path
+        elif nested_path.exists() and (any(nested_path.glob("*.json")) or any(nested_path.glob("*.bin")) or any(nested_path.glob("*.pt"))):
+            cached = True
+            path = nested_path
+        else:
+            cached = False
+            path = local_path  # Default to direct path
+        
+        size = self._get_dir_size(path) if cached else 0
         
         info = {
             "name": model_name,
-            "cached": local_path.exists(),
-            "path": str(local_path),
-            "size": self._get_dir_size(local_path) if local_path.exists() else 0
+            "cached": cached,
+            "path": str(path),
+            "size": size,
+            "size_mb": round(size / 1024 / 1024, 2) if size > 0 else 0
         }
         
         return info
@@ -124,12 +152,34 @@ class OfflineModelManager:
     def list_cached_models(self) -> list:
         """List all cached models."""
         models = []
+        
+        # Check direct model directories (e.g., sentence-transformers_all-MiniLM-L6-v2)
         for model_dir in self.embeddings_dir.iterdir():
-            if model_dir.is_dir():
-                models.append({
-                    "name": model_dir.name.replace("_", "/"),
-                    "path": str(model_dir),
-                    "size": self._get_dir_size(model_dir)
-                })
+            if model_dir.is_dir() and not model_dir.name.startswith('.'):
+                # Check if it's a saved model directory (has config.json or similar)
+                if any(model_dir.glob("*.json")) or any(model_dir.glob("*.bin")) or any(model_dir.glob("*.pt")):
+                    model_name = model_dir.name.replace("_", "/")
+                    models.append({
+                        "name": model_name,
+                        "path": str(model_dir),
+                        "size": self._get_dir_size(model_dir)
+                    })
+        
+        # Also check nested embeddings directory (created by SentenceTransformer)
+        nested_embeddings = self.embeddings_dir / "embeddings"
+        if nested_embeddings.exists():
+            for model_dir in nested_embeddings.iterdir():
+                if model_dir.is_dir() and not model_dir.name.startswith('.'):
+                    # Check if it's a saved model directory
+                    if any(model_dir.glob("*.json")) or any(model_dir.glob("*.bin")) or any(model_dir.glob("*.pt")):
+                        model_name = model_dir.name.replace("_", "/")
+                        # Avoid duplicates
+                        if not any(m["name"] == model_name for m in models):
+                            models.append({
+                                "name": model_name,
+                                "path": str(model_dir),
+                                "size": self._get_dir_size(model_dir)
+                            })
+        
         return models
 

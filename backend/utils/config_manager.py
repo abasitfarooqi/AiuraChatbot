@@ -300,3 +300,11 @@ def get_config_manager(config_dir: str = "./config") -> ConfigManager:
         _config_manager = ConfigManager(config_dir)
     return _config_manager
 
+
+# Unified config manager (preferred)
+def get_unified_config() -> Dict[str, Any]:
+    """Get unified configuration (preferred method)."""
+    from backend.utils.unified_config_manager import get_unified_config_manager
+    manager = get_unified_config_manager()
+    return manager.load_config()
+

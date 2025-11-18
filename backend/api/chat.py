@@ -223,3 +223,48 @@ async def clear_chat_all(
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@router.delete("/delete/{chat_id}")
+async def delete_chat(
+    chat_id: str,
+    db: Session = Depends(get_db)
+):
+    """Delete a chat completely (messages, memory, token usage, and chat record)."""
+    try:
+        from backend.models.database import Message, ConversationMemory, Chat, TokenUsage
+        
+        # Delete all messages
+        messages_deleted = db.query(Message).filter(
+            Message.chat_id == chat_id
+        ).delete()
+        
+        # Delete conversation memory
+        memory_deleted = db.query(ConversationMemory).filter(
+            ConversationMemory.chat_id == chat_id
+        ).delete()
+        
+        # Delete token usage records
+        token_usage_deleted = db.query(TokenUsage).filter(
+            TokenUsage.chat_id == chat_id
+        ).delete()
+        
+        # Delete the chat record itself
+        chat_deleted = db.query(Chat).filter(Chat.chat_id == chat_id).delete()
+        
+        db.commit()
+        
+        return {
+            "status": "success",
+            "message": f"Chat {chat_id} deleted successfully",
+            "deleted": {
+                "messages": messages_deleted,
+                "memory": memory_deleted,
+                "token_usage": token_usage_deleted,
+                "chat": chat_deleted > 0
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error deleting chat: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+

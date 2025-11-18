@@ -2381,3 +2381,751 @@
 2025-11-19 02:43:18.493 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
 2025-11-19 02:43:18.493 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
 2025-11-19 02:43:22.945 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:43:25.940 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:43:25.941 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:43:25.942 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:43:25.942 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:43:30.270 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:43:30.274 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:43:30.274 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:49:52.374 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:49:56.596 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:49:56.598 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:49:56.598 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:49:56.598 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:50:01.068 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:50:01.073 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:50:01.073 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:50:06.333 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:50:09.235 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:50:09.236 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:50:09.236 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:50:09.236 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:50:13.487 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:50:13.958 | INFO     | backend.services.rag_service:load_knowledge_base:167 - Loaded 38 chunks into vector database
+2025-11-19 02:50:13.958 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:50:14.163 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:50:17.467 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:50:17.468 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:50:17.468 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:50:17.468 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:50:21.679 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:50:21.683 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:50:21.683 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:50:22.192 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:50:26.475 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:50:26.476 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:50:26.476 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:50:26.477 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:50:30.772 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:50:30.776 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:50:30.776 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:50:30.982 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:50:33.916 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:50:33.917 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:50:33.917 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:50:33.918 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:50:38.048 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:50:38.052 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:50:38.052 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:50:47.050 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:50:50.893 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:50:50.894 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:50:50.894 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:50:50.894 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:50:55.716 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:50:55.721 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:50:55.721 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:50:55.926 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:50:59.156 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:50:59.157 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:50:59.158 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:50:59.158 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:51:03.385 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:51:03.389 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:51:03.389 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:51:04.100 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:51:06.987 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:51:06.988 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:51:06.989 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:51:06.989 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:51:12.122 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:51:12.126 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:51:12.126 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:51:12.331 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:51:16.317 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 02:51:16.319 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 02:51:16.319 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:51:16.319 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:51:21.000 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 02:51:21.004 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:51:21.005 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 02:51:24.243 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 02:51:27.091 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 02:51:27.092 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 02:51:27.092 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:51:27.092 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:51:31.313 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 02:51:31.316 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:51:31.317 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 02:51:31.522 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 02:51:34.444 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 02:51:34.445 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 02:51:34.445 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:51:34.445 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:51:39.789 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 02:51:39.792 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:51:39.792 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 02:51:42.222 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 02:51:45.127 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 02:51:45.129 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 02:51:45.129 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:51:45.129 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:51:49.146 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 02:51:49.150 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:51:49.150 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 02:53:37.079 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 02:53:40.482 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 02:53:40.484 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 02:53:40.484 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:53:40.484 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:53:40.610 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 02:53:40.614 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:53:40.614 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 02:53:49.142 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 02:53:51.802 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 02:53:51.803 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 02:53:51.803 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:53:51.803 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:53:51.913 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 02:53:51.917 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:53:51.917 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 02:57:54.914 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 02:57:57.963 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 02:57:57.965 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 02:57:57.965 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:57:57.966 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:57:58.117 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 02:57:58.121 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:57:58.121 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 02:58:08.130 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 02:58:10.766 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 02:58:10.768 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 02:58:10.768 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:58:10.768 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:58:10.870 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 02:58:10.874 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:58:10.874 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:08:29.935 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:08:32.737 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:08:32.739 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:08:32.739 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:08:32.739 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:08:32.840 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:08:32.844 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:08:32.844 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:09:47.944 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:09:50.845 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:09:50.847 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:09:50.847 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:09:50.847 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:09:50.953 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:09:50.956 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:09:50.957 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:11:09.703 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:11:34.136 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:11:34.137 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:11:34.137 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:11:34.139 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:11:34.276 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:11:34.280 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:11:34.280 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:11:45.602 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:11:52.646 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:11:52.648 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:11:52.648 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:11:52.648 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:11:52.750 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:11:52.754 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:11:52.754 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:12:01.871 | INFO     | backend.utils.config_manager:load_app_config:29 - Loaded app config from config/app_config.json
+2025-11-19 03:12:07.747 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:12:07.748 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:12:07.796 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:12:07.797 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:12:07.826 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:12:07.827 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:12:07.827 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:12:19.779 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:12:19.781 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:12:19.845 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:12:19.845 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:12:19.864 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:12:19.864 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:12:19.864 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:12:29.611 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:12:29.612 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:12:29.672 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:12:29.674 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:12:29.704 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:12:29.704 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:12:29.704 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:12:51.911 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:12:51.912 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:12:51.966 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:12:51.966 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:12:51.984 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:12:51.984 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:12:51.984 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:13:23.660 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:13:23.661 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:13:23.712 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:13:23.713 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:13:23.731 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:13:23.731 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:13:23.731 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:13:39.460 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:13:39.460 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:13:39.507 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:13:39.507 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:13:39.525 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:13:39.526 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:13:39.526 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:14:05.050 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:14:05.052 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:14:05.102 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:14:05.102 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:14:05.120 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:14:05.120 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:14:05.120 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:14:27.875 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:14:27.876 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:14:27.927 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:14:27.928 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:14:27.946 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:14:27.947 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:14:27.947 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:14:44.375 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:14:44.376 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:14:44.423 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:14:44.424 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:14:44.441 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:14:44.441 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:14:44.441 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:15:24.060 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:15:24.062 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:15:24.112 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:15:24.112 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:15:24.129 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:15:24.130 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:15:24.130 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:17:10.767 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:17:10.768 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:17:10.822 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:17:10.822 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:17:10.842 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:17:10.842 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:17:10.842 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:17:36.888 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:17:36.889 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:17:36.930 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:17:36.936 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:17:36.955 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:17:36.955 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:17:36.973 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:17:36.989 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:17:36.989 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:17:48.021 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:17:48.022 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:17:48.074 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:17:48.074 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:17:48.091 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:17:48.091 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:17:48.091 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:17:56.502 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:17:56.533 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:17:56.533 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:17:56.557 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:17:56.573 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:17:56.573 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:17:57.667 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:17:57.668 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:17:57.714 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:20:47.354 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:20:47.355 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:20:47.410 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:20:49.207 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:20:49.244 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:20:49.248 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:20:49.272 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:20:49.291 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:20:49.291 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:20:50.923 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:20:50.955 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:20:50.955 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:20:50.978 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:20:50.994 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:20:50.994 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:22:30.979 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:22:30.980 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:22:31.029 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:22:31.030 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:22:31.048 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:22:31.049 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:22:31.049 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:22:50.530 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:22:54.645 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:22:54.646 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:22:54.646 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:22:54.647 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:22:54.790 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:22:54.794 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:22:54.794 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:23:00.204 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:23:00.204 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:23:00.234 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:23:00.235 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:23:00.259 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:23:00.259 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:23:00.259 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:23:20.504 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:23:24.557 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:23:24.558 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:23:24.559 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:23:24.559 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:23:24.697 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:23:24.701 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:23:24.701 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:23:45.489 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:23:45.490 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:23:45.521 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:23:45.522 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:23:45.547 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:23:45.547 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:23:45.547 | INFO     | backend.services.chatbot_service:_load_chatbot_config:1110 - Chatbot service configuration loaded from unified config
+2025-11-19 03:24:52.178 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:24:54.958 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:24:54.960 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:24:54.960 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:24:54.960 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:24:55.114 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:24:55.118 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:24:55.118 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:25:45.496 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:25:45.497 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:25:45.533 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:25:45.542 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:25:45.565 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:25:45.565 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:25:45.583 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:25:45.596 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:25:45.596 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:25:46.234 | INFO     | backend.utils.config_manager:load_app_config:29 - Loaded app config from config/app_config.json
+2025-11-19 03:25:47.016 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:25:47.017 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:25:47.068 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:25:47.077 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:25:47.077 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:25:47.101 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:25:47.799 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:25:47.800 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:25:47.847 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:25:47.855 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:25:47.856 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:25:47.881 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:25:48.433 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:25:48.433 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:25:48.475 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:25:48.480 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:25:48.499 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:25:48.499 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:25:48.518 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:25:48.532 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:25:48.532 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:25:49.616 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:25:49.617 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:25:49.668 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:25:49.675 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:25:49.675 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:25:49.699 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:25:50.399 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:25:50.400 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:25:50.448 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:25:50.456 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:25:50.456 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:25:50.481 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:26:27.000 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:26:27.001 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:26:27.050 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:26:27.057 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:26:27.057 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:26:27.083 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:29:03.283 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:29:07.123 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:29:07.125 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:29:07.125 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:29:07.125 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:29:07.272 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:29:07.276 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:29:07.277 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:29:07.482 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:29:10.470 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:29:10.472 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:29:10.472 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:29:10.472 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:29:10.591 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:29:10.595 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:29:10.595 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:29:10.800 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:29:15.906 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:29:15.907 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:29:15.907 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:29:15.908 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:78 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:29:16.022 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:29:16.026 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:29:16.026 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:29:19.163 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:29:22.295 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:29:22.296 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:29:22.296 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:29:22.297 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:29:22.411 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:29:22.415 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:29:22.415 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:29:41.323 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:29:44.414 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:29:44.416 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:29:44.416 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:29:44.417 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:29:44.533 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:29:44.537 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:29:44.537 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:29:53.433 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:29:56.439 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:29:56.440 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:29:56.440 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:29:56.441 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:29:56.549 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:29:56.553 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:29:56.553 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:30:06.667 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:30:09.648 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:30:09.650 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:30:09.650 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:30:09.650 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:30:09.760 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:30:09.764 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:30:09.764 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:30:16.896 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:30:16.920 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:30:16.920 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:30:16.934 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:30:16.935 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:30:16.957 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:30:16.964 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:30:16.978 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:30:16.978 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:30:25.546 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:30:25.546 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:30:25.586 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:30:25.598 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:30:25.599 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:30:25.624 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:30:32.429 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:30:32.430 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:30:32.470 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:30:32.477 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:30:32.478 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:30:32.503 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:30:33.778 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:30:33.779 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:30:33.816 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:30:33.824 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:30:33.824 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:30:33.848 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:30:38.166 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:30:40.822 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:30:40.823 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:30:40.824 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:30:40.825 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:30:40.928 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:30:40.931 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:30:40.931 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:30:40.934 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:30:40.934 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:30:40.956 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:30:40.965 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:30:40.985 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:30:40.985 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:30:41.002 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:30:41.016 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:30:41.016 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:32:35.851 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:32:39.633 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:32:39.634 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:32:39.634 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:32:39.635 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:32:39.747 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:32:39.751 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:32:39.751 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:33:37.028 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:33:37.029 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:33:37.065 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:33:37.075 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:33:37.095 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:33:37.095 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:33:37.114 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:33:37.129 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:33:37.129 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:33:57.503 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:33:57.504 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:33:57.530 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:33:57.533 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:33:57.547 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:33:57.547 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:33:57.564 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:33:57.578 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:33:57.578 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:33:59.342 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:33:59.342 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:33:59.373 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:33:59.385 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:33:59.385 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:33:59.409 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:34:52.289 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:34:52.289 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:34:52.318 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:34:52.322 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:34:52.338 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:34:52.338 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:34:52.356 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:34:52.370 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:34:52.370 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:34:53.787 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:34:56.485 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:34:56.486 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:34:56.486 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:34:56.487 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:34:56.591 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:34:56.595 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:34:56.595 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:34:56.607 | ERROR    | backend.api.database:get_database_stats:56 - Error getting database stats: (sqlite3.OperationalError) no such column: tokens_total
+[SQL: SELECT SUM(tokens_total)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-19 03:34:59.173 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:34:59.173 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:34:59.217 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:34:59.224 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:34:59.246 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:34:59.247 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:34:59.265 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:34:59.279 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:34:59.279 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:35:01.029 | ERROR    | backend.api.database:get_database_stats:56 - Error getting database stats: (sqlite3.OperationalError) no such column: tokens_total
+[SQL: SELECT SUM(tokens_total)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-19 03:35:02.779 | ERROR    | backend.api.database:get_database_stats:56 - Error getting database stats: (sqlite3.OperationalError) no such column: tokens_total
+[SQL: SELECT SUM(tokens_total)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-19 03:36:03.274 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:36:03.275 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:36:03.322 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:36:03.334 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:36:03.335 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:36:03.361 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:36:07.623 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:36:07.624 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:36:07.670 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:36:15.825 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:36:15.825 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:36:15.870 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:36:15.875 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:36:15.893 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:36:15.893 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:36:15.912 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:36:15.927 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:36:15.927 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:36:16.495 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:36:16.496 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:36:16.546 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:36:16.550 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:36:16.566 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:36:16.567 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:36:16.586 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:36:16.601 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:36:16.601 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:36:17.475 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:36:17.509 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:36:17.509 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:36:17.533 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:36:17.551 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:36:17.551 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:36:59.836 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:37:02.739 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:37:02.740 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:37:02.740 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:37:02.740 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:37:02.853 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:37:02.857 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:37:02.857 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:38:01.098 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:38:03.811 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:38:03.812 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:38:03.812 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:38:03.812 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:38:03.915 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:38:03.918 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:38:03.918 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:38:14.233 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:38:14.234 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:38:14.274 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:38:14.285 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:38:14.306 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:38:14.306 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:38:14.327 | ERROR    | backend.api.database:get_database_stats:92 - Error getting database stats: (sqlite3.OperationalError) no such column: tokens_total
+[SQL: SELECT SUM(tokens_total)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-19 03:38:14.331 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:38:14.346 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:38:14.346 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:38:14.346 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:38:14.346 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:38:14.368 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:38:14.372 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:38:14.386 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:38:14.386 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:38:19.463 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:38:19.464 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:38:19.509 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:38:19.514 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:38:19.531 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:38:19.532 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:38:19.548 | ERROR    | backend.api.database:get_database_stats:92 - Error getting database stats: (sqlite3.OperationalError) no such column: tokens_total
+[SQL: SELECT SUM(tokens_total)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-19 03:38:19.551 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:38:19.551 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:38:19.574 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:38:19.577 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:38:19.590 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:38:19.590 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:38:19.591 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:38:19.604 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:38:19.604 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:38:24.470 | ERROR    | backend.api.database:get_database_stats:92 - Error getting database stats: (sqlite3.OperationalError) no such column: tokens_total
+[SQL: SELECT SUM(tokens_total)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-19 03:38:25.049 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:38:25.050 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:38:25.099 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:38:25.110 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:38:25.111 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:38:25.136 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:38:27.069 | ERROR    | backend.api.database:get_database_stats:92 - Error getting database stats: (sqlite3.OperationalError) no such column: tokens_total
+[SQL: SELECT SUM(tokens_total)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-19 03:38:32.102 | ERROR    | backend.api.database:get_database_stats:92 - Error getting database stats: (sqlite3.OperationalError) no such column: tokens_total
+[SQL: SELECT SUM(tokens_total)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-19 03:38:32.107 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:38:32.108 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:38:32.154 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:38:32.160 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:38:32.178 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:38:32.178 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:38:33.782 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:38:33.782 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:38:33.831 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:38:33.836 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:38:33.853 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:38:33.854 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:38:33.871 | ERROR    | backend.api.database:get_database_stats:92 - Error getting database stats: (sqlite3.OperationalError) no such column: tokens_total
+[SQL: SELECT SUM(tokens_total)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-11-19 03:38:33.873 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:38:33.873 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:38:33.897 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:38:33.899 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:38:33.913 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:38:33.913 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:38:33.915 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:38:33.928 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:38:33.928 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:39:11.037 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:39:14.783 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:39:14.784 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:39:14.784 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:39:14.785 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:39:14.898 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:39:14.902 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:39:14.902 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:39:19.180 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:39:19.180 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:39:19.213 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:39:19.224 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:39:19.244 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:39:19.245 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:39:19.272 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:39:19.285 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:39:19.286 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:39:19.286 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:39:19.286 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:39:19.309 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:39:19.315 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:39:19.330 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:39:19.330 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:39:24.315 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:39:27.226 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:39:27.227 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:39:27.227 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:39:27.228 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:39:27.336 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:39:27.340 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:39:27.340 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:39:37.956 | INFO     | backend.app.main:shutdown_event:142 - Shutting down application...
+2025-11-19 03:39:40.610 | INFO     | backend.app.main:startup_event:120 - Starting up application...
+2025-11-19 03:39:40.612 | INFO     | backend.app.main:startup_event:125 - Database initialized
+2025-11-19 03:39:40.612 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:39:40.612 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:39:40.718 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:39:40.721 | INFO     | backend.services.rag_service:load_knowledge_base:113 - Collection already has 38 chunks. Skipping load.
+2025-11-19 03:39:40.722 | INFO     | backend.app.main:startup_event:134 - Knowledge base loaded
+2025-11-19 03:39:42.116 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:39:42.116 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:39:42.157 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:39:42.167 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:39:42.187 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:39:42.187 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:39:42.216 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:39:42.230 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:39:42.230 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:39:42.231 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:39:42.231 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:39:42.252 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:39:42.257 | INFO     | backend.services.llm_service:__init__:34 - Loaded active model from DB: mistral (ollama)
+2025-11-19 03:39:42.270 | INFO     | backend.services.llm_service:_check_ollama_connection:69 - Ollama connection successful
+2025-11-19 03:39:42.270 | INFO     | backend.services.llm_service:_initialize_provider:59 - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 03:40:07.782 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:40:07.783 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:40:07.834 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:40:07.846 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:40:07.846 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:40:07.874 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:40:09.547 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:40:09.548 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:40:09.600 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:40:09.608 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:40:09.608 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:40:09.632 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:40:12.081 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:40:12.082 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:40:12.129 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:40:12.138 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:40:12.138 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:40:12.164 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:40:15.331 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:40:15.332 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:40:15.379 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully
+2025-11-19 03:40:15.387 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 03:40:15.388 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline:83 - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 03:40:15.413 | INFO     | backend.services.rag_service:_initialize:85 - RAG service initialized successfully

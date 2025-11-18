@@ -29,27 +29,30 @@ class ChatbotService:
         self._load_chatbot_config()
     
     def get_system_prompt(self) -> str:
-        """Get system prompt for LLM from JSON config."""
+        """Get system prompt for LLM from unified config."""
         try:
-            from backend.utils.config_manager import get_config_manager
-            config_manager = get_config_manager()
-            prompts = config_manager.load_system_prompts()
+            from backend.utils.unified_config_manager import get_unified_config_manager
+            config_manager = get_unified_config_manager()
+            unified_config = config_manager.load_config()
+            prompts = unified_config.get("prompts", {})
             return prompts.get("main_system_prompt", self._get_default_system_prompt())
         except Exception as e:
             logger.warning(f"Error loading system prompt from config: {e}, using default")
             return self._get_default_system_prompt()
     
     def _get_default_system_prompt(self) -> str:
-        """Get default system prompt if JSON config fails."""
-        return """You are the Neguinho Motors chatbot assistant. You help customers with bike rentals, sales, finance, servicing, MOT testing, delivery, accessories, and motorbike maintenance/repairs services.
+        """Get default system prompt if config fails."""
+        company_name = self.business_info.get("company_name", "Company")
+        services = ", ".join(self.business_info.get("services_list", ["services"]))
+        return f"""You are the {company_name} chatbot assistant. You help customers with {services}.
 
 CRITICAL RULES - STRICTLY ENFORCE:
 1. ONLY use information provided in the INFORMATION section below
 2. NEVER make up, guess, or hallucinate any information
 3. NEVER use knowledge from outside the provided information
-4. If information is not in the provided context, say: "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
-5. ONLY answer questions about Neguinho Motors services
-6. For out-of-domain queries, say: "I can only assist with bike rentals, sales, finance, servicing, MOT testing, delivery, accessories, and motorbike maintenance/repairs services related to Neguinho Motors. How can I help you with our services?"
+4. If information is not in the provided context, say: "I don't have that information in my knowledge base."
+5. ONLY answer questions about {company_name} services
+6. For out-of-domain queries, redirect to appropriate services
 
 RESPONSE FORMAT:
 - Use ONLY facts from the provided INFORMATION section
@@ -86,15 +89,18 @@ RESPONSE FORMAT:
             
             # Check domain relevance
             if not self.rag_service.is_domain_relevant(message):
-                # Get out-of-domain message from config
+                # Get out-of-domain message from unified config
                 try:
-                    from backend.utils.config_manager import get_config_manager
-                    config_manager = get_config_manager()
-                    prompts = config_manager.load_system_prompts()
+                    from backend.utils.unified_config_manager import get_unified_config_manager
+                    config_manager = get_unified_config_manager()
+                    unified_config = config_manager.load_config()
+                    prompts = unified_config.get("prompts", {})
                     out_of_domain_msg = prompts.get("out_of_domain_message", 
-                        "I can only assist with bike rentals, sales, finance, deposit, warranty, and company policies related to Neguinho Motors. How can I help you with our services?")
+                        f"I can only assist with {', '.join(self.business_info.get('services_list', ['our services']))} related to {self.business_info.get('company_name', 'our company')}. How can I help you with our services?")
                 except:
-                    out_of_domain_msg = "I can only assist with bike rentals, sales, finance, deposit, warranty, and company policies related to Neguinho Motors. How can I help you with our services?"
+                    company_name = self.business_info.get("company_name", "our company")
+                    services = ", ".join(self.business_info.get("services_list", ["our services"]))
+                    out_of_domain_msg = f"I can only assist with {services} related to {company_name}. How can I help you with our services?"
                 
                 # Save assistant response for out-of-domain
                 assistant_message = self._save_message(
@@ -176,13 +182,16 @@ RESPONSE FORMAT:
                     # NO FALLBACK - Return message that information is not available
                     # This ensures no hallucinations
                     try:
-                        from backend.utils.config_manager import get_config_manager
-                        config_manager = get_config_manager()
-                        prompts = config_manager.load_system_prompts()
+                        from backend.utils.unified_config_manager import get_unified_config_manager
+                        config_manager = get_unified_config_manager()
+                        unified_config = config_manager.load_config()
+                        prompts = unified_config.get("prompts", {})
                         fallback_msg = prompts.get("fallback_message",
-                            "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.")
+                            f"I don't have that information in my knowledge base. Please contact us at {self.contact_info.get('primary_email', '')} or {self.contact_info.get('primary_phone', '')} for more details.")
                     except:
-                        fallback_msg = "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
+                        email = self.contact_info.get("primary_email", "")
+                        phone = self.contact_info.get("primary_phone", "")
+                        fallback_msg = f"I don't have that information in my knowledge base. Please contact us at {email} or {phone} for more details."
                     
                     assistant_message = self._save_message(
                         chat_id,
@@ -213,30 +222,29 @@ RESPONSE FORMAT:
             if context_text:
                 # Handle simple greetings specially
                 if is_simple_greeting:
-                    # Simple greeting - use prompt from JSON config
+                    # Simple greeting - use prompt from unified config
                     try:
-                        from backend.utils.config_manager import get_config_manager
-                        config_manager = get_config_manager()
-                        prompts = config_manager.load_system_prompts()
+                        from backend.utils.unified_config_manager import get_unified_config_manager
+                        config_manager = get_unified_config_manager()
+                        unified_config = config_manager.load_config()
+                        prompts = unified_config.get("prompts", {})
                         greeting_template = prompts.get("greeting_prompt", 
-                            """The user just said: "{message}"
-
-Respond with a friendly greeting and offer to help with Neguinho Motors services (bike rentals, sales, finance, servicing, MOT testing, delivery, accessories, and motorbike maintenance and repairs).
-
-Keep it brief and welcoming. Do not mention any specific information unless asked.""")
+                            f"""The user just said: "{{message}}"\n\nRespond with a friendly greeting and offer to help with {self.business_info.get('company_name', 'our company')} services.\n\nKeep it brief and welcoming. Do not mention any specific information unless asked.""")
                         user_message_content = greeting_template.format(message=message)
                     except:
+                        company_name = self.business_info.get("company_name", "our company")
                         user_message_content = f"""The user just said: "{message}"
 
-Respond with a friendly greeting and offer to help with Neguinho Motors services (bike rentals, sales, finance, servicing, MOT testing, delivery, accessories, and motorbike maintenance and repairs).
+Respond with a friendly greeting and offer to help with {company_name} services.
 
 Keep it brief and welcoming. Do not mention any specific information unless asked."""
                 else:
-                    # STRICT prompt - use from JSON config
+                    # STRICT prompt - use from unified config
                     try:
-                        from backend.utils.config_manager import get_config_manager
-                        config_manager = get_config_manager()
-                        prompts = config_manager.load_system_prompts()
+                        from backend.utils.unified_config_manager import get_unified_config_manager
+                        config_manager = get_unified_config_manager()
+                        unified_config = config_manager.load_config()
+                        prompts = unified_config.get("prompts", {})
                         query_template = prompts.get("query_prompt",
                             """CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.
 
@@ -247,15 +255,22 @@ QUESTION: {message}
 
 INSTRUCTIONS:
 - Use ONLY facts from the INFORMATION section above
-- If the answer is not in the information, say: "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
+- If the answer is not in the information, say: "{fallback_message}"
 - DO NOT make up, guess, or invent any information
 - DO NOT use knowledge from outside the provided information
 - Format your answer with proper line breaks and structure
 
 ANSWER (based ONLY on the information above):""")
-                        user_message_content = query_template.format(context_text=context_text, message=message)
+                        fallback_msg = prompts.get("fallback_message", "I don't have that information in my knowledge base.")
+                        user_message_content = query_template.format(
+                            context_text=context_text, 
+                            message=message,
+                            fallback_message=fallback_msg
+                        )
                     except:
                         # Fallback to default
+                        email = self.contact_info.get("primary_email", "")
+                        phone = self.contact_info.get("primary_phone", "")
                         user_message_content = f"""CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.
 
 INFORMATION FROM KNOWLEDGE BASE:
@@ -265,7 +280,7 @@ QUESTION: {message}
 
 INSTRUCTIONS:
 - Use ONLY facts from the INFORMATION section above
-- If the answer is not in the information, say: "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
+- If the answer is not in the information, say: "I don't have that information in my knowledge base. Please contact us at {email} or {phone} for more details."
 - DO NOT make up, guess, or invent any information
 - DO NOT use knowledge from outside the provided information
 - Format your answer with proper line breaks and structure
@@ -274,13 +289,16 @@ ANSWER (based ONLY on the information above):"""
             else:
                 # This should not happen due to check above, but just in case
                 try:
-                    from backend.utils.config_manager import get_config_manager
-                    config_manager = get_config_manager()
-                    prompts = config_manager.load_system_prompts()
+                    from backend.utils.unified_config_manager import get_unified_config_manager
+                    config_manager = get_unified_config_manager()
+                    unified_config = config_manager.load_config()
+                    prompts = unified_config.get("prompts", {})
                     fallback_msg = prompts.get("fallback_message",
-                        "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.")
+                        f"I don't have that information in my knowledge base. Please contact us at {self.contact_info.get('primary_email', '')} or {self.contact_info.get('primary_phone', '')} for more details.")
                 except:
-                    fallback_msg = "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
+                    email = self.contact_info.get("primary_email", "")
+                    phone = self.contact_info.get("primary_phone", "")
+                    fallback_msg = f"I don't have that information in my knowledge base. Please contact us at {email} or {phone} for more details."
                 
                 assistant_message = self._save_message(
                     chat_id,
@@ -319,8 +337,9 @@ ANSWER (based ONLY on the information above):"""
                 if not self._validate_response_from_rag(response_content, retrieved_chunks, message):
                     # Response seems to contain information not in RAG - return safe message
                     logger.warning(f"Response validation failed - possible hallucination detected for query: {message[:50]}")
-                    response_content = validation_config.get("fallback_message", 
-                        "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.")
+                    fallback = validation_config.get("fallback_message", 
+                        f"I don't have that information in my knowledge base. Please contact us at {self.contact_info.get('primary_email', '')} or {self.contact_info.get('primary_phone', '')} for more details.")
+                    response_content = fallback
             
             # Post-process response for better structure
             response_content = self._format_response(response_content, message, retrieved_chunks)
@@ -396,15 +415,17 @@ ANSWER (based ONLY on the information above):"""
             traceback.print_exc()
             # Ensure we have chat_id even on error
             try:
-                # Get error message from config
+                # Get error message from unified config
                 try:
-                    from backend.utils.config_manager import get_config_manager
-                    config_manager = get_config_manager()
-                    prompts = config_manager.load_system_prompts()
+                    from backend.utils.unified_config_manager import get_unified_config_manager
+                    config_manager = get_unified_config_manager()
+                    unified_config = config_manager.load_config()
+                    prompts = unified_config.get("prompts", {})
                     error_msg = prompts.get("error_message",
-                        "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at enquiries@neguinhomotors.co.uk")
+                        f"I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at {self.contact_info.get('primary_email', '')}")
                 except:
-                    error_msg = "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at enquiries@neguinhomotors.co.uk"
+                    email = self.contact_info.get("primary_email", "")
+                    error_msg = f"I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at {email}"
                 
                 chat = self._get_or_create_chat(chat_id, user_id, vendor_id or settings.default_vendor_id)
                 error_message = self._save_message(
@@ -427,13 +448,15 @@ ANSWER (based ONLY on the information above):"""
             except:
                 # Fallback if even chat creation fails
                 try:
-                    from backend.utils.config_manager import get_config_manager
-                    config_manager = get_config_manager()
-                    prompts = config_manager.load_system_prompts()
+                    from backend.utils.unified_config_manager import get_unified_config_manager
+                    config_manager = get_unified_config_manager()
+                    unified_config = config_manager.load_config()
+                    prompts = unified_config.get("prompts", {})
                     error_msg = prompts.get("error_message",
-                        "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at enquiries@neguinhomotors.co.uk")
+                        f"I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at {self.contact_info.get('primary_email', '')}")
                 except:
-                    error_msg = "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at enquiries@neguinhomotors.co.uk"
+                    email = self.contact_info.get("primary_email", "")
+                    error_msg = f"I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at {email}"
                 
                 return {
                     "response": error_msg,
@@ -947,9 +970,10 @@ ANSWER (based ONLY on the information above):"""
         # Check if response mentions specific details that should be in RAG
         # If response is very generic or just contact info, it's likely safe
         response_lower = response.lower()
+        email = self.contact_info.get("primary_email", "").lower()
         
         # If response is just contact info or "don't have info", it's valid
-        if "contact" in response_lower and "enquiries@neguinhomotors.co.uk" in response_lower:
+        if "contact" in response_lower and email and email in response_lower:
             return True
         
         if "don't have that information" in response_lower:
@@ -1048,10 +1072,18 @@ ANSWER (based ONLY on the information above):"""
             query_lower = query.lower()
             contact_keywords = formatting_config.get("contact_keywords", ["service", "rental", "sale", "finance"])
             min_length = formatting_config.get("min_response_length_for_contact", 50)
-            contact_info = formatting_config.get("contact_info", "Contact: 0208 314 1498 or enquiries@neguinhomotors.co.uk")
+            contact_info_template = formatting_config.get("contact_info", "{contact_format}")
+            # Resolve contact format
+            contact_format = self.contact_info.get("contact_format", "Contact: {phone} or {email}").format(
+                phone=self.contact_info.get("primary_phone", ""),
+                email=self.contact_info.get("primary_email", "")
+            )
+            contact_info = contact_info_template.replace("{contact_format}", contact_format)
             
+            phone = self.contact_info.get("primary_phone", "")
+            email = self.contact_info.get("primary_email", "")
             if any(keyword in query_lower for keyword in contact_keywords):
-                if '0208 314 1498' not in response and 'enquiries@neguinhomotors.co.uk' not in response:
+                if phone not in response and email not in response:
                     # Only add if response is substantial
                     if len(response) > min_length:
                         response += f"\n\n{contact_info}"
@@ -1066,15 +1098,21 @@ ANSWER (based ONLY on the information above):"""
         return response
     
     def _load_chatbot_config(self):
-        """Load chatbot service configuration from JSON."""
+        """Load chatbot service configuration from unified config."""
         try:
-            from backend.utils.config_manager import get_config_manager
-            config_manager = get_config_manager()
-            self.chatbot_config = config_manager.load_chatbot_service_config()
-            logger.info("Chatbot service configuration loaded")
+            from backend.utils.unified_config_manager import get_unified_config_manager
+            config_manager = get_unified_config_manager()
+            unified_config = config_manager.load_config()
+            self.chatbot_config = unified_config.get("chatbot_service", {})
+            # Also store business and contact info for easy access
+            self.business_info = unified_config.get("business", {})
+            self.contact_info = unified_config.get("contact", {})
+            logger.info("Chatbot service configuration loaded from unified config")
         except Exception as e:
             logger.warning(f"Error loading chatbot service config: {e}, using defaults")
             self.chatbot_config = {}
+            self.business_info = {}
+            self.contact_info = {}
     
     def reload_chatbot_config(self):
         """Reload chatbot service configuration from file."""

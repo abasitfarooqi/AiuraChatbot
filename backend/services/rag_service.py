@@ -67,9 +67,19 @@ class RAGService:
             )
             
             # Get or create collection
+            # Get company name for metadata
+            try:
+                from backend.utils.unified_config_manager import get_unified_config_manager
+                config_manager = get_unified_config_manager()
+                unified_config = config_manager.load_config()
+                company_name = unified_config.get("business", {}).get("company_name", "Company")
+                collection_desc = f"{company_name} Knowledge Base"
+            except:
+                collection_desc = "Knowledge Base"
+            
             self.collection = self.client.get_or_create_collection(
                 name=self.settings.chroma_collection_name,
-                metadata={"description": "Neguinho Motors Knowledge Base"}
+                metadata={"description": collection_desc}
             )
             
             logger.info("RAG service initialized successfully")
@@ -106,9 +116,19 @@ class RAGService:
                     logger.info(f"Collection has {existing_count} chunks but expected {expected_count}. Reloading...")
                     # Clear collection
                     self.client.delete_collection(name=self.settings.chroma_collection_name)
+                    # Get company name for metadata
+                    try:
+                        from backend.utils.unified_config_manager import get_unified_config_manager
+                        config_manager = get_unified_config_manager()
+                        unified_config = config_manager.load_config()
+                        company_name = unified_config.get("business", {}).get("company_name", "Company")
+                        collection_desc = f"{company_name} Knowledge Base"
+                    except:
+                        collection_desc = "Knowledge Base"
+                    
                     self.collection = self.client.get_or_create_collection(
                         name=self.settings.chroma_collection_name,
-                        metadata={"description": "Neguinho Motors Knowledge Base"}
+                        metadata={"description": collection_desc}
                     )
             
             # Process chunks
@@ -282,9 +302,23 @@ class RAGService:
                 return False
         
         # If query contains company-related terms, it's likely relevant
-        company_terms = ["neguinho", "ngn", "motors", "motorcycle", "bike", "scooter"]
+        # Get company terms from unified config
+        try:
+            from backend.utils.unified_config_manager import get_unified_config_manager
+            config_manager = get_unified_config_manager()
+            unified_config = config_manager.load_config()
+            business = unified_config.get("business", {})
+            company_name = business.get("company_name", "").lower()
+            trading_names = [name.lower() for name in business.get("trading_names", [])]
+            # Extract key words from company name
+            company_terms = [company_name] + trading_names
+            # Add common business terms
+            company_terms.extend(["motorcycle", "bike", "scooter", "vehicle", "motorbike"])
+        except:
+            company_terms = ["motorcycle", "bike", "scooter"]
+        
         for term in company_terms:
-            if term in query_lower:
+            if term and term in query_lower:
                 return True
         
         # Check domain keywords

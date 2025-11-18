@@ -46,8 +46,12 @@ AiuraChatbot/
 │   ├── start.sh                 # Start script
 │   ├── stop.sh                  # Stop script
 │   └── restart.sh               # Restart script
-├── rag_knowledge_base.json      # RAG-optimised knowledge base
-├── ngn_chatbot_knowledge_base.json  # Original knowledge base
+├── rag_knowledge_base.json      # RAG-optimised knowledge base (active)
+├── others/                      # Non-essential files (documentation, tests, reference data)
+│   ├── documentation/          # All documentation files
+│   ├── test_scripts/           # Test scripts
+│   ├── helper_scripts/         # Helper scripts (tunnels, etc.)
+│   └── reference_data/         # Reference data files
 ├── requirements.txt             # Python dependencies
 ├── .env.example                 # Environment variables template
 └── README.md                    # This file
