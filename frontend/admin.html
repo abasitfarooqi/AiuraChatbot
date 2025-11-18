@@ -156,6 +156,7 @@
             <button class="tab" onclick="switchTab('memory')">Memory</button>
             <button class="tab" onclick="switchTab('config')">LLM Config</button>
             <button class="tab" onclick="switchTab('app-config')">App Config</button>
+            <button class="tab" onclick="switchTab('chatbot-service')">Chatbot Service</button>
             <button class="tab" onclick="switchTab('knowledge-base')">Knowledge Base</button>
             <button class="tab" onclick="switchTab('updates')">Updates</button>
         </div>
@@ -264,7 +265,7 @@
             </div>
         </div>
         
-        <!-- Config Tab -->
+        <!-- Config Tab (LLM) -->
         <div id="config" class="tab-content">
             <div class="section">
                 <h2>LLM Configuration</h2>
@@ -296,6 +297,81 @@
                 <button onclick="loadLLMConfig()" style="margin-left: 1rem; background: #27ae60;">Load Current</button>
             </div>
         </div>
+        
+        <!-- App Config Tab -->
+        <div id="app-config" class="tab-content">
+            <div class="section">
+                <h2>Application Configuration</h2>
+                <div class="form-group">
+                    <label>Configuration JSON</label>
+                    <textarea id="appConfigJson" rows="20" style="font-family: monospace; font-size: 0.9rem;"></textarea>
+                    <small style="display: block; margin-top: 0.25rem; color: #666;">Edit application configuration. Changes are saved to config/app_config.json</small>
+                </div>
+                <button onclick="loadAppConfig()" style="background: #27ae60;">Load Config</button>
+                <button onclick="saveAppConfig()" style="margin-left: 1rem;">Save Config</button>
+                <button onclick="reloadAppConfig()" style="margin-left: 1rem; background: #3498db;">Reload from File</button>
+            </div>
+        </div>
+        
+        <!-- Chatbot Service Config Tab -->
+        <div id="chatbot-service" class="tab-content">
+            <div class="section">
+                <h2>Chatbot Service Configuration</h2>
+                <div class="form-group">
+                    <label>Configuration JSON</label>
+                    <textarea id="chatbotServiceConfigJson" rows="30" style="font-family: monospace; font-size: 0.9rem;"></textarea>
+                    <small style="display: block; margin-top: 0.25rem; color: #666;">
+                        Edit chatbot service settings: greetings, topic detection, suggestions, response formatting, etc.
+                        Changes are saved to config/chatbot_service_config.json
+                    </small>
+                </div>
+                <button onclick="loadChatbotServiceConfig()" style="background: #27ae60;">Load Config</button>
+                <button onclick="saveChatbotServiceConfig()" style="margin-left: 1rem;">Save Config</button>
+                <button onclick="validateChatbotServiceConfig()" style="margin-left: 1rem; background: #3498db;">Validate JSON</button>
+            </div>
+        </div>
+        
+        <!-- Knowledge Base Tab -->
+        <div id="knowledge-base" class="tab-content">
+            <div class="section">
+                <h2>Knowledge Base Editor</h2>
+                <div class="form-group">
+                    <label>Knowledge Base JSON</label>
+                    <textarea id="knowledgeBaseJson" rows="25" style="font-family: monospace; font-size: 0.9rem;"></textarea>
+                    <small style="display: block; margin-top: 0.25rem; color: #666;">Edit knowledge base chunks. Changes are saved and automatically reloaded into vector database.</small>
+                </div>
+                <button onclick="loadKnowledgeBaseEditor()" style="background: #27ae60;">Load Knowledge Base</button>
+                <button onclick="saveKnowledgeBase()" style="margin-left: 1rem;">Save & Reload</button>
+                <button onclick="validateKnowledgeBase()" style="margin-left: 1rem; background: #3498db;">Validate JSON</button>
+            </div>
+        </div>
+        
+        <!-- Updates Tab -->
+        <div id="updates" class="tab-content">
+            <div class="section">
+                <h2>Updates & Management</h2>
+                
+                <div class="form-group">
+                    <h3>Offline Model Management</h3>
+                    <div id="offlineModelsList">Loading...</div>
+                    <button onclick="loadOfflineModels()" style="background: #27ae60;">Refresh Models</button>
+                </div>
+                
+                <div class="form-group" style="margin-top: 2rem;">
+                    <h3>Download Model for Offline Use</h3>
+                    <input type="text" id="modelToDownload" placeholder="e.g., sentence-transformers/all-MiniLM-L6-v2" style="width: 400px;">
+                    <button onclick="downloadModel()" style="margin-left: 1rem;">Download Model</button>
+                    <small style="display: block; margin-top: 0.25rem; color: #666;">Download Hugging Face models for offline use</small>
+                </div>
+                
+                <div class="form-group" style="margin-top: 2rem;">
+                    <h3>System Prompts</h3>
+                    <textarea id="systemPromptsJson" rows="15" style="font-family: monospace; font-size: 0.9rem;"></textarea>
+                    <button onclick="loadSystemPrompts()" style="background: #27ae60;">Load Prompts</button>
+                    <button onclick="saveSystemPrompts()" style="margin-left: 1rem;">Save Prompts</button>
+                </div>
+            </div>
+        </div>
     </div>
     
     <script>
@@ -313,6 +389,13 @@
             if (tabName === 'rag') getRAGStats();
             if (tabName === 'memory') loadLLMConfig();
             if (tabName === 'config') loadLLMConfig();
+            if (tabName === 'app-config') loadAppConfig();
+            if (tabName === 'chatbot-service') loadChatbotServiceConfig();
+            if (tabName === 'knowledge-base') loadKnowledgeBaseEditor();
+            if (tabName === 'updates') {
+                loadOfflineModels();
+                loadSystemPrompts();
+            }
         }
         
         async function loadModels() {
@@ -496,6 +579,238 @@
             } catch (error) {
                 console.error('Error updating LLM config:', error);
                 alert('Error updating configuration');
+            }
+        }
+        
+        // App Config Functions
+        async function loadAppConfig() {
+            try {
+                const response = await fetch(`${API_BASE}/config/`);
+                const data = await response.json();
+                document.getElementById('appConfigJson').value = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error loading app config:', error);
+                alert('Error loading app config');
+            }
+        }
+        
+        async function saveAppConfig() {
+            try {
+                const jsonText = document.getElementById('appConfigJson').value;
+                const config = JSON.parse(jsonText);
+                
+                const response = await fetch(`${API_BASE}/config/section`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({section: 'all', data: config})
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('Configuration saved successfully!');
+                } else {
+                    alert('Error saving configuration');
+                }
+            } catch (error) {
+                console.error('Error saving app config:', error);
+                alert('Error: Invalid JSON or save failed');
+            }
+        }
+        
+        async function reloadAppConfig() {
+            try {
+                const response = await fetch(`${API_BASE}/config/reload`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    loadAppConfig();
+                    alert('Configuration reloaded from file');
+                }
+            } catch (error) {
+                console.error('Error reloading config:', error);
+                alert('Error reloading configuration');
+            }
+        }
+        
+        // Knowledge Base Editor Functions
+        async function loadKnowledgeBaseEditor() {
+            try {
+                const response = await fetch(`${API_BASE}/config/knowledge-base`);
+                const data = await response.json();
+                document.getElementById('knowledgeBaseJson').value = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error loading knowledge base:', error);
+                alert('Error loading knowledge base');
+            }
+        }
+        
+        async function saveKnowledgeBase() {
+            try {
+                const jsonText = document.getElementById('knowledgeBaseJson').value;
+                const kb = JSON.parse(jsonText);
+                
+                const response = await fetch(`${API_BASE}/config/knowledge-base`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(kb)
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('Knowledge base saved and reloaded successfully!');
+                    getRAGStats();
+                } else {
+                    alert('Warning: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error saving knowledge base:', error);
+                alert('Error: Invalid JSON or save failed');
+            }
+        }
+        
+        function validateKnowledgeBase() {
+            try {
+                const jsonText = document.getElementById('knowledgeBaseJson').value;
+                JSON.parse(jsonText);
+                alert('JSON is valid!');
+            } catch (error) {
+                alert('Invalid JSON: ' + error.message);
+            }
+        }
+        
+        // Offline Models Functions
+        async function loadOfflineModels() {
+            try {
+                const response = await fetch(`${API_BASE}/config/models/offline`);
+                const data = await response.json();
+                
+                let html = '<table><tr><th>Model Name</th><th>Size</th><th>Path</th></tr>';
+                if (data.models && data.models.length > 0) {
+                    data.models.forEach(model => {
+                        const sizeMB = (model.size / 1024 / 1024).toFixed(2);
+                        html += `<tr><td>${model.name}</td><td>${sizeMB} MB</td><td>${model.path}</td></tr>`;
+                    });
+                } else {
+                    html += '<tr><td colspan="3">No models cached</td></tr>';
+                }
+                html += '</table>';
+                
+                document.getElementById('offlineModelsList').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading offline models:', error);
+                document.getElementById('offlineModelsList').textContent = 'Error loading models';
+            }
+        }
+        
+        async function downloadModel() {
+            const modelName = document.getElementById('modelToDownload').value.trim();
+            if (!modelName) {
+                alert('Please enter a model name');
+                return;
+            }
+            
+            if (!confirm(`Download model: ${modelName}?\n\nThis may take several minutes.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/config/models/download`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({model_name: modelName})
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('Model downloaded successfully!');
+                    loadOfflineModels();
+                } else {
+                    alert('Error: ' + result.detail);
+                }
+            } catch (error) {
+                console.error('Error downloading model:', error);
+                alert('Error downloading model');
+            }
+        }
+        
+        // Chatbot Service Config Functions
+        async function loadChatbotServiceConfig() {
+            try {
+                const response = await fetch(`${API_BASE}/config/chatbot-service`);
+                const data = await response.json();
+                document.getElementById('chatbotServiceConfigJson').value = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error loading chatbot service config:', error);
+                alert('Error loading chatbot service config');
+            }
+        }
+        
+        async function saveChatbotServiceConfig() {
+            try {
+                const jsonText = document.getElementById('chatbotServiceConfigJson').value;
+                const config = JSON.parse(jsonText);
+                
+                const response = await fetch(`${API_BASE}/config/chatbot-service`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(config)
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('Chatbot service configuration saved successfully!\n\nNote: Server restart recommended for full effect.');
+                } else {
+                    alert('Error saving chatbot service configuration');
+                }
+            } catch (error) {
+                console.error('Error saving chatbot service config:', error);
+                alert('Error: Invalid JSON or save failed');
+            }
+        }
+        
+        function validateChatbotServiceConfig() {
+            try {
+                const jsonText = document.getElementById('chatbotServiceConfigJson').value;
+                JSON.parse(jsonText);
+                alert('JSON is valid!');
+            } catch (error) {
+                alert('Invalid JSON: ' + error.message);
+            }
+        }
+        
+        // System Prompts Functions
+        async function loadSystemPrompts() {
+            try {
+                const response = await fetch(`${API_BASE}/config/prompts`);
+                const data = await response.json();
+                document.getElementById('systemPromptsJson').value = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error loading system prompts:', error);
+                alert('Error loading system prompts');
+            }
+        }
+        
+        async function saveSystemPrompts() {
+            try {
+                const jsonText = document.getElementById('systemPromptsJson').value;
+                const prompts = JSON.parse(jsonText);
+                
+                const response = await fetch(`${API_BASE}/config/prompts`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(prompts)
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('System prompts saved successfully!');
+                } else {
+                    alert('Error saving system prompts');
+                }
+            } catch (error) {
+                console.error('Error saving system prompts:', error);
+                alert('Error: Invalid JSON or save failed');
             }
         }
         

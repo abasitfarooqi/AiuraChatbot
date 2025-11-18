@@ -225,6 +225,68 @@ class ConfigManager:
             "out_of_domain_message": "I can only assist with Neguinho Motors services.",
             "error_message": "I'm sorry, I'm experiencing technical difficulties."
         }
+    
+    def load_chatbot_service_config(self) -> Dict[str, Any]:
+        """Load chatbot service configuration from JSON."""
+        try:
+            config_file = self.config_dir / "chatbot_service_config.json"
+            if config_file.exists():
+                with open(config_file, "r", encoding="utf-8") as f:
+                    config = json.load(f)
+                logger.info(f"Loaded chatbot service config from {config_file}")
+                return config
+            else:
+                logger.warning(f"Chatbot service config file not found: {config_file}, using defaults")
+                default_config = self._get_default_chatbot_service_config()
+                self.save_chatbot_service_config(default_config)
+                return default_config
+        except Exception as e:
+            logger.error(f"Error loading chatbot service config: {e}")
+            return self._get_default_chatbot_service_config()
+    
+    def save_chatbot_service_config(self, config: Dict[str, Any]) -> bool:
+        """Save chatbot service configuration to JSON."""
+        try:
+            config_file = self.config_dir / "chatbot_service_config.json"
+            with open(config_file, "w", encoding="utf-8") as f:
+                json.dump(config, f, indent=2, ensure_ascii=False)
+            logger.info(f"Saved chatbot service config to {config_file}")
+            return True
+        except Exception as e:
+            logger.error(f"Error saving chatbot service config: {e}")
+            return False
+    
+    def _get_default_chatbot_service_config(self) -> Dict[str, Any]:
+        """Get default chatbot service configuration."""
+        return {
+            "greetings": {
+                "simple_greetings": ["hi", "hello", "hey"],
+                "initial_suggestions": [
+                    "What services do you offer?",
+                    "Tell me about rental bikes",
+                    "What are your opening hours?"
+                ]
+            },
+            "topic_detection": {
+                "topic_keywords": {
+                    "rental": ["rental", "rent"],
+                    "sale": ["sale", "buy"],
+                    "finance": ["finance", "emi"]
+                },
+                "service_topics": ["rental", "sale", "finance"]
+            },
+            "suggestions": {
+                "max_suggestions": 5,
+                "default_suggestions": [
+                    "What services do you offer?",
+                    "Tell me about rental bikes"
+                ]
+            },
+            "response_formatting": {
+                "add_contact_info": True,
+                "contact_info": "Contact: 0208 314 1498"
+            }
+        }
 
 
 # Global config manager instance

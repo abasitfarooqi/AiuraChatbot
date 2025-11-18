@@ -70,11 +70,17 @@ async def update_config(request: ConfigUpdateRequest):
 
 @router.post("/section")
 async def update_config_section(request: ConfigSectionRequest):
-    """Update an entire configuration section."""
+    """Update an entire configuration section or full config."""
     try:
         config_manager = get_config_manager()
         config = config_manager.load_app_config()
-        config[request.section] = request.data
+        
+        # If section is "all", replace entire config
+        if request.section == "all":
+            config = request.data
+        else:
+            config[request.section] = request.data
+        
         success = config_manager.save_app_config(config)
         if success:
             return {"status": "success", "section": request.section}
@@ -198,8 +204,45 @@ async def get_offline_models():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class ModelDownloadRequest(BaseModel):
+    """Request model for downloading a model."""
+    model_name: str
+
+
+@router.get("/chatbot-service")
+async def get_chatbot_service_config():
+    """Get chatbot service configuration."""
+    try:
+        config_manager = get_config_manager()
+        config = config_manager.load_chatbot_service_config()
+        return config
+    except Exception as e:
+        logger.error(f"Error getting chatbot service config: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/chatbot-service")
+async def update_chatbot_service_config(config: Dict[str, Any]):
+    """Update chatbot service configuration."""
+    try:
+        config_manager = get_config_manager()
+        success = config_manager.save_chatbot_service_config(config)
+        if success:
+            # Reload config in chatbot service
+            from backend.services.chatbot_service import ChatbotService
+            # Note: This will reload on next request, or you could implement a singleton reload
+            return {"status": "success", "message": "Chatbot service configuration updated. Restart server or wait for next request to apply changes."}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to update chatbot service config")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating chatbot service config: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.post("/models/download")
-async def download_model(model_name: str):
+async def download_model(request: ModelDownloadRequest):
     """Download a model for offline use."""
     try:
         from backend.services.offline_model_manager import OfflineModelManager
@@ -207,12 +250,12 @@ async def download_model(model_name: str):
         settings = get_settings()
         
         model_manager = OfflineModelManager(cache_dir=settings.embedding_cache_dir)
-        success = model_manager.download_embedding_model(model_name)
+        success = model_manager.download_embedding_model(request.model_name)
         
         if success:
-            return {"status": "success", "message": f"Model {model_name} downloaded successfully"}
+            return {"status": "success", "message": f"Model {request.model_name} downloaded successfully"}
         else:
-            raise HTTPException(status_code=500, detail=f"Failed to download model {model_name}")
+            raise HTTPException(status_code=500, detail=f"Failed to download model {request.model_name}")
     except HTTPException:
         raise
     except Exception as e:

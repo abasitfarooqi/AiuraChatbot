@@ -1,0 +1,199 @@
+{
+  "greetings": {
+    "simple_greetings": [
+      "hi",
+      "hello",
+      "hey",
+      "good morning",
+      "good afternoon",
+      "good evening",
+      "greetings"
+    ],
+    "initial_suggestions": [
+      "What services do you offer?",
+      "Tell me about rental bikes",
+      "What are your opening hours?",
+      "Where are your branches located?"
+    ]
+  },
+  "topic_detection": {
+    "topic_keywords": {
+      "rental": ["rental", "rent", "hire", "leasing", "weekly", "monthly rental"],
+      "sale": ["sale", "buy", "purchase", "price", "cost", "for sale"],
+      "finance": ["finance", "emi", "payment plan", "installment", "credit", "loan"],
+      "servicing": ["service", "servicing", "repair", "maintenance", "fix"],
+      "mot": ["mot", "test", "certificate"],
+      "delivery": ["delivery", "deliver", "transport", "shipping"],
+      "accessories": ["accessories", "accessory", "helmet", "gear", "equipment"],
+      "accident": ["accident", "crash", "claim", "insurance"],
+      "branch": ["branch", "location", "address", "where"],
+      "opening": ["opening", "hours", "time", "when open"]
+    },
+    "service_topics": ["rental", "sale", "finance", "servicing", "mot", "delivery", "accessories", "accident"]
+  },
+  "question_analysis": {
+    "complete_question_indicators": [
+      {
+        "indicator": "what",
+        "keywords": ["service", "price", "cost", "bike", "model", "opening", "hours", "branch", "location"]
+      },
+      {
+        "indicator": "how",
+        "keywords": ["much", "long", "many", "do", "can"]
+      },
+      {
+        "indicator": "where",
+        "keywords": ["are", "is", "do", "can"]
+      },
+      {
+        "indicator": "when",
+        "keywords": ["are", "is", "do", "can"]
+      },
+      {
+        "indicator": "do you",
+        "keywords": ["offer", "have", "sell", "rent", "provide"]
+      },
+      {
+        "indicator": "tell me",
+        "keywords": ["about", "more"]
+      },
+      {
+        "indicator": "can i",
+        "keywords": ["rent", "buy", "get", "test"]
+      },
+      {
+        "indicator": "rental",
+        "keywords": ["price", "bike", "cost", "period", "term"]
+      },
+      {
+        "indicator": "finance",
+        "keywords": ["option", "rate", "term", "deposit", "available"]
+      },
+      {
+        "indicator": "sale",
+        "keywords": ["bike", "price", "available", "model"]
+      }
+    ],
+    "min_words_for_complete": 4,
+    "min_words_for_question_structure": 5,
+    "max_short_question_words": 2
+  },
+  "suggestions": {
+    "service_suggestions": {
+      "rental": {
+        "primary": [
+          "What are the rental prices for each bike?",
+          "What documents do I need for rental?",
+          "What is the minimum rental period?"
+        ],
+        "cross_sell": "We also offer bike sales and finance - would you like to know more?"
+      },
+      "sale": {
+        "primary": [
+          "What bikes are available for sale?",
+          "Do you offer finance options?",
+          "Can I test ride a bike?"
+        ],
+        "cross_sell": "We also offer rentals and servicing - interested?"
+      },
+      "finance": {
+        "primary": [
+          "What is the interest rate?",
+          "How long is the finance term?",
+          "What deposit is required?"
+        ],
+        "cross_sell": "We also offer bike sales and rentals - want to know more?"
+      },
+      "servicing": {
+        "primary": [
+          "What services do you offer?",
+          "How much does a service cost?",
+          "Do you collect bikes for service?"
+        ],
+        "cross_sell": "We also offer MOT testing and repairs - need more info?"
+      },
+      "mot": {
+        "primary": [
+          "How much does an MOT cost?",
+          "How long does an MOT take?",
+          "Do you offer pre-MOT checks?"
+        ],
+        "cross_sell": "We also offer servicing and repairs - want details?"
+      },
+      "delivery": {
+        "primary": [
+          "How much does delivery cost?",
+          "How long does delivery take?",
+          "Do you deliver nationwide?"
+        ],
+        "cross_sell": "We also offer bike sales and rentals - interested?"
+      }
+    },
+    "all_services": {
+      "rental": "Tell me about bike rental options",
+      "sale": "What bikes do you have for sale?",
+      "finance": "Do you offer finance options?",
+      "servicing": "What servicing do you offer?",
+      "mot": "Do you do MOT testing?",
+      "delivery": "Do you offer delivery service?",
+      "accessories": "What accessories do you sell?",
+      "accident": "Do you offer accident management?"
+    },
+    "default_suggestions": [
+      "What services do you offer?",
+      "Tell me about rental bikes",
+      "What are your opening hours?",
+      "Where are your branches located?"
+    ],
+    "multi_service_message": "We also offer other services - would you like to know more?",
+    "max_suggestions": 5,
+    "min_services_for_cross_sell": 2,
+    "min_messages_for_cross_sell": 3
+  },
+  "intelligent_suggestions": {
+    "enabled": true,
+    "min_questions_for_analysis": 4,
+    "rental_follow_ups": {
+      "deposit": "What deposit is required for rental?",
+      "insurance": "What insurance do I need for rental?",
+      "delivery": "Do you deliver rental bikes?"
+    },
+    "sale_follow_ups": {
+      "finance": "Do you offer finance for bike purchases?",
+      "test_ride": "Can I test ride before buying?",
+      "warranty": "What warranty do you offer on bikes?"
+    },
+    "finance_follow_ups": {
+      "interest_rate": "What is the interest rate?",
+      "term": "How long is the finance term?",
+      "deposit": "What deposit is required for finance?"
+    },
+    "servicing_follow_ups": {
+      "cost": "How much does a service cost?",
+      "collect": "Do you collect bikes for service?",
+      "mot": "Do you also do MOT testing?"
+    },
+    "multi_service_follow_ups": {
+      "delivery": "Do you offer delivery service?",
+      "accessories": "What accessories do you sell?",
+      "accident": "Do you offer accident management?"
+    }
+  },
+  "response_formatting": {
+    "add_contact_info": true,
+    "contact_keywords": ["service", "rental", "sale", "finance", "opening", "branch", "contact", "help"],
+    "min_response_length_for_contact": 50,
+    "contact_info": "Contact: 0208 314 1498 or enquiries@neguinhomotors.co.uk",
+    "default_empty_response": "I'm here to help! How can I assist you today?"
+  },
+  "context_management": {
+    "max_context_messages": 10,
+    "max_recent_messages_for_query": 6,
+    "max_user_messages_for_context": 4
+  },
+  "validation": {
+    "enable_response_validation": true,
+    "fallback_message": "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
+  }
+}
+

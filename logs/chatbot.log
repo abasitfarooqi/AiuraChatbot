@@ -2188,3 +2188,196 @@
 2025-11-19 02:35:04.960 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
 2025-11-19 02:35:04.963 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
 2025-11-19 02:35:04.963 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:35:14.368 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:35:17.227 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:35:17.228 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:35:17.228 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:35:17.228 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:35:21.286 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:35:21.290 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:35:21.290 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:36:24.858 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:36:28.567 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:36:28.569 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:36:28.569 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:36:28.569 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:36:32.744 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:36:32.748 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:36:32.749 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:36:33.763 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:36:36.682 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:36:36.683 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:36:36.683 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:36:36.683 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:36:40.628 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:36:40.632 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:36:40.632 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:36:56.401 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:36:59.406 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:36:59.407 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:36:59.407 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:36:59.408 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:37:03.355 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:37:03.358 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:37:03.358 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:37:03.563 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:37:06.415 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:37:06.416 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:37:06.416 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:37:06.417 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:37:10.481 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:37:10.485 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:37:10.485 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:37:33.032 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:37:35.784 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:37:35.785 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:37:35.785 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:37:35.786 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:37:40.843 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:37:40.847 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:37:40.847 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:37:41.052 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:37:43.909 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:37:43.910 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:37:43.910 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:37:43.910 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:37:48.355 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:37:48.358 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:37:48.358 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:39:22.859 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:39:29.811 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:39:29.812 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:39:29.812 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:39:29.813 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:39:34.560 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:39:34.564 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:39:34.564 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:39:34.770 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:39:37.645 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:39:37.646 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:39:37.646 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:39:37.646 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:39:41.711 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:39:41.715 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:39:41.715 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:39:42.729 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:39:45.587 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:39:45.588 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:39:45.588 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:39:45.588 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:39:49.520 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:39:49.524 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:39:49.524 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:39:49.730 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:39:54.340 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:39:54.341 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:39:54.341 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:39:54.342 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:39:58.351 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:39:58.355 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:39:58.355 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:40:07.855 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:40:11.515 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:40:11.516 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:40:11.516 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:40:11.516 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:40:15.664 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:40:15.668 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:40:15.668 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:40:23.356 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:40:34.435 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:40:34.436 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:40:34.437 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:40:34.437 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:40:38.427 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:40:38.431 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:40:38.431 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:40:38.637 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:40:41.568 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:40:41.569 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:40:41.569 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:40:41.569 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:40:45.786 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:40:45.789 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:40:45.789 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:40:45.995 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:40:49.012 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:40:49.013 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:40:49.013 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:40:49.013 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:40:53.020 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:40:53.024 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:40:53.024 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:41:03.545 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:41:06.454 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:41:06.455 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:41:06.455 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:41:06.455 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:41:10.569 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:41:10.573 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:41:10.573 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:41:13.406 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:41:18.584 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:41:18.585 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:41:18.585 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:41:18.585 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:41:22.970 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:41:22.976 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:41:22.976 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:41:23.383 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:41:27.665 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:41:27.666 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:41:27.666 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:41:27.666 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:41:31.768 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:41:31.771 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:41:31.772 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:41:31.978 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:41:34.984 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:41:34.985 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:41:34.985 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:41:34.985 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:41:38.968 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:41:38.971 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:41:38.971 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:41:43.420 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:41:46.440 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:41:46.441 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:41:46.441 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:41:46.441 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:41:50.581 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:41:50.585 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:41:50.585 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:41:53.519 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:41:56.488 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:41:56.490 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:41:56.490 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:41:56.490 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:42:00.579 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:42:00.582 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:42:00.583 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:42:00.788 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:42:05.597 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:42:05.598 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:42:05.598 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:42:05.598 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:42:09.595 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:42:09.600 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:42:09.600 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:42:10.616 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:42:13.652 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:42:13.653 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:42:13.653 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:42:13.653 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:42:17.803 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:42:17.807 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:42:17.808 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:43:10.467 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...
+2025-11-19 02:43:13.400 | INFO     | backend.app.main:startup_event:110 - Starting up application...
+2025-11-19 02:43:13.401 | INFO     | backend.app.main:startup_event:115 - Database initialized
+2025-11-19 02:43:13.401 | INFO     | backend.services.rag_service:_initialize:33 - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 02:43:13.401 | WARNING  | backend.services.offline_model_manager:load_embedding_model_offline:82 - Model not found in cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-19 02:43:18.489 | INFO     | backend.services.rag_service:_initialize:75 - RAG service initialized successfully
+2025-11-19 02:43:18.493 | INFO     | backend.services.rag_service:load_knowledge_base:103 - Collection already has 38 chunks. Skipping load.
+2025-11-19 02:43:18.493 | INFO     | backend.app.main:startup_event:124 - Knowledge base loaded
+2025-11-19 02:43:22.945 | INFO     | backend.app.main:shutdown_event:132 - Shutting down application...

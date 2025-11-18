@@ -26,9 +26,21 @@ class ChatbotService:
         self.llm_service = LLMService(db=db)  # Pass db to load active model
         self.memory_service = MemoryService(db)
         self.settings = settings
+        self._load_chatbot_config()
     
     def get_system_prompt(self) -> str:
-        """Get system prompt for LLM."""
+        """Get system prompt for LLM from JSON config."""
+        try:
+            from backend.utils.config_manager import get_config_manager
+            config_manager = get_config_manager()
+            prompts = config_manager.load_system_prompts()
+            return prompts.get("main_system_prompt", self._get_default_system_prompt())
+        except Exception as e:
+            logger.warning(f"Error loading system prompt from config: {e}, using default")
+            return self._get_default_system_prompt()
+    
+    def _get_default_system_prompt(self) -> str:
+        """Get default system prompt if JSON config fails."""
         return """You are the Neguinho Motors chatbot assistant. You help customers with bike rentals, sales, finance, servicing, MOT testing, delivery, accessories, and motorbike maintenance/repairs services.
 
 CRITICAL RULES - STRICTLY ENFORCE:
@@ -74,15 +86,25 @@ RESPONSE FORMAT:
             
             # Check domain relevance
             if not self.rag_service.is_domain_relevant(message):
+                # Get out-of-domain message from config
+                try:
+                    from backend.utils.config_manager import get_config_manager
+                    config_manager = get_config_manager()
+                    prompts = config_manager.load_system_prompts()
+                    out_of_domain_msg = prompts.get("out_of_domain_message", 
+                        "I can only assist with bike rentals, sales, finance, deposit, warranty, and company policies related to Neguinho Motors. How can I help you with our services?")
+                except:
+                    out_of_domain_msg = "I can only assist with bike rentals, sales, finance, deposit, warranty, and company policies related to Neguinho Motors. How can I help you with our services?"
+                
                 # Save assistant response for out-of-domain
                 assistant_message = self._save_message(
                     chat_id,
                     "assistant",
-                    "I can only assist with bike rentals, sales, finance, deposit, warranty, and company policies related to Neguinho Motors. How can I help you with our services?",
+                    out_of_domain_msg,
                     tokens_used=0
                 )
                 return {
-                    "response": "I can only assist with bike rentals, sales, finance, deposit, warranty, and company policies related to Neguinho Motors. How can I help you with our services?",
+                    "response": out_of_domain_msg,
                     "chat_id": chat_id,
                     "message_id": assistant_message.message_id,
                     "is_domain_relevant": False,
@@ -101,7 +123,8 @@ RESPONSE FORMAT:
             
             # Check if current message is a simple greeting (should be handled fresh)
             message_lower = message.lower().strip()
-            is_simple_greeting = message_lower in ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "greetings"]
+            simple_greetings = self.chatbot_config.get("greetings", {}).get("simple_greetings", ["hi", "hello", "hey"])
+            is_simple_greeting = message_lower in simple_greetings
             
             # For initial chat OR simple greetings: use ONLY current message, no context dependency
             if is_initial_chat or is_simple_greeting:
@@ -152,14 +175,23 @@ RESPONSE FORMAT:
                 else:
                     # NO FALLBACK - Return message that information is not available
                     # This ensures no hallucinations
+                    try:
+                        from backend.utils.config_manager import get_config_manager
+                        config_manager = get_config_manager()
+                        prompts = config_manager.load_system_prompts()
+                        fallback_msg = prompts.get("fallback_message",
+                            "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.")
+                    except:
+                        fallback_msg = "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
+                    
                     assistant_message = self._save_message(
                         chat_id,
                         "assistant",
-                        "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.",
+                        fallback_msg,
                         tokens_used=0
                     )
                     return {
-                        "response": "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.",
+                        "response": fallback_msg,
                         "chat_id": chat_id,
                         "message_id": assistant_message.message_id,
                         "is_domain_relevant": True,
@@ -174,21 +206,57 @@ RESPONSE FORMAT:
             # Only add conversation history if this is NOT an initial chat AND NOT a simple greeting
             # For initial chat or greetings, use only the current question with RAG context
             if not is_initial_chat and not is_simple_greeting and context:
-                messages.extend(context[-10:])  # Last 10 messages for context
+                max_context = self.chatbot_config.get("context_management", {}).get("max_context_messages", 10)
+                messages.extend(context[-max_context:])  # Last N messages for context
             
             # Add current query with STRICT RAG-only instructions
             if context_text:
                 # Handle simple greetings specially
                 if is_simple_greeting:
-                    # Simple greeting - provide friendly welcome without RAG context
-                    user_message_content = f"""The user just said: "{message}"
+                    # Simple greeting - use prompt from JSON config
+                    try:
+                        from backend.utils.config_manager import get_config_manager
+                        config_manager = get_config_manager()
+                        prompts = config_manager.load_system_prompts()
+                        greeting_template = prompts.get("greeting_prompt", 
+                            """The user just said: "{message}"
+
+Respond with a friendly greeting and offer to help with Neguinho Motors services (bike rentals, sales, finance, servicing, MOT testing, delivery, accessories, and motorbike maintenance and repairs).
+
+Keep it brief and welcoming. Do not mention any specific information unless asked.""")
+                        user_message_content = greeting_template.format(message=message)
+                    except:
+                        user_message_content = f"""The user just said: "{message}"
 
 Respond with a friendly greeting and offer to help with Neguinho Motors services (bike rentals, sales, finance, servicing, MOT testing, delivery, accessories, and motorbike maintenance and repairs).
 
 Keep it brief and welcoming. Do not mention any specific information unless asked."""
                 else:
-                    # STRICT prompt - only use provided information
-                    user_message_content = f"""CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.
+                    # STRICT prompt - use from JSON config
+                    try:
+                        from backend.utils.config_manager import get_config_manager
+                        config_manager = get_config_manager()
+                        prompts = config_manager.load_system_prompts()
+                        query_template = prompts.get("query_prompt",
+                            """CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.
+
+INFORMATION FROM KNOWLEDGE BASE:
+{context_text}
+
+QUESTION: {message}
+
+INSTRUCTIONS:
+- Use ONLY facts from the INFORMATION section above
+- If the answer is not in the information, say: "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
+- DO NOT make up, guess, or invent any information
+- DO NOT use knowledge from outside the provided information
+- Format your answer with proper line breaks and structure
+
+ANSWER (based ONLY on the information above):""")
+                        user_message_content = query_template.format(context_text=context_text, message=message)
+                    except:
+                        # Fallback to default
+                        user_message_content = f"""CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.
 
 INFORMATION FROM KNOWLEDGE BASE:
 {context_text}
@@ -205,14 +273,23 @@ INSTRUCTIONS:
 ANSWER (based ONLY on the information above):"""
             else:
                 # This should not happen due to check above, but just in case
+                try:
+                    from backend.utils.config_manager import get_config_manager
+                    config_manager = get_config_manager()
+                    prompts = config_manager.load_system_prompts()
+                    fallback_msg = prompts.get("fallback_message",
+                        "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.")
+                except:
+                    fallback_msg = "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
+                
                 assistant_message = self._save_message(
                     chat_id,
                     "assistant",
-                    "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.",
+                    fallback_msg,
                     tokens_used=0
                 )
                 return {
-                    "response": "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.",
+                    "response": fallback_msg,
                     "chat_id": chat_id,
                     "message_id": assistant_message.message_id,
                     "is_domain_relevant": True,
@@ -237,10 +314,13 @@ ANSWER (based ONLY on the information above):"""
             tokens_used = llm_response.get("tokens_used", 0)
             
             # Validate response is based on RAG chunks (prevent hallucinations)
-            if not self._validate_response_from_rag(response_content, retrieved_chunks, message):
-                # Response seems to contain information not in RAG - return safe message
-                logger.warning(f"Response validation failed - possible hallucination detected for query: {message[:50]}")
-                response_content = "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
+            validation_config = self.chatbot_config.get("validation", {})
+            if validation_config.get("enable_response_validation", True):
+                if not self._validate_response_from_rag(response_content, retrieved_chunks, message):
+                    # Response seems to contain information not in RAG - return safe message
+                    logger.warning(f"Response validation failed - possible hallucination detected for query: {message[:50]}")
+                    response_content = validation_config.get("fallback_message", 
+                        "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.")
             
             # Post-process response for better structure
             response_content = self._format_response(response_content, message, retrieved_chunks)
@@ -287,13 +367,13 @@ ANSWER (based ONLY on the information above):"""
             # For ongoing chat, only show suggestions if question was incomplete/ambiguous
             suggestions = []
             if is_initial_chat or is_simple_greeting:
-                # Initial chat or greeting - show general helpful suggestions
-                suggestions = [
+                # Initial chat or greeting - show general helpful suggestions from config
+                suggestions = self.chatbot_config.get("greetings", {}).get("initial_suggestions", [
                     "What services do you offer?",
                     "Tell me about rental bikes",
                     "What are your opening hours?",
                     "Where are your branches located?"
-                ]
+                ])
             elif not (is_complete_question and topic_changed):
                 # Ongoing chat - only show suggestions if question was incomplete/ambiguous
                 suggestions = self._generate_suggestions(chat_id, message, retrieved_chunks, current_topics=current_topics)
@@ -316,15 +396,25 @@ ANSWER (based ONLY on the information above):"""
             traceback.print_exc()
             # Ensure we have chat_id even on error
             try:
+                # Get error message from config
+                try:
+                    from backend.utils.config_manager import get_config_manager
+                    config_manager = get_config_manager()
+                    prompts = config_manager.load_system_prompts()
+                    error_msg = prompts.get("error_message",
+                        "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at enquiries@neguinhomotors.co.uk")
+                except:
+                    error_msg = "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at enquiries@neguinhomotors.co.uk"
+                
                 chat = self._get_or_create_chat(chat_id, user_id, vendor_id or settings.default_vendor_id)
                 error_message = self._save_message(
                     chat_id,
                     "assistant",
-                    "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at enquiries@neguinhomotors.co.uk",
+                    error_msg,
                     tokens_used=0
                 )
                 return {
-                    "response": "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at enquiries@neguinhomotors.co.uk",
+                    "response": error_msg,
                     "chat_id": chat_id,
                     "message_id": error_message.message_id,
                     "error": str(e),
@@ -336,8 +426,17 @@ ANSWER (based ONLY on the information above):"""
                 }
             except:
                 # Fallback if even chat creation fails
+                try:
+                    from backend.utils.config_manager import get_config_manager
+                    config_manager = get_config_manager()
+                    prompts = config_manager.load_system_prompts()
+                    error_msg = prompts.get("error_message",
+                        "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at enquiries@neguinhomotors.co.uk")
+                except:
+                    error_msg = "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at enquiries@neguinhomotors.co.uk"
+                
                 return {
-                    "response": "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at enquiries@neguinhomotors.co.uk",
+                    "response": error_msg,
                     "chat_id": chat_id or f"error_{user_id}",
                     "message_id": "",
                     "error": str(e),
@@ -443,10 +542,13 @@ ANSWER (based ONLY on the information above):"""
         # Extract topics from current message
         current_topics = self._extract_topics(current_message)
         
-        # Extract topics from recent conversation (last 3-4 user messages)
+        # Extract topics from recent conversation
+        context_config = self.chatbot_config.get("context_management", {})
+        max_recent = context_config.get("max_recent_messages_for_query", 6)
+        
         recent_topics = set()
         recent_messages = []
-        for msg in context[-6:]:  # Get last 6 messages
+        for msg in context[-max_recent:]:
             if isinstance(msg, dict) and msg.get("role") == "user":
                 msg_content = msg.get("content", "")
                 recent_messages.append(msg_content)
@@ -487,19 +589,12 @@ ANSWER (based ONLY on the information above):"""
         message_lower = message.lower()
         topics = set()
         
-        # Define topic keywords
-        topic_keywords = {
-            "rental": ["rental", "rent", "hire", "leasing", "weekly", "monthly rental"],
-            "sale": ["sale", "buy", "purchase", "price", "cost", "for sale"],
-            "finance": ["finance", "emi", "payment plan", "installment", "credit", "loan"],
-            "servicing": ["service", "servicing", "repair", "maintenance", "fix"],
-            "mot": ["mot", "test", "certificate"],
-            "delivery": ["delivery", "deliver", "transport", "shipping"],
-            "accessories": ["accessories", "accessory", "helmet", "gear", "equipment"],
-            "accident": ["accident", "crash", "claim", "insurance"],
-            "branch": ["branch", "location", "address", "where"],
-            "opening": ["opening", "hours", "time", "when open"]
-        }
+        # Get topic keywords from config
+        topic_keywords = self.chatbot_config.get("topic_detection", {}).get("topic_keywords", {
+            "rental": ["rental", "rent", "hire"],
+            "sale": ["sale", "buy", "purchase"],
+            "finance": ["finance", "emi", "payment plan"]
+        })
         
         # Detect topics
         for topic, keywords in topic_keywords.items():
@@ -520,41 +615,34 @@ ANSWER (based ONLY on the information above):"""
         """
         message_lower = message.lower().strip()
         
-        # Complete question indicators
-        complete_indicators = [
-            # Question words with specific service mentions
-            ("what", ["service", "price", "cost", "bike", "model", "opening", "hours", "branch", "location"]),
-            ("how", ["much", "long", "many", "do", "can"]),
-            ("where", ["are", "is", "do", "can"]),
-            ("when", ["are", "is", "do", "can"]),
-            ("do you", ["offer", "have", "sell", "rent", "provide"]),
-            ("tell me", ["about", "more"]),
-            ("can i", ["rent", "buy", "get", "test"]),
-            # Specific service mentions with question structure
-            ("rental", ["price", "bike", "cost", "period", "term"]),
-            ("finance", ["option", "rate", "term", "deposit", "available"]),
-            ("sale", ["bike", "price", "available", "model"]),
-        ]
+        # Get complete question indicators from config
+        question_config = self.chatbot_config.get("question_analysis", {})
+        complete_indicators = question_config.get("complete_question_indicators", [])
+        min_words_complete = question_config.get("min_words_for_complete", 4)
+        min_words_structure = question_config.get("min_words_for_question_structure", 5)
+        max_short_words = question_config.get("max_short_question_words", 2)
         
         # Check for complete question patterns
-        for indicator, keywords in complete_indicators:
+        for indicator_config in complete_indicators:
+            indicator = indicator_config.get("indicator", "")
+            keywords = indicator_config.get("keywords", [])
             if indicator in message_lower:
                 if any(keyword in message_lower for keyword in keywords):
                     return True
         
         # Check for very short/ambiguous questions
         words = message_lower.split()
-        if len(words) <= 2:
+        if len(words) <= max_short_words:
             return False
         
         # Check for specific service mentions with enough detail
-        service_mentions = ["rental", "sale", "finance", "service", "servicing", "mot", "delivery"]
-        if any(service in message_lower for service in service_mentions):
-            if len(words) >= 4:  # Has enough words to be specific
+        service_topics = self.chatbot_config.get("topic_detection", {}).get("service_topics", ["rental", "sale", "finance"])
+        if any(service in message_lower for service in service_topics):
+            if len(words) >= min_words_complete:
                 return True
         
         # Default: if message is long enough and has question structure, consider it complete
-        if len(words) >= 5 and ("?" in message or any(q in message_lower for q in ["what", "how", "where", "when", "do", "can"])):
+        if len(words) >= min_words_structure and ("?" in message or any(q in message_lower for q in ["what", "how", "where", "when", "do", "can"])):
             return True
         
         return False
@@ -574,16 +662,20 @@ ANSWER (based ONLY on the information above):"""
         if not context or len(context) < 2:
             return current_message
         
-        # Get last 3-4 user messages for context
+        # Get last user messages for context
+        context_config = self.chatbot_config.get("context_management", {})
+        max_recent = context_config.get("max_recent_messages_for_query", 6)
+        max_user = context_config.get("max_user_messages_for_context", 4)
+        
         recent_messages = []
-        for msg in context[-6:]:  # Get last 6 messages (3 user + 3 assistant)
+        for msg in context[-max_recent:]:
             if isinstance(msg, dict) and msg.get("role") == "user":
                 recent_messages.append(msg.get("content", ""))
         
         # Combine recent messages with current message
         if recent_messages:
-            # Take last 3-4 user messages
-            recent_context = " ".join(recent_messages[-4:])
+            # Take last N user messages
+            recent_context = " ".join(recent_messages[-max_user:])
             enhanced_query = f"{recent_context} {current_message}"
             return enhanced_query.strip()
         
@@ -635,34 +727,32 @@ ANSWER (based ONLY on the information above):"""
                 topic_history.extend(list(topics))
             
             # Count unique services asked about
-            service_topics = {"rental", "sale", "finance", "servicing", "mot", "delivery", "accessories", "accident"}
+            service_topics_list = self.chatbot_config.get("topic_detection", {}).get("service_topics", ["rental", "sale", "finance"])
+            service_topics = set(service_topics_list)
             asked_services = conversation_topics.intersection(service_topics)
             num_services_asked = len(asked_services)
             
             # Get last question's topics for primary suggestions
             last_question_topics = topics if topics else set()
             
-            # Sales strategy: If user has asked about 2+ different services, suggest other services
-            # This happens when 4th question (or later) is about another service
-            if num_services_asked >= 2 and len(all_user_messages) >= 3:
+            # Get suggestion config
+            suggestions_config = self.chatbot_config.get("suggestions", {})
+            min_services_for_cross_sell = suggestions_config.get("min_services_for_cross_sell", 2)
+            min_messages_for_cross_sell = suggestions_config.get("min_messages_for_cross_sell", 3)
+            max_suggestions = suggestions_config.get("max_suggestions", 5)
+            all_services = suggestions_config.get("all_services", {})
+            multi_service_message = suggestions_config.get("multi_service_message", "We also offer other services - would you like to know more?")
+            
+            # Sales strategy: If user has asked about multiple services, suggest other services
+            if num_services_asked >= min_services_for_cross_sell and len(all_user_messages) >= min_messages_for_cross_sell:
                 # User is exploring multiple services - suggest complementary services
-                all_services = {
-                    "rental": "Tell me about bike rental options",
-                    "sale": "What bikes do you have for sale?",
-                    "finance": "Do you offer finance options?",
-                    "servicing": "What servicing do you offer?",
-                    "mot": "Do you do MOT testing?",
-                    "delivery": "Do you offer delivery service?",
-                    "accessories": "What accessories do you sell?",
-                    "accident": "Do you offer accident management?"
-                }
                 
                 # Suggest services they haven't asked about yet
                 unasked_services = set(all_services.keys()) - asked_services
                 
                 if unasked_services:
                     # Sales-oriented suggestions
-                    suggestions.append("We also offer other services - would you like to know more?")
+                    suggestions.append(multi_service_message)
                     
                     # Add 2-3 specific service suggestions
                     for service in list(unasked_services)[:3]:
@@ -678,77 +768,66 @@ ANSWER (based ONLY on the information above):"""
                         suggestions.append("Do you offer part exchange?")
             else:
                 # User is focused on one service - suggest related questions based on LAST question
+                # Get service-specific suggestions from config
+                service_suggestions = suggestions_config.get("service_suggestions", {})
+                
                 # Primary suggestions based on current/last question
-                if "rental" in last_question_topics:
-                    suggestions.append("What are the rental prices for each bike?")
-                    suggestions.append("What documents do I need for rental?")
-                    suggestions.append("What is the minimum rental period?")
-                    # Sales approach: suggest other services if only asked about one service
+                if "rental" in last_question_topics and "rental" in service_suggestions:
+                    rental_config = service_suggestions["rental"]
+                    suggestions.extend(rental_config.get("primary", []))
                     if num_services_asked == 1:
-                        suggestions.append("We also offer bike sales and finance - would you like to know more?")
-                elif "sale" in last_question_topics:
-                    suggestions.append("What bikes are available for sale?")
-                    suggestions.append("Do you offer finance options?")
-                    suggestions.append("Can I test ride a bike?")
+                        suggestions.append(rental_config.get("cross_sell", ""))
+                elif "sale" in last_question_topics and "sale" in service_suggestions:
+                    sale_config = service_suggestions["sale"]
+                    suggestions.extend(sale_config.get("primary", []))
                     if num_services_asked == 1:
-                        suggestions.append("We also offer rentals and servicing - interested?")
-                elif "finance" in last_question_topics:
-                    suggestions.append("What is the interest rate?")
-                    suggestions.append("How long is the finance term?")
-                    suggestions.append("What deposit is required?")
+                        suggestions.append(sale_config.get("cross_sell", ""))
+                elif "finance" in last_question_topics and "finance" in service_suggestions:
+                    finance_config = service_suggestions["finance"]
+                    suggestions.extend(finance_config.get("primary", []))
                     if num_services_asked == 1:
-                        suggestions.append("We also offer bike sales and rentals - want to know more?")
-                elif "servicing" in last_question_topics:
-                    suggestions.append("What services do you offer?")
-                    suggestions.append("How much does a service cost?")
-                    suggestions.append("Do you collect bikes for service?")
+                        suggestions.append(finance_config.get("cross_sell", ""))
+                elif "servicing" in last_question_topics and "servicing" in service_suggestions:
+                    servicing_config = service_suggestions["servicing"]
+                    suggestions.extend(servicing_config.get("primary", []))
                     if num_services_asked == 1:
-                        suggestions.append("We also offer MOT testing and repairs - need more info?")
-                elif "mot" in last_question_topics:
-                    suggestions.append("How much does an MOT cost?")
-                    suggestions.append("How long does an MOT take?")
-                    suggestions.append("Do you offer pre-MOT checks?")
+                        suggestions.append(servicing_config.get("cross_sell", ""))
+                elif "mot" in last_question_topics and "mot" in service_suggestions:
+                    mot_config = service_suggestions["mot"]
+                    suggestions.extend(mot_config.get("primary", []))
                     if num_services_asked == 1:
-                        suggestions.append("We also offer servicing and repairs - want details?")
-                elif "delivery" in last_question_topics:
-                    suggestions.append("How much does delivery cost?")
-                    suggestions.append("How long does delivery take?")
-                    suggestions.append("Do you deliver nationwide?")
+                        suggestions.append(mot_config.get("cross_sell", ""))
+                elif "delivery" in last_question_topics and "delivery" in service_suggestions:
+                    delivery_config = service_suggestions["delivery"]
+                    suggestions.extend(delivery_config.get("primary", []))
                     if num_services_asked == 1:
-                        suggestions.append("We also offer bike sales and rentals - interested?")
+                        suggestions.append(delivery_config.get("cross_sell", ""))
                 else:
                     # General suggestions based on chunks or default
                     chunk_keywords = set()
                     for chunk in chunks[:3]:  # Check top 3 chunks
                         content = chunk.get("content", "").lower()
-                        if "rental" in content:
-                            chunk_keywords.add("rental")
-                        if "sale" in content or "buy" in content:
-                            chunk_keywords.add("sale")
-                        if "finance" in content:
-                            chunk_keywords.add("finance")
-                        if "service" in content:
-                            chunk_keywords.add("servicing")
+                        for topic in service_topics_list:
+                            if topic in content:
+                                chunk_keywords.add(topic)
                     
                     if chunk_keywords:
-                        if "rental" in chunk_keywords:
-                            suggestions.append("Tell me about rental bikes")
-                        if "sale" in chunk_keywords:
-                            suggestions.append("What bikes do you sell?")
-                        if "finance" in chunk_keywords:
-                            suggestions.append("Do you offer finance?")
+                        for topic in chunk_keywords:
+                            if topic in all_services:
+                                suggestions.append(all_services[topic])
                     
                     if not suggestions:
-                        # Default helpful suggestions
-                        suggestions = [
+                        # Default helpful suggestions from config
+                        suggestions = suggestions_config.get("default_suggestions", [
                             "What services do you offer?",
                             "Tell me about rental bikes",
                             "What are your opening hours?",
                             "Where are your branches located?"
-                        ]
+                        ])
             
-            # Add 5th suggestion based on last 4 questions
-            if len(all_user_messages) >= 4:
+            # Add intelligent suggestions based on last questions (if enabled)
+            intelligent_config = self.chatbot_config.get("intelligent_suggestions", {})
+            if intelligent_config.get("enabled", True) and len(all_user_messages) >= intelligent_config.get("min_questions_for_analysis", 4):
                 # Get last 4 user questions
                 last_4_questions = all_user_messages[-4:] if len(all_user_messages) >= 4 else all_user_messages
                 
@@ -763,54 +842,66 @@ ANSWER (based ONLY on the information above):"""
                 # Generate intelligent 5th suggestion based on patterns
                 q5_suggestion = None
                 
+                # Get follow-up suggestions from config
+                rental_follow_ups = intelligent_config.get("rental_follow_ups", {})
+                sale_follow_ups = intelligent_config.get("sale_follow_ups", {})
+                finance_follow_ups = intelligent_config.get("finance_follow_ups", {})
+                servicing_follow_ups = intelligent_config.get("servicing_follow_ups", {})
+                multi_service_follow_ups = intelligent_config.get("multi_service_follow_ups", {})
+                
                 # If they've been asking about rental multiple times
                 rental_count = sum(1 for q in last_4_question_texts if "rental" in q or "rent" in q)
                 if rental_count >= 2:
-                    if "deposit" not in " ".join(last_4_question_texts):
-                        q5_suggestion = "What deposit is required for rental?"
-                    elif "insurance" not in " ".join(last_4_question_texts):
-                        q5_suggestion = "What insurance do I need for rental?"
-                    elif "delivery" not in " ".join(last_4_question_texts):
-                        q5_suggestion = "Do you deliver rental bikes?"
+                    if "deposit" not in " ".join(last_4_question_texts) and "deposit" in rental_follow_ups:
+                        q5_suggestion = rental_follow_ups["deposit"]
+                    elif "insurance" not in " ".join(last_4_question_texts) and "insurance" in rental_follow_ups:
+                        q5_suggestion = rental_follow_ups["insurance"]
+                    elif "delivery" not in " ".join(last_4_question_texts) and "delivery" in rental_follow_ups:
+                        q5_suggestion = rental_follow_ups["delivery"]
                 
                 # If they've been asking about sale multiple times
                 sale_count = sum(1 for q in last_4_question_texts if "sale" in q or "buy" in q or "purchase" in q)
                 if sale_count >= 2:
-                    if "finance" not in " ".join(last_4_question_texts):
-                        q5_suggestion = "Do you offer finance for bike purchases?"
-                    elif "test" not in " ".join(last_4_question_texts) and "ride" not in " ".join(last_4_question_texts):
-                        q5_suggestion = "Can I test ride before buying?"
-                    elif "warranty" not in " ".join(last_4_question_texts):
-                        q5_suggestion = "What warranty do you offer on bikes?"
+                    if "finance" not in " ".join(last_4_question_texts) and "finance" in sale_follow_ups:
+                        q5_suggestion = sale_follow_ups["finance"]
+                    elif ("test" not in " ".join(last_4_question_texts) and "ride" not in " ".join(last_4_question_texts) 
+                          and "test_ride" in sale_follow_ups):
+                        q5_suggestion = sale_follow_ups["test_ride"]
+                    elif "warranty" not in " ".join(last_4_question_texts) and "warranty" in sale_follow_ups:
+                        q5_suggestion = sale_follow_ups["warranty"]
                 
                 # If they've been asking about finance
                 finance_count = sum(1 for q in last_4_question_texts if "finance" in q or "emi" in q or "payment" in q)
                 if finance_count >= 2:
-                    if "interest" not in " ".join(last_4_question_texts) and "rate" not in " ".join(last_4_question_texts):
-                        q5_suggestion = "What is the interest rate?"
-                    elif "term" not in " ".join(last_4_question_texts) and "period" not in " ".join(last_4_question_texts):
-                        q5_suggestion = "How long is the finance term?"
-                    elif "deposit" not in " ".join(last_4_question_texts):
-                        q5_suggestion = "What deposit is required for finance?"
+                    if ("interest" not in " ".join(last_4_question_texts) and "rate" not in " ".join(last_4_question_texts) 
+                        and "interest_rate" in finance_follow_ups):
+                        q5_suggestion = finance_follow_ups["interest_rate"]
+                    elif ("term" not in " ".join(last_4_question_texts) and "period" not in " ".join(last_4_question_texts) 
+                          and "term" in finance_follow_ups):
+                        q5_suggestion = finance_follow_ups["term"]
+                    elif "deposit" not in " ".join(last_4_question_texts) and "deposit" in finance_follow_ups:
+                        q5_suggestion = finance_follow_ups["deposit"]
                 
                 # If they've been asking about servicing
                 service_count = sum(1 for q in last_4_question_texts if "service" in q or "repair" in q or "maintenance" in q)
                 if service_count >= 2:
-                    if "cost" not in " ".join(last_4_question_texts) and "price" not in " ".join(last_4_question_texts):
-                        q5_suggestion = "How much does a service cost?"
-                    elif "collect" not in " ".join(last_4_question_texts) and "pickup" not in " ".join(last_4_question_texts):
-                        q5_suggestion = "Do you collect bikes for service?"
-                    elif "mot" not in " ".join(last_4_question_texts):
-                        q5_suggestion = "Do you also do MOT testing?"
+                    if ("cost" not in " ".join(last_4_question_texts) and "price" not in " ".join(last_4_question_texts) 
+                        and "cost" in servicing_follow_ups):
+                        q5_suggestion = servicing_follow_ups["cost"]
+                    elif ("collect" not in " ".join(last_4_question_texts) and "pickup" not in " ".join(last_4_question_texts) 
+                          and "collect" in servicing_follow_ups):
+                        q5_suggestion = servicing_follow_ups["collect"]
+                    elif "mot" not in " ".join(last_4_question_texts) and "mot" in servicing_follow_ups:
+                        q5_suggestion = servicing_follow_ups["mot"]
                 
                 # If they've asked about multiple different services, suggest a related one
                 if len(last_4_topics.intersection(service_topics)) >= 2:
-                    if "delivery" not in last_4_topics:
-                        q5_suggestion = "Do you offer delivery service?"
-                    elif "accessories" not in last_4_topics:
-                        q5_suggestion = "What accessories do you sell?"
-                    elif "accident" not in last_4_topics:
-                        q5_suggestion = "Do you offer accident management?"
+                    if "delivery" not in last_4_topics and "delivery" in multi_service_follow_ups:
+                        q5_suggestion = multi_service_follow_ups["delivery"]
+                    elif "accessories" not in last_4_topics and "accessories" in multi_service_follow_ups:
+                        q5_suggestion = multi_service_follow_ups["accessories"]
+                    elif "accident" not in last_4_topics and "accident" in multi_service_follow_ups:
+                        q5_suggestion = multi_service_follow_ups["accident"]
                 
                 # If no specific pattern, suggest based on most common topic
                 if not q5_suggestion and last_4_topics:
@@ -828,17 +919,18 @@ ANSWER (based ONLY on the information above):"""
                 if q5_suggestion and q5_suggestion not in suggestions:
                     suggestions.append(q5_suggestion)
             
-            # Limit to 5 suggestions
-            return suggestions[:5]
+            # Limit suggestions based on config
+            return suggestions[:max_suggestions]
             
         except Exception as e:
             logger.error(f"Error generating suggestions: {e}")
-            # Return default suggestions on error
-            return [
+            # Return default suggestions from config on error
+            default_suggestions = self.chatbot_config.get("suggestions", {}).get("default_suggestions", [
                 "What services do you offer?",
                 "Tell me about rental bikes",
                 "What are your opening hours?"
-            ]
+            ])
+            return default_suggestions
     
     def _validate_response_from_rag(self, response: str, chunks: List[Dict], query: str) -> bool:
         """
@@ -951,20 +1043,40 @@ ANSWER (based ONLY on the information above):"""
                             response += '.'
         
         # Add contact information if not present and response is about services
-        if query and isinstance(query, str):
+        formatting_config = self.chatbot_config.get("response_formatting", {})
+        if formatting_config.get("add_contact_info", True) and query and isinstance(query, str):
             query_lower = query.lower()
-            if any(keyword in query_lower for keyword in ['service', 'rental', 'sale', 'finance', 'opening', 'branch', 'contact', 'help']):
+            contact_keywords = formatting_config.get("contact_keywords", ["service", "rental", "sale", "finance"])
+            min_length = formatting_config.get("min_response_length_for_contact", 50)
+            contact_info = formatting_config.get("contact_info", "Contact: 0208 314 1498 or enquiries@neguinhomotors.co.uk")
+            
+            if any(keyword in query_lower for keyword in contact_keywords):
                 if '0208 314 1498' not in response and 'enquiries@neguinhomotors.co.uk' not in response:
-                    # Only add if response is substantial (more than 50 chars)
-                    if len(response) > 50:
-                        response += "\n\nContact: 0208 314 1498 or enquiries@neguinhomotors.co.uk"
+                    # Only add if response is substantial
+                    if len(response) > min_length:
+                        response += f"\n\n{contact_info}"
         
         # Clean up any remaining formatting issues
         response = response.strip()
         
         # Final check: ensure response is not empty
         if not response:
-            return "I'm here to help! How can I assist you today?"
+            return formatting_config.get("default_empty_response", "I'm here to help! How can I assist you today?")
         
         return response
+    
+    def _load_chatbot_config(self):
+        """Load chatbot service configuration from JSON."""
+        try:
+            from backend.utils.config_manager import get_config_manager
+            config_manager = get_config_manager()
+            self.chatbot_config = config_manager.load_chatbot_service_config()
+            logger.info("Chatbot service configuration loaded")
+        except Exception as e:
+            logger.warning(f"Error loading chatbot service config: {e}, using defaults")
+            self.chatbot_config = {}
+    
+    def reload_chatbot_config(self):
+        """Reload chatbot service configuration from file."""
+        self._load_chatbot_config()
 
