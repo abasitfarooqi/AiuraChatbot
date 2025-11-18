@@ -1,0 +1,187 @@
+{
+  "application": {
+    "environment": "development",
+    "debug": true,
+    "app_name": "AiuraChatbot",
+    "app_version": "1.0.0",
+    "api_host": "0.0.0.0",
+    "api_port": 8000,
+    "api_prefix": "/api/v1"
+  },
+  "database": {
+    "database_url": "sqlite:///./data/chatbot.db",
+    "database_echo": false
+  },
+  "vector_database": {
+    "chroma_db_path": "./data/chroma_db",
+    "chroma_collection_name": "neguinho_motors_kb"
+  },
+  "embedding": {
+    "model": "sentence-transformers/all-MiniLM-L6-v2",
+    "device": "cpu",
+    "batch_size": 32,
+    "cache_dir": "./models/embeddings",
+    "offline_mode": true
+  },
+  "llm": {
+    "provider": "ollama",
+    "model": "mistral",
+    "base_url": "http://localhost:11434",
+    "temperature": 0.7,
+    "max_tokens": 4000,
+    "top_p": 0.9,
+    "top_k": 40,
+    "offline_mode": true
+  },
+  "openai": {
+    "api_key": null,
+    "model": "gpt-4-turbo-preview",
+    "enabled": false
+  },
+  "rag": {
+    "top_k": 5,
+    "similarity_threshold": 0.2,
+    "enable_filtering": true,
+    "enable_reranking": false,
+    "knowledge_base_path": "./rag_knowledge_base.json"
+  },
+  "memory": {
+    "enabled": true,
+    "max_turns": 20,
+    "summary_enabled": false,
+    "summary_threshold": 15
+  },
+  "domain_restriction": {
+    "enabled": true,
+    "keywords": [
+      "rental",
+      "sale",
+      "finance",
+      "deposit",
+      "warranty",
+      "policy",
+      "servicing",
+      "mot",
+      "delivery",
+      "accessories",
+      "neguinho",
+      "ngn",
+      "honda",
+      "yamaha",
+      "bike",
+      "motorcycle",
+      "scooter",
+      "opening",
+      "hours",
+      "branch",
+      "branches",
+      "location",
+      "locations",
+      "where",
+      "situated",
+      "situate",
+      "address",
+      "contact",
+      "phone",
+      "email",
+      "how many",
+      "catford",
+      "tooting",
+      "sutton"
+    ]
+  },
+  "credits": {
+    "token_tracking_enabled": true,
+    "credit_system_enabled": true,
+    "default_user_credits": 1000,
+    "credit_cost_per_message": 10
+  },
+  "multi_vendor": {
+    "enabled": false,
+    "default_vendor_id": "default"
+  },
+  "logging": {
+    "log_level": "INFO",
+    "log_file": "./logs/chatbot.log",
+    "log_rotation": "10 MB",
+    "log_retention": "30 days"
+  },
+  "cors": {
+    "origins": [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "http://127.0.0.1:3000",
+      "http://127.0.0.1:5173",
+      "http://localhost:8000",
+      "http://127.0.0.1:8000",
+      "*"
+    ],
+    "credentials": true
+  },
+  "security": {
+    "secret_key": "your-secret-key-change-in-production",
+    "access_token_expire_minutes": 1440
+  },
+  "frontend": {
+    "frontend_url": "http://localhost:5173"
+  },
+  "contact": {
+    "phone": "0208 314 1498",
+    "email": "enquiries@neguinhomotors.co.uk",
+    "whatsapp": true
+  },
+  "company": {
+    "name": "Neguinho Motors Ltd",
+    "company_number": "11600635",
+    "registered_address": "9-13 Catford Hill, London, SE6 4NU",
+    "trading_names": ["NGN Motors", "Neguinho Motors", "NGN"]
+  },
+  "branches": [
+    {
+      "name": "Catford",
+      "address": "9-13 Unit 1179 Catford Hill, London SE6 4NU",
+      "phone": "0208 314 1498",
+      "postcode": "SE6 4NU",
+      "opening_hours": {
+        "monday": "09:00-18:00",
+        "tuesday": "09:00-18:00",
+        "wednesday": "09:00-18:00",
+        "thursday": "09:00-18:00",
+        "friday": "09:00-18:00",
+        "saturday": "09:00-18:00",
+        "sunday": "closed"
+      }
+    },
+    {
+      "name": "Tooting",
+      "address": "4A Penwortham Road, London SW16 6RE",
+      "phone": "0203 409 5478",
+      "postcode": "SW16 6RE",
+      "opening_hours": {
+        "monday": "09:00-18:00",
+        "tuesday": "09:00-18:00",
+        "wednesday": "09:00-18:00",
+        "thursday": "09:00-18:00",
+        "friday": "09:00-18:00",
+        "saturday": "09:00-18:00",
+        "sunday": "closed"
+      }
+    },
+    {
+      "name": "Sutton",
+      "address": "329 High St, Sutton SM1 1LW",
+      "phone": "0208 412 9275",
+      "postcode": "SM1 1LW",
+      "opening_hours": {
+        "monday": "09:00-18:00",
+        "tuesday": "09:00-18:00",
+        "wednesday": "09:00-18:00",
+        "thursday": "09:00-18:00",
+        "friday": "09:00-18:00",
+        "saturday": "09:00-18:00",
+        "sunday": "closed"
+      }
+    }
+  ]
+}
+

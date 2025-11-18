@@ -3,6 +3,7 @@ RAG (Retrieval-Augmented Generation) Service.
 Handles vector database operations, embeddings, and retrieval with filtering.
 """
 import json
+import os
 import chromadb
 from chromadb.config import Settings as ChromaSettings
 from sentence_transformers import SentenceTransformer
@@ -30,10 +31,31 @@ class RAGService:
         try:
             # Initialize embedding model
             logger.info(f"Loading embedding model: {self.settings.embedding_model}")
-            self.embedding_model = SentenceTransformer(
-                self.settings.embedding_model,
-                device=self.settings.embedding_device
-            )
+            
+            # Use offline mode if enabled
+            if self.settings.embedding_offline_mode:
+                from backend.services.offline_model_manager import OfflineModelManager
+                model_manager = OfflineModelManager(cache_dir=self.settings.embedding_cache_dir)
+                
+                # Try to load from cache first
+                model = model_manager.load_embedding_model_offline(self.settings.embedding_model)
+                if model:
+                    self.embedding_model = model
+                else:
+                    # Fallback to normal loading (will cache automatically)
+                    logger.warning("Model not in cache, loading from Hugging Face (will cache for offline use)")
+                    os.environ['TRANSFORMERS_CACHE'] = self.settings.embedding_cache_dir
+                    os.environ['HF_HOME'] = self.settings.embedding_cache_dir
+                    self.embedding_model = SentenceTransformer(
+                        self.settings.embedding_model,
+                        device=self.settings.embedding_device,
+                        cache_folder=self.settings.embedding_cache_dir
+                    )
+            else:
+                self.embedding_model = SentenceTransformer(
+                    self.settings.embedding_model,
+                    device=self.settings.embedding_device
+                )
             
             # Initialize ChromaDB
             db_path = Path(self.settings.chroma_db_path)
