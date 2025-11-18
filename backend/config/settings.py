@@ -60,7 +60,7 @@ class Settings(BaseSettings):
     
     # Domain Restriction
     domain_restriction_enabled: bool = True
-    domain_keywords: str = "rental,sale,finance,deposit,warranty,policy,servicing,mot,delivery,accessories,neguinho,ngn,honda,yamaha,bike,motorcycle,scooter,opening,hours,branch,location,contact,phone,email,address"
+    domain_keywords: str = "rental,sale,finance,deposit,warranty,policy,servicing,mot,delivery,accessories,neguinho,ngn,honda,yamaha,bike,motorcycle,scooter,opening,hours,branch,branches,location,locations,where,situated,situate,address,contact,phone,email,how many,catford,tooting,sutton"
     
     # Token & Credit Management
     token_tracking_enabled: bool = True
@@ -78,12 +78,18 @@ class Settings(BaseSettings):
     log_rotation: str = "10 MB"
     log_retention: str = "30 days"
     
-    # CORS
+    # CORS - Allow ngrok and common origins
+    # Note: Use "*" to allow all origins (including ngrok domains)
+    # For production, specify exact domains instead
     cors_origins: List[str] = [
         "http://localhost:3000",
         "http://localhost:5173",
         "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173"
+        "http://127.0.0.1:5173",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+        # Allow all origins for widget embedding and ngrok (restrict in production)
+        "*"
     ]
     cors_credentials: bool = True
     

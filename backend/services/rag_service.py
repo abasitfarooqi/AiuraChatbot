@@ -279,7 +279,9 @@ class RAGService:
             "sale": ["buy", "purchase", "selling", "sales", "price", "cost"],
             "finance": ["payment", "emi", "installment", "credit", "loan"],
             "service": ["servicing", "repair", "maintenance", "fix"],
-            "help": ["assist", "support", "information", "details", "tell me", "explain"]
+            "help": ["assist", "support", "information", "details", "tell me", "explain"],
+            "location": ["where", "situated", "situate", "located", "address", "place", "places"],
+            "branch": ["branches", "location", "locations", "store", "stores", "shop", "shops"]
         }
         
         for main_term, syn_list in synonyms.items():

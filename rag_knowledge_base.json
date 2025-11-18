@@ -88,6 +88,24 @@
       "content": "Sutton Branch: 329 High St, Sutton SM1 1LW. Phone: 0208 412 9275. Email: enquiries@neguinhomotors.co.uk. WhatsApp available. Opening hours: Monday-Saturday 09:00-18:00, Sunday closed. Services: sales, rentals, servicing, repairs, MOT, delivery. Parking available."
     },
     {
+      "symbol": "BRANCH_004",
+      "keyword": "branches_location_summary",
+      "tags": ["branch", "branches", "location", "where", "situated", "address", "how_many", "all_branches", "locations"],
+      "mapping": {
+        "category": "branches",
+        "subcategory": "summary",
+        "priority": "high",
+        "domain": "neguinhomotors"
+      },
+      "metadata": {
+        "source": "branches",
+        "last_verified": "2025-01-27",
+        "confidence": "high",
+        "vendor_id": "default"
+      },
+      "content": "Neguinho Motors has 3 branches located in London:\n\n1. CATFORD BRANCH\n   Address: 9-13 Unit 1179 Catford Hill, London SE6 4NU\n   Phone: 0208 314 1498\n   Email: enquiries@neguinhomotors.co.uk\n\n2. TOOTING BRANCH\n   Address: 4A Penwortham Road, London SW16 6RE\n   Phone: 0203 409 5478\n   Email: enquiries@neguinhomotors.co.uk\n\n3. SUTTON BRANCH\n   Address: 329 High St, Sutton SM1 1LW\n   Phone: 0208 412 9275\n   Email: enquiries@neguinhomotors.co.uk\n\nAll branches are open Monday to Saturday, 9:00 AM to 6:00 PM. Closed on Sundays.\n\nAll branches offer: bike sales, rentals, servicing, repairs, MOT testing, and delivery services. WhatsApp is available at all branches. Parking is available at all locations."
+    },
+    {
       "symbol": "RENTAL_001",
       "keyword": "rental_overview",
       "tags": ["rental", "hire", "overview", "contract", "terms", "service"],

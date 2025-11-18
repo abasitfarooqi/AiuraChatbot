@@ -143,17 +143,35 @@
             height: 90vh;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
+        
+        .disclaimer {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            color: #856404;
+            text-align: center;
+            border-radius: 0;
+        }
+        
+        .disclaimer strong {
+            color: #856404;
+        }
     </style>
 </head>
 <body>
     <div class="main-container">
         <div class="chat-list" id="chatList">
             <h3 style="margin-bottom: 1rem;">Chats</h3>
-            <button id="newChatBtn" style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">New Chat</button>
+            <button id="newChatBtn" style="width: 100%; padding: 0.75rem; margin-bottom: 0.5rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">New Chat</button>
+            <button onclick="clearAllData()" style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear All Data</button>
             <div id="chatsContainer"></div>
         </div>
         
         <div class="chat-container">
+            <div class="disclaimer">
+                <strong>⚠️ Disclaimer:</strong> I'm a chatbot and may make mistakes. Information provided might be incorrect. Please always verify important details by contacting us at <strong>0208 314 1498</strong> or <strong>enquiries@neguinhomotors.co.uk</strong>.
+            </div>
             <div class="chat-header">
                 <h2>Neguinho Motors Chatbot</h2>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
@@ -484,6 +502,51 @@
             document.getElementById('messagesContainer').innerHTML = 
                 '<div class="message assistant">Hello! I\'m the Neguinho Motors chatbot. How can I help you today?</div>';
         };
+        
+        async function clearAllData() {
+            if (!confirm('⚠️ WARNING: This will clear ALL data including:\n\n• All localStorage data\n• All chat history\n• All conversation memory\n\nThis cannot be undone! Are you sure?')) {
+                return;
+            }
+            
+            try {
+                // Clear all chats for this user
+                const chatsResponse = await fetch(`${API_BASE}/chat/chats/${userId}`);
+                const chatsData = await chatsResponse.json();
+                
+                if (chatsData.chats && chatsData.chats.length > 0) {
+                    // Delete each chat
+                    for (const chat of chatsData.chats) {
+                        try {
+                            await fetch(`${API_BASE}/chat/clear/${chat.chat_id}`, {
+                                method: 'POST'
+                            });
+                        } catch (e) {
+                            console.error(`Error clearing chat ${chat.chat_id}:`, e);
+                        }
+                    }
+                }
+                
+                // Clear localStorage
+                localStorage.clear();
+                
+                // Reset UI
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('chatbot_userId', userId);
+                currentChatId = null;
+                updateChatIdDisplay();
+                document.getElementById('userId').textContent = userId;
+                document.getElementById('messagesContainer').innerHTML = 
+                    '<div class="message assistant">Hello! I\'m the Neguinho Motors chatbot. How can I help you today?</div>';
+                
+                // Reload chats
+                await loadUserChats();
+                
+                alert('✅ All data cleared successfully!');
+            } catch (error) {
+                console.error('Error clearing all data:', error);
+                alert('Error clearing data: ' + error.message);
+            }
+        }
         
         // Initialize chat ID display
         updateChatIdDisplay();

@@ -35,14 +35,26 @@ app = FastAPI(
     description="Neguinho Motors Chatbot API with RAG + LLM"
 )
 
-# CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=settings.cors_credentials,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# CORS middleware - Allow all origins for widget embedding (including ngrok)
+# In production, restrict to specific domains
+cors_origins = settings.cors_origins
+if "*" in cors_origins:
+    # If "*" is in the list, allow all origins
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=False,  # Cannot use credentials with "*"
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins,
+        allow_credentials=settings.cors_credentials,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 # Include API router
 app.include_router(api_router, prefix=settings.api_prefix)
@@ -59,6 +71,22 @@ if frontend_path.exists():
         if file_path.exists() and file_path.suffix == ".html":
             return FileResponse(str(file_path))
         return {"error": "File not found"}
+    
+    @app.get("/widget")
+    async def serve_widget():
+        """Serve chatbot widget for embedding."""
+        widget_path = frontend_path / "widget.html"
+        if widget_path.exists():
+            return FileResponse(str(widget_path))
+        return {"error": "Widget not found"}
+    
+    @app.get("/standalone-widget")
+    async def serve_standalone_widget():
+        """Serve standalone widget that works from file system."""
+        widget_path = frontend_path / "standalone-widget.html"
+        if widget_path.exists():
+            return FileResponse(str(widget_path))
+        return {"error": "Standalone widget not found"}
     
     @app.get("/admin")
     async def admin_redirect():

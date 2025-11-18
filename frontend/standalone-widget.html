@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neguinho Motors Chatbot Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .chatbot-container {
+            width: 100%;
+            max-width: 450px;
+            height: 700px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .chatbot-header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chatbot-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        
+        .header-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .header-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        
+        .header-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .header-btn.clear {
+            background: rgba(231,76,60,0.8);
+        }
+        
+        .header-btn.clear:hover {
+            background: rgba(231,76,60,1);
+        }
+        
+        .chatbot-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: #f9f9f9;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            background: #3498db;
+            color: white;
+            border-radius: 18px 18px 4px 18px;
+        }
+        
+        .message.assistant {
+            align-self: flex-start;
+            background: white;
+            color: #2c3e50;
+            border: 1px solid #e0e0e0;
+            border-radius: 18px 18px 18px 4px;
+        }
+        
+        .chatbot-input-container {
+            padding: 1rem;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 0.5rem;
+            background: white;
+        }
+        
+        .chatbot-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            font-size: 0.95rem;
+            border-radius: 4px;
+        }
+        
+        .chatbot-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .chatbot-send {
+            padding: 0.75rem 1.5rem;
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .chatbot-send:hover {
+            background: #2980b9;
+        }
+        
+        .chatbot-send:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .suggestions {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: rgba(52, 152, 219, 0.1);
+            border-left: 3px solid #3498db;
+            border-radius: 4px;
+        }
+        
+        .suggestions-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #3498db;
+        }
+        
+        .suggestion-btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: white;
+            border: 1px solid #3498db;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #3498db;
+            border-radius: 4px;
+        }
+        
+        .suggestion-btn:hover {
+            background: #3498db;
+            color: white;
+        }
+        
+        .suggestion-btn:last-child {
+            margin-bottom: 0;
+        }
+        
+        .config-panel {
+            padding: 1rem;
+            background: #ecf0f1;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.85rem;
+        }
+        
+        .config-panel input {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        
+        .config-panel label {
+            display: block;
+            margin-top: 0.5rem;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .status {
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .disclaimer {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            color: #856404;
+            text-align: center;
+            border-radius: 0;
+        }
+        
+        .disclaimer strong {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <div class="disclaimer">
+            <strong>⚠️ Disclaimer:</strong> I'm a chatbot and may make mistakes. Information provided might be incorrect. Please always verify important details by contacting us at <strong>0208 314 1498</strong> or <strong>enquiries@neguinhomotors.co.uk</strong>.
+        </div>
+        <div class="config-panel">
+            <label>API Base URL:</label>
+            <input type="text" id="apiUrlInput" placeholder="http://localhost:8001/api/v1" value="http://localhost:8001/api/v1">
+            <button class="header-btn" onclick="updateApiUrl()" style="margin-top: 0.5rem; width: 100%;">Update API URL</button>
+            <div id="statusIndicator" class="status disconnected">Disconnected</div>
+        </div>
+        
+        <div class="chatbot-header">
+            <h3>Neguinho Motors Chatbot</h3>
+            <div class="header-buttons">
+                <button class="header-btn" onclick="clearChatHistory()">Clear Chat</button>
+                <button class="header-btn clear" onclick="clearAllData()">Reset</button>
+            </div>
+        </div>
+        
+        <div class="chatbot-messages" id="chatbotMessages">
+            <div class="message assistant">
+                Hello! I'm the Neguinho Motors chatbot. I can help you with bike rentals, sales, finance, servicing, and more. How can I assist you today?
+            </div>
+        </div>
+        
+        <div class="chatbot-input-container">
+            <input 
+                type="text" 
+                class="chatbot-input" 
+                id="chatbotInput" 
+                placeholder="Type your message..."
+                onkeypress="if(event.key === 'Enter') sendMessage()"
+            >
+            <button class="chatbot-send" id="chatbotSend" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration - Use same keys as index.html for consistency
+        const API_BASE = window.CHATBOT_API_URL || 'http://localhost:8001/api/v1';
+        
+        // Initialize - Same as index.html
+        let userId = localStorage.getItem('chatbot_userId');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('chatbot_userId', userId);
+        }
+        
+        let currentChatId = localStorage.getItem('chatbot_currentChatId');
+        
+        // Load saved API URL if configurable
+        const savedApiUrl = localStorage.getItem('chatbot_widget_apiUrl');
+        if (savedApiUrl) {
+            document.getElementById('apiUrlInput').value = savedApiUrl;
+        } else {
+            document.getElementById('apiUrlInput').value = API_BASE;
+        }
+        
+        // Load user chats on load (same as index.html)
+        loadUserChats().then(() => {
+            // If we have a saved chatId, load it from server
+            if (currentChatId) {
+                loadChat(currentChatId);
+            }
+        });
+        
+        // Check API connection
+        checkApiConnection();
+        
+        function getApiBaseUrl() {
+            const inputUrl = document.getElementById('apiUrlInput').value.trim();
+            return inputUrl || API_BASE;
+        }
+        
+        function updateApiUrl() {
+            const newUrl = document.getElementById('apiUrlInput').value.trim();
+            if (newUrl) {
+                localStorage.setItem('chatbot_widget_apiUrl', newUrl);
+                checkApiConnection();
+                alert('API URL updated to: ' + newUrl);
+            }
+        }
+        
+        async function checkApiConnection() {
+            const statusDiv = document.getElementById('statusIndicator');
+            try {
+                const apiUrl = getApiBaseUrl();
+                const healthUrl = apiUrl.replace('/api/v1', '') + '/health';
+                const response = await fetch(healthUrl);
+                if (response.ok) {
+                    statusDiv.textContent = 'Connected';
+                    statusDiv.className = 'status connected';
+                } else {
+                    throw new Error('Not connected');
+                }
+            } catch (error) {
+                statusDiv.textContent = 'Disconnected - Check API URL';
+                statusDiv.className = 'status disconnected';
+            }
+        }
+        
+        function generateChatId() {
+            return 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        async function loadUserChats() {
+            // Same as index.html - load chats from server
+            try {
+                const apiUrl = getApiBaseUrl();
+                const response = await fetch(`${apiUrl}/chat/chats/${userId}`);
+                const data = await response.json();
+                // Chats loaded - can be used for future features
+            } catch (error) {
+                console.error('Error loading chats:', error);
+            }
+        }
+        
+        async function loadChat(chatId) {
+            // Same as index.html - load chat history from server
+            currentChatId = chatId;
+            localStorage.setItem('chatbot_currentChatId', chatId);
+            
+            try {
+                const apiUrl = getApiBaseUrl();
+                const response = await fetch(`${apiUrl}/chat/history/${chatId}`);
+                const data = await response.json();
+                
+                const container = document.getElementById('chatbotMessages');
+                container.innerHTML = '';
+                
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(msg => {
+                        addMessage(msg.role, msg.content);
+                    });
+                } else {
+                    addMessage('assistant', 'Hello! I\'m the Neguinho Motors chatbot. How can I help you today?');
+                }
+            } catch (error) {
+                console.error('Error loading chat:', error);
+                addMessage('assistant', 'Hello! I\'m the Neguinho Motors chatbot. How can I help you today?');
+            }
+        }
+        
+        async function sendMessage() {
+            // Same behavior as index.html
+            const input = document.getElementById('chatbotInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Create chat ID if not exists
+            if (!currentChatId) {
+                currentChatId = generateChatId();
+            }
+            
+            // Add user message to UI
+            addMessage('user', message);
+            input.value = '';
+            
+            // Disable input
+            const sendButton = document.getElementById('chatbotSend');
+            sendButton.disabled = true;
+            sendButton.innerHTML = '<div class="loading"></div>';
+            
+            try {
+                const apiUrl = getApiBaseUrl();
+                const requestBody = {
+                    user_id: userId,
+                    message: message
+                };
+                
+                // Only add chat_id if it exists
+                if (currentChatId) {
+                    requestBody.chat_id = currentChatId;
+                }
+                
+                const response = await fetch(`${apiUrl}/chat/message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: `HTTP error! status: ${response.status}` }));
+                    throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Update currentChatId from response and save to localStorage
+                if (data.chat_id) {
+                    currentChatId = data.chat_id;
+                    localStorage.setItem('chatbot_currentChatId', currentChatId);
+                }
+                
+                // Add assistant response
+                addMessage('assistant', data.response);
+                
+                // Add suggestions if available
+                if (data.suggestions && data.suggestions.length > 0) {
+                    addSuggestions(data.suggestions);
+                }
+                
+                // Reload chats (same as index.html)
+                await loadUserChats();
+                
+                // Update connection status
+                checkApiConnection();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('assistant', `Sorry, I encountered an error: ${error.message}. Please check if the API is running and the URL is correct.`);
+            } finally {
+                sendButton.disabled = false;
+                sendButton.textContent = 'Send';
+            }
+        }
+        
+        function addMessage(role, content) {
+            // Same as index.html - no localStorage saving, server handles persistence
+            const container = document.getElementById('chatbotMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            // Preserve line breaks in response
+            const formattedContent = content.replace(/\n/g, '<br>');
+            messageDiv.innerHTML = formattedContent;
+            
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function addSuggestions(suggestions) {
+            const container = document.getElementById('chatbotMessages');
+            
+            // Remove existing suggestions
+            const existingSuggestions = container.querySelector('.suggestions');
+            if (existingSuggestions) {
+                existingSuggestions.remove();
+            }
+            
+            const suggestionsDiv = document.createElement('div');
+            suggestionsDiv.className = 'suggestions';
+            
+            const title = document.createElement('div');
+            title.className = 'suggestions-title';
+            title.textContent = 'You might also ask:';
+            suggestionsDiv.appendChild(title);
+            
+            suggestions.forEach(suggestion => {
+                const btn = document.createElement('button');
+                btn.className = 'suggestion-btn';
+                btn.textContent = suggestion;
+                btn.onclick = () => {
+                    document.getElementById('chatbotInput').value = suggestion;
+                    sendMessage();
+                };
+                suggestionsDiv.appendChild(btn);
+            });
+            
+            container.appendChild(suggestionsDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        async function clearChatHistory() {
+            // Same as index.html clearCurrentChat
+            if (!currentChatId) {
+                alert('No active chat to clear');
+                return;
+            }
+            
+            if (!confirm(`Are you sure you want to clear ALL data for this chat?\n\nThis will delete:\n- All messages\n- Conversation memory\n- Chat history\n\nChat ID: ${currentChatId}`)) {
+                return;
+            }
+            
+            try {
+                const apiUrl = getApiBaseUrl();
+                const response = await fetch(`${apiUrl}/chat/clear/${currentChatId}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert('Chat cleared successfully!');
+                    // Reset to new chat
+                    currentChatId = null;
+                    localStorage.removeItem('chatbot_currentChatId');
+                    const container = document.getElementById('chatbotMessages');
+                    container.innerHTML = '<div class="message assistant">Hello! I\'m the Neguinho Motors chatbot. How can I help you today?</div>';
+                    await loadUserChats();
+                } else {
+                    alert('Error clearing chat');
+                }
+            } catch (error) {
+                console.error('Error clearing chat:', error);
+                alert('Error clearing chat');
+            }
+        }
+        
+        async function clearAllData() {
+            // Same as index.html clearAllData
+            if (!confirm('⚠️ WARNING: This will clear ALL data including:\n\n• All localStorage data\n• All chat history\n• All conversation memory\n\nThis cannot be undone! Are you sure?')) {
+                return;
+            }
+            
+            try {
+                const apiUrl = getApiBaseUrl();
+                // Clear all chats for this user
+                const chatsResponse = await fetch(`${apiUrl}/chat/chats/${userId}`);
+                const chatsData = await chatsResponse.json();
+                
+                if (chatsData.chats && chatsData.chats.length > 0) {
+                    // Delete each chat
+                    for (const chat of chatsData.chats) {
+                        try {
+                            await fetch(`${apiUrl}/chat/clear/${chat.chat_id}`, {
+                                method: 'POST'
+                            });
+                        } catch (e) {
+                            console.error(`Error clearing chat ${chat.chat_id}:`, e);
+                        }
+                    }
+                }
+                
+                // Clear localStorage
+                localStorage.clear();
+                
+                // Reset UI
+                userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('chatbot_userId', userId);
+                currentChatId = null;
+                const container = document.getElementById('chatbotMessages');
+                container.innerHTML = '<div class="message assistant">Hello! I\'m the Neguinho Motors chatbot. How can I help you today?</div>';
+                
+                // Reload chats
+                await loadUserChats();
+                
+                alert('✅ All data cleared successfully!');
+            } catch (error) {
+                console.error('Error clearing all data:', error);
+                alert('Error clearing data: ' + error.message);
+            }
+        }
+        
+        // Enter key support
+        document.getElementById('chatbotInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
+

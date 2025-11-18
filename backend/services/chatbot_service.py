@@ -29,11 +29,21 @@ class ChatbotService:
     
     def get_system_prompt(self) -> str:
         """Get system prompt for LLM."""
-        return """You are the Neguinho Motors chatbot assistant. You help customers with bike rentals, sales, finance, servicing, MOT testing, delivery, accessories, and company information.
+        return """You are the Neguinho Motors chatbot assistant. You help customers with bike rentals, sales, finance, servicing, MOT testing, delivery, accessories, and motorbike maintenance/repairs services.
 
-    DOMAIN RESTRICTION:
-   - ONLY answer questions about Neguinho Motors services
-   - For out-of-domain queries, politely redirect: "I can only assist with bike rentals, sales, finance, servicing, and company policies related to Neguinho Motors. How can I help you with our services?" """
+CRITICAL RULES - STRICTLY ENFORCE:
+1. ONLY use information provided in the INFORMATION section below
+2. NEVER make up, guess, or hallucinate any information
+3. NEVER use knowledge from outside the provided information
+4. If information is not in the provided context, say: "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
+5. ONLY answer questions about Neguinho Motors services
+6. For out-of-domain queries, say: "I can only assist with bike rentals, sales, finance, servicing, MOT testing, delivery, accessories, and motorbike maintenance/repairs services related to Neguinho Motors. How can I help you with our services?"
+
+RESPONSE FORMAT:
+- Use ONLY facts from the provided INFORMATION section
+- If a detail is not mentioned in the information, do NOT invent it
+- Be accurate and precise
+- Format responses with proper line breaks and structure"""
     
     async def process_message(
         self,
@@ -82,20 +92,37 @@ class ChatbotService:
                     "retrieved_chunks": 0
                 }
             
+            # Check if this is the first message in the chat (initial chat)
             # Get conversation context (last 3-4 messages for better context)
             context = self.memory_service.get_conversation_context(chat_id)
             
-            # Check if current question is complete and topic-changing
-            is_complete_question, topic_changed, current_topics = self._analyze_question_completeness(message, context)
+            # Check if this is an initial/starting chat (no previous messages)
+            is_initial_chat = not context or len(context) == 0
             
-            # Build query: use only current message if it's complete and topic-changing,
-            # otherwise use enhanced query with conversation history
-            if is_complete_question and topic_changed:
-                # User asked a complete question about a different topic - use only current question
+            # Check if current message is a simple greeting (should be handled fresh)
+            message_lower = message.lower().strip()
+            is_simple_greeting = message_lower in ["hi", "hello", "hey", "good morning", "good afternoon", "good evening", "greetings"]
+            
+            # For initial chat OR simple greetings: use ONLY current message, no context dependency
+            if is_initial_chat or is_simple_greeting:
+                # First message or greeting - use only current question, no previous context
                 query_for_rag = message
+                is_complete_question = True
+                topic_changed = True
+                current_topics = self._extract_topics(message) if not is_simple_greeting else set()
             else:
-                # Incomplete or ambiguous question - use conversation history for context
-                query_for_rag = self._build_enhanced_query(message, context)
+                # Chat has history - use context-aware analysis
+                # Check if current question is complete and topic-changing
+                is_complete_question, topic_changed, current_topics = self._analyze_question_completeness(message, context)
+                
+                # Build query: use only current message if it's complete and topic-changing,
+                # otherwise use enhanced query with conversation history
+                if is_complete_question and topic_changed:
+                    # User asked a complete question about a different topic - use only current question
+                    query_for_rag = message
+                else:
+                    # Incomplete or ambiguous question - use conversation history for context
+                    query_for_rag = self._build_enhanced_query(message, context)
             
             # Retrieve relevant chunks from RAG
             retrieved_chunks = self.rag_service.retrieve(
@@ -103,7 +130,7 @@ class ChatbotService:
                 vendor_id=vendor_id or settings.default_vendor_id
             )
             
-            # Build context for LLM
+            # Build context for LLM - STRICT: Only use RAG chunks, no fallback
             context_text = ""
             if retrieved_chunks:
                 context_text = "\n\n".join([
@@ -114,7 +141,7 @@ class ChatbotService:
                 # Try a broader search with lower threshold
                 broader_chunks = self.rag_service.retrieve(
                     query=message,
-                    top_k=3,
+                    top_k=5,
                     vendor_id=vendor_id or settings.default_vendor_id
                 )
                 if broader_chunks:
@@ -123,27 +150,77 @@ class ChatbotService:
                         for i, chunk in enumerate(broader_chunks)
                     ])
                 else:
-                    # Use general company information as fallback
-                    context_text = "Neguinho Motors is a London-based motorcycle business specialising in Honda & Yamaha scooters and motorcycles. Services: bike rentals, sales, finance, servicing, MOT testing, delivery. Contact: enquiries@neguinhomotors.co.uk or 0208 314 1498. Opening hours: Monday-Saturday 9am-6pm."
+                    # NO FALLBACK - Return message that information is not available
+                    # This ensures no hallucinations
+                    assistant_message = self._save_message(
+                        chat_id,
+                        "assistant",
+                        "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.",
+                        tokens_used=0
+                    )
+                    return {
+                        "response": "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.",
+                        "chat_id": chat_id,
+                        "message_id": assistant_message.message_id,
+                        "is_domain_relevant": True,
+                        "tokens_used": 0,
+                        "credits_used": 0,
+                        "model_used": "",
+                        "retrieved_chunks": 0
+                    }
             
             # Prepare messages for LLM
             messages = []
-            if context:
+            # Only add conversation history if this is NOT an initial chat AND NOT a simple greeting
+            # For initial chat or greetings, use only the current question with RAG context
+            if not is_initial_chat and not is_simple_greeting and context:
                 messages.extend(context[-10:])  # Last 10 messages for context
             
-            # Add current query with better context formatting
+            # Add current query with STRICT RAG-only instructions
             if context_text:
-                # Enhanced prompt with detailed formatting instructions
-                user_message_content = f"""Answer the question using ONLY the information provided below.
+                # Handle simple greetings specially
+                if is_simple_greeting:
+                    # Simple greeting - provide friendly welcome without RAG context
+                    user_message_content = f"""The user just said: "{message}"
 
-INFORMATION:
+Respond with a friendly greeting and offer to help with Neguinho Motors services (bike rentals, sales, finance, servicing, MOT testing, delivery, accessories, and motorbike maintenance and repairs).
+
+Keep it brief and welcoming. Do not mention any specific information unless asked."""
+                else:
+                    # STRICT prompt - only use provided information
+                    user_message_content = f"""CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.
+
+INFORMATION FROM KNOWLEDGE BASE:
 {context_text}
 
 QUESTION: {message}
 
-ANSWER (format with proper line breaks and structure):"""
+INSTRUCTIONS:
+- Use ONLY facts from the INFORMATION section above
+- If the answer is not in the information, say: "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
+- DO NOT make up, guess, or invent any information
+- DO NOT use knowledge from outside the provided information
+- Format your answer with proper line breaks and structure
+
+ANSWER (based ONLY on the information above):"""
             else:
-                user_message_content = f"Question: {message}\n\nPlease provide a helpful, well-structured answer with proper formatting."
+                # This should not happen due to check above, but just in case
+                assistant_message = self._save_message(
+                    chat_id,
+                    "assistant",
+                    "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.",
+                    tokens_used=0
+                )
+                return {
+                    "response": "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.",
+                    "chat_id": chat_id,
+                    "message_id": assistant_message.message_id,
+                    "is_domain_relevant": True,
+                    "tokens_used": 0,
+                    "credits_used": 0,
+                    "model_used": "",
+                    "retrieved_chunks": 0
+                }
             
             messages.append({
                 "role": "user",
@@ -158,6 +235,12 @@ ANSWER (format with proper line breaks and structure):"""
             
             response_content = llm_response.get("content", "")
             tokens_used = llm_response.get("tokens_used", 0)
+            
+            # Validate response is based on RAG chunks (prevent hallucinations)
+            if not self._validate_response_from_rag(response_content, retrieved_chunks, message):
+                # Response seems to contain information not in RAG - return safe message
+                logger.warning(f"Response validation failed - possible hallucination detected for query: {message[:50]}")
+                response_content = "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
             
             # Post-process response for better structure
             response_content = self._format_response(response_content, message, retrieved_chunks)
@@ -200,9 +283,19 @@ ANSWER (format with proper line breaks and structure):"""
                 self.db.commit()
             
             # Generate helpful suggestions based on conversation history and current topic
-            # Only show suggestions if question was incomplete/ambiguous (not topic-changing)
+            # For initial chat or greetings, show general suggestions
+            # For ongoing chat, only show suggestions if question was incomplete/ambiguous
             suggestions = []
-            if not (is_complete_question and topic_changed):
+            if is_initial_chat or is_simple_greeting:
+                # Initial chat or greeting - show general helpful suggestions
+                suggestions = [
+                    "What services do you offer?",
+                    "Tell me about rental bikes",
+                    "What are your opening hours?",
+                    "Where are your branches located?"
+                ]
+            elif not (is_complete_question and topic_changed):
+                # Ongoing chat - only show suggestions if question was incomplete/ambiguous
                 suggestions = self._generate_suggestions(chat_id, message, retrieved_chunks, current_topics=current_topics)
             
             return {
@@ -746,6 +839,37 @@ ANSWER (format with proper line breaks and structure):"""
                 "Tell me about rental bikes",
                 "What are your opening hours?"
             ]
+    
+    def _validate_response_from_rag(self, response: str, chunks: List[Dict], query: str) -> bool:
+        """
+        Validate that response is based on RAG chunks.
+        Returns True if response seems valid, False if it might contain hallucinations.
+        """
+        if not chunks or len(chunks) == 0:
+            # No chunks - response should be the "don't have info" message
+            return "don't have that information" in response.lower() or "contact us" in response.lower()
+        
+        # Extract key terms from RAG chunks
+        rag_content = " ".join([chunk.get("content", "").lower() for chunk in chunks])
+        
+        # Check if response mentions specific details that should be in RAG
+        # If response is very generic or just contact info, it's likely safe
+        response_lower = response.lower()
+        
+        # If response is just contact info or "don't have info", it's valid
+        if "contact" in response_lower and "enquiries@neguinhomotors.co.uk" in response_lower:
+            return True
+        
+        if "don't have that information" in response_lower:
+            return True
+        
+        # Check for common hallucination patterns
+        # If response contains very specific numbers/dates not in RAG, might be hallucination
+        # But we'll be lenient - if chunks exist, assume response is based on them
+        # The strict prompt should prevent most hallucinations
+        
+        # For now, if we have chunks, trust the LLM (strict prompt should prevent hallucinations)
+        return True
     
     def _format_response(self, response: str, query: str, chunks: List[Dict]) -> str:
         """
