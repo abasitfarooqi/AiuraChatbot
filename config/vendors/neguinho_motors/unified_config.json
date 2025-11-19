@@ -172,7 +172,23 @@
   "domain_restriction": {
     "enabled": true,
     "auto_generate_keywords": true,
-    "keywords": []
+    "keywords": [
+      "honda vision 125",
+      "honda forza 125",
+      "honda pcx 125",
+      "honda sh 125",
+      "yamaha nmax 125",
+      "yamaha xmax 125",
+      "honda",
+      "yamaha",
+      "vision",
+      "forza",
+      "pcx",
+      "sh",
+      "nmax",
+      "xmax",
+      "125"
+    ]
   },
   "credits": {
     "token_tracking_enabled": true,
@@ -237,7 +253,13 @@
           "hire",
           "leasing",
           "weekly",
-          "monthly rental"
+          "monthly rental",
+          "honda vision 125",
+          "honda forza 125",
+          "honda pcx 125",
+          "honda sh 125",
+          "yamaha nmax 125",
+          "yamaha xmax 125"
         ],
         "sale": [
           "sale",
@@ -245,7 +267,13 @@
           "purchase",
           "price",
           "cost",
-          "for sale"
+          "for sale",
+          "honda vision 125",
+          "honda forza 125",
+          "honda pcx 125",
+          "honda sh 125",
+          "yamaha nmax 125",
+          "yamaha xmax 125"
         ],
         "finance": [
           "finance",
@@ -253,7 +281,13 @@
           "payment plan",
           "installment",
           "credit",
-          "loan"
+          "loan",
+          "honda vision 125",
+          "honda forza 125",
+          "honda pcx 125",
+          "honda sh 125",
+          "yamaha nmax 125",
+          "yamaha xmax 125"
         ],
         "servicing": [
           "service",
@@ -323,7 +357,16 @@
             "opening",
             "hours",
             "branch",
-            "location"
+            "location",
+            "honda",
+            "yamaha",
+            "vision",
+            "forza",
+            "pcx",
+            "sh",
+            "nmax",
+            "xmax",
+            "125"
           ]
         },
         {
@@ -333,7 +376,16 @@
             "long",
             "many",
             "do",
-            "can"
+            "can",
+            "honda",
+            "yamaha",
+            "vision",
+            "forza",
+            "pcx",
+            "sh",
+            "nmax",
+            "xmax",
+            "125"
           ]
         },
         {
@@ -387,7 +439,16 @@
             "bike",
             "cost",
             "period",
-            "term"
+            "term",
+            "honda",
+            "yamaha",
+            "vision",
+            "forza",
+            "pcx",
+            "sh",
+            "nmax",
+            "xmax",
+            "125"
           ]
         },
         {
@@ -397,7 +458,16 @@
             "rate",
             "term",
             "deposit",
-            "available"
+            "available",
+            "honda",
+            "yamaha",
+            "vision",
+            "forza",
+            "pcx",
+            "sh",
+            "nmax",
+            "xmax",
+            "125"
           ]
         },
         {
@@ -406,7 +476,16 @@
             "bike",
             "price",
             "available",
-            "model"
+            "model",
+            "honda",
+            "yamaha",
+            "vision",
+            "forza",
+            "pcx",
+            "sh",
+            "nmax",
+            "xmax",
+            "125"
           ]
         }
       ],

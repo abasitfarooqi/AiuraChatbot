@@ -986,6 +986,198 @@
         "vendor_id": "neguinho_motors"
       },
       "content": "Servicing & Repairs:\n\nBASIC SERVICE (every 6,000 miles):\n • Engine oil & filter change\n • Brake inspection\n • Tyre check\n • Chain/belt inspection\n • Basic electrical checks\n • General safety inspection\n\nFULL/MAJOR SERVICE (every 12,000 miles):\n • All basic service items\n • Spark plugs\n • Transmission maintenance\n • Advanced brake servicing\n • Suspension & steering inspection\n • Frame inspection\n • Exhaust inspection\n\nREPAIRS:\n • Fault diagnosis\n • Chain & sprocket replacement\n • Brake pads & discs\n • Tyre replacement\n • Accessory fitting\n • General mechanical repairs\n • Electrical repairs\n\nADDITIONAL:\n • Electric bikes serviced\n • Service book stamping\n • Digital records maintained\n • Collection & delivery available (free with repair service)\n • Same-day service available\n • Walk-in available\n\nContact for quotes: 0208 314 1498 or enquiries@neguinhomotors.co.uk"
+    },
+    {
+      "symbol": "MODEL_HONDA_VISION_125",
+      "keyword": "honda_vision_125_pricing",
+      "tags": [
+        "honda",
+        "vision",
+        "125",
+        "honda vision 125",
+        "rental",
+        "finance",
+        "sale",
+        "price",
+        "new",
+        "used",
+        "purchase",
+        "buy"
+      ],
+      "mapping": {
+        "category": "models",
+        "subcategory": "honda_vision_125",
+        "priority": "high",
+        "domain": "neguinhomotors"
+      },
+      "metadata": {
+        "source": "models.pricing",
+        "model": "Honda Vision 125",
+        "last_verified": "2025-01-27",
+        "confidence": "high",
+        "vendor_id": "neguinho_motors"
+      },
+      "content": "Honda Vision 125 Pricing:\n\nRENTAL: £70 per week. Minimum rental period: 6 weeks. Maximum term: Up to 1 year. Monthly payment in advance via bank transfer. Security deposit required (refundable within 14 days). Includes tax, MOT, and weekly maintenance. Comprehensive insurance required (customer provides).\n\nFINANCE: Available for purchase. Interest-free finance available. Maximum term: 12 months. Monthly instalments via bank transfer. Deposit required (amount varies). Total price = Vehicle Price + Accessories. Contact for exact finance pricing: 0208 314 1498 or enquiries@neguinhomotors.co.uk.\n\nSALE: New and used Honda Vision 125 available. Used bike prices vary based on condition, year, and mileage. Inventory changes frequently. Test rides available (licence required). Part exchange accepted. Delivery available (insured). Contact for current pricing and availability: 0208 314 1498 or enquiries@neguinhomotors.co.uk."
+    },
+    {
+      "symbol": "MODEL_HONDA_FORZA_125",
+      "keyword": "honda_forza_125_pricing",
+      "tags": [
+        "honda",
+        "forza",
+        "125",
+        "honda forza 125",
+        "rental",
+        "finance",
+        "sale",
+        "price",
+        "new",
+        "used",
+        "purchase",
+        "buy"
+      ],
+      "mapping": {
+        "category": "models",
+        "subcategory": "honda_forza_125",
+        "priority": "high",
+        "domain": "neguinhomotors"
+      },
+      "metadata": {
+        "source": "models.pricing",
+        "model": "Honda Forza 125",
+        "last_verified": "2025-01-27",
+        "confidence": "high",
+        "vendor_id": "neguinho_motors"
+      },
+      "content": "Honda Forza 125 Pricing:\n\nRENTAL: £75 per week. Minimum rental period: 6 weeks. Maximum term: Up to 1 year. Monthly payment in advance via bank transfer. Security deposit required (refundable within 14 days). Includes tax, MOT, and weekly maintenance. Comprehensive insurance required (customer provides).\n\nFINANCE: Available for purchase. Interest-free finance available. Maximum term: 12 months. Monthly instalments via bank transfer. Deposit required (amount varies). Total price = Vehicle Price + Accessories. Contact for exact finance pricing: 0208 314 1498 or enquiries@neguinhomotors.co.uk.\n\nSALE: New and used Honda Forza 125 available. Used bike example price: £3,699.99 (prices vary based on condition, year, and mileage). New bikes available - contact for current pricing. Inventory changes frequently. Test rides available (licence required). Part exchange accepted. Delivery available (insured). Contact for current pricing and availability: 0208 314 1498 or enquiries@neguinhomotors.co.uk."
+    },
+    {
+      "symbol": "MODEL_HONDA_PCX_125",
+      "keyword": "honda_pcx_125_pricing",
+      "tags": [
+        "honda",
+        "pcx",
+        "125",
+        "honda pcx 125",
+        "rental",
+        "finance",
+        "sale",
+        "price",
+        "new",
+        "used",
+        "purchase",
+        "buy"
+      ],
+      "mapping": {
+        "category": "models",
+        "subcategory": "honda_pcx_125",
+        "priority": "high",
+        "domain": "neguinhomotors"
+      },
+      "metadata": {
+        "source": "models.pricing",
+        "model": "Honda PCX 125",
+        "last_verified": "2025-01-27",
+        "confidence": "high",
+        "vendor_id": "neguinho_motors"
+      },
+      "content": "Honda PCX 125 Pricing:\n\nRENTAL: £75 per week. Minimum rental period: 6 weeks. Maximum term: Up to 1 year. Monthly payment in advance via bank transfer. Security deposit required (refundable within 14 days). Includes tax, MOT, and weekly maintenance. Comprehensive insurance required (customer provides).\n\nFINANCE: Available for purchase. Interest-free finance available. Maximum term: 12 months. Monthly instalments via bank transfer. Deposit required (amount varies). Total price = Vehicle Price + Accessories. Contact for exact finance pricing: 0208 314 1498 or enquiries@neguinhomotors.co.uk.\n\nSALE: New and used Honda PCX 125 available. New bikes 2025 available - contact for current pricing. Used bike example price: £2,199.99 (prices vary based on condition, year, and mileage). Inventory changes frequently. Test rides available (licence required). Part exchange accepted. Delivery available (insured). Contact for current pricing and availability: 0208 314 1498 or enquiries@neguinhomotors.co.uk."
+    },
+    {
+      "symbol": "MODEL_HONDA_SH_125",
+      "keyword": "honda_sh_125_pricing",
+      "tags": [
+        "honda",
+        "sh",
+        "125",
+        "honda sh 125",
+        "rental",
+        "finance",
+        "sale",
+        "price",
+        "new",
+        "used",
+        "purchase",
+        "buy"
+      ],
+      "mapping": {
+        "category": "models",
+        "subcategory": "honda_sh_125",
+        "priority": "high",
+        "domain": "neguinhomotors"
+      },
+      "metadata": {
+        "source": "models.pricing",
+        "model": "Honda SH 125",
+        "last_verified": "2025-01-27",
+        "confidence": "high",
+        "vendor_id": "neguinho_motors"
+      },
+      "content": "Honda SH 125 Pricing:\n\nRENTAL: £75 per week. Minimum rental period: 6 weeks. Maximum term: Up to 1 year. Monthly payment in advance via bank transfer. Security deposit required (refundable within 14 days). Includes tax, MOT, and weekly maintenance. Comprehensive insurance required (customer provides).\n\nFINANCE: Available for purchase. Interest-free finance available. Maximum term: 12 months. Monthly instalments via bank transfer. Deposit required (amount varies). Total price = Vehicle Price + Accessories. Contact for exact finance pricing: 0208 314 1498 or enquiries@neguinhomotors.co.uk.\n\nSALE: New and used Honda SH 125 available. Used bike prices vary based on condition, year, and mileage. Inventory changes frequently. Test rides available (licence required). Part exchange accepted. Delivery available (insured). Contact for current pricing and availability: 0208 314 1498 or enquiries@neguinhomotors.co.uk."
+    },
+    {
+      "symbol": "MODEL_YAMAHA_NMAX_125",
+      "keyword": "yamaha_nmax_125_pricing",
+      "tags": [
+        "yamaha",
+        "nmax",
+        "125",
+        "yamaha nmax 125",
+        "rental",
+        "finance",
+        "sale",
+        "price",
+        "new",
+        "used",
+        "purchase",
+        "buy"
+      ],
+      "mapping": {
+        "category": "models",
+        "subcategory": "yamaha_nmax_125",
+        "priority": "high",
+        "domain": "neguinhomotors"
+      },
+      "metadata": {
+        "source": "models.pricing",
+        "model": "Yamaha NMAX 125",
+        "last_verified": "2025-01-27",
+        "confidence": "high",
+        "vendor_id": "neguinho_motors"
+      },
+      "content": "Yamaha NMAX 125 Pricing:\n\nRENTAL: £75 per week. Minimum rental period: 6 weeks. Maximum term: Up to 1 year. Monthly payment in advance via bank transfer. Security deposit required (refundable within 14 days). Includes tax, MOT, and weekly maintenance. Comprehensive insurance required (customer provides).\n\nFINANCE: Available for purchase. Interest-free finance available. Maximum term: 12 months. Monthly instalments via bank transfer. Deposit required (amount varies). Total price = Vehicle Price + Accessories. Contact for exact finance pricing: 0208 314 1498 or enquiries@neguinhomotors.co.uk.\n\nSALE: New and used Yamaha NMAX 125 available. New bikes 2025 available - contact for current pricing. Used bike example price: £1,799 (prices vary based on condition, year, and mileage). Inventory changes frequently. Test rides available (licence required). Part exchange accepted. Delivery available (insured). Contact for current pricing and availability: 0208 314 1498 or enquiries@neguinhomotors.co.uk."
+    },
+    {
+      "symbol": "MODEL_YAMAHA_XMAX_125",
+      "keyword": "yamaha_xmax_125_pricing",
+      "tags": [
+        "yamaha",
+        "xmax",
+        "125",
+        "yamaha xmax 125",
+        "rental",
+        "finance",
+        "sale",
+        "price",
+        "new",
+        "used",
+        "purchase",
+        "buy"
+      ],
+      "mapping": {
+        "category": "models",
+        "subcategory": "yamaha_xmax_125",
+        "priority": "high",
+        "domain": "neguinhomotors"
+      },
+      "metadata": {
+        "source": "models.pricing",
+        "model": "Yamaha XMAX 125",
+        "last_verified": "2025-01-27",
+        "confidence": "high",
+        "vendor_id": "neguinho_motors"
+      },
+      "content": "Yamaha XMAX 125 Pricing:\n\nRENTAL: £100 per week. Minimum rental period: 6 weeks. Maximum term: Up to 1 year. Monthly payment in advance via bank transfer. Security deposit required (refundable within 14 days). Includes tax, MOT, and weekly maintenance. Comprehensive insurance required (customer provides).\n\nFINANCE: Available for purchase. Interest-free finance available. Maximum term: 12 months. Monthly instalments via bank transfer. Deposit required (amount varies). Total price = Vehicle Price + Accessories. Contact for exact finance pricing: 0208 314 1498 or enquiries@neguinhomotors.co.uk.\n\nSALE: New and used Yamaha XMAX 125 available. Used bike prices vary based on condition, year, and mileage. Inventory changes frequently. Test rides available (licence required). Part exchange accepted. Delivery available (insured). Contact for current pricing and availability: 0208 314 1498 or enquiries@neguinhomotors.co.uk."
     }
   ]
 }
