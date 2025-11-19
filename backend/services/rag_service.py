@@ -18,9 +18,10 @@ settings = get_settings()
 class RAGService:
     """RAG service for knowledge base retrieval."""
     
-    def __init__(self):
+    def __init__(self, vendor_id: Optional[str] = None):
         """Initialize RAG service with vector database and embedding model."""
         self.settings = settings
+        self.vendor_id = vendor_id or settings.default_vendor_id
         self.embedding_model = None
         self.client = None
         self.collection = None
@@ -66,31 +67,51 @@ class RAGService:
                 settings=ChromaSettings(anonymized_telemetry=False)
             )
             
-            # Get or create collection
-            # Get company name for metadata
+            # Get or create collection - use vendor-specific collection
+            collection_name = self.settings.chroma_collection_name
+            collection_desc = "Knowledge Base"
+            
             try:
-                from backend.utils.unified_config_manager import get_unified_config_manager
-                config_manager = get_unified_config_manager()
+                from backend.utils.vendor_manager import get_vendor_manager
+                vendor_manager = get_vendor_manager()
+                # Get vendor-specific collection name
+                collection_name = vendor_manager.get_vendor_chroma_collection(self.vendor_id)
+                # Get company name for metadata
+                config_manager = vendor_manager.get_vendor_config_manager(self.vendor_id)
                 unified_config = config_manager.load_config()
                 company_name = unified_config.get("business", {}).get("company_name", "Company")
                 collection_desc = f"{company_name} Knowledge Base"
-            except:
-                collection_desc = "Knowledge Base"
+            except Exception as e:
+                logger.warning(f"Error loading vendor config for collection: {e}, using default")
             
             self.collection = self.client.get_or_create_collection(
-                name=self.settings.chroma_collection_name,
-                metadata={"description": collection_desc}
+                name=collection_name,
+                metadata={"description": collection_desc, "vendor_id": self.vendor_id}
             )
             
-            logger.info("RAG service initialized successfully")
+            # Auto-load knowledge base if collection is empty
+            if self.collection.count() == 0:
+                logger.info(f"Collection is empty, auto-loading knowledge base for vendor {self.vendor_id}")
+                try:
+                    self.load_knowledge_base()
+                except Exception as e:
+                    logger.warning(f"Failed to auto-load knowledge base for vendor {self.vendor_id}: {e}")
+            
+            logger.info(f"RAG service initialized successfully for vendor {self.vendor_id} (collection: {collection_name}, chunks: {self.collection.count()})")
             
         except Exception as e:
             logger.error(f"Error initializing RAG service: {e}")
             raise
     
-    def load_knowledge_base(self, kb_path: str = "rag_knowledge_base.json"):
+    def load_knowledge_base(self, kb_path: Optional[str] = None):
         """Load knowledge base from JSON and create embeddings."""
         try:
+            # If no path provided, use vendor-specific path
+            if kb_path is None:
+                from backend.utils.vendor_manager import get_vendor_manager
+                vendor_manager = get_vendor_manager()
+                kb_path = str(vendor_manager.get_vendor_rag_path(self.vendor_id))
+            
             kb_file = Path(kb_path)
             if not kb_file.exists():
                 logger.warning(f"Knowledge base file not found: {kb_path}")
@@ -114,12 +135,15 @@ class RAGService:
                     return True
                 else:
                     logger.info(f"Collection has {existing_count} chunks but expected {expected_count}. Reloading...")
-                    # Clear collection
-                    self.client.delete_collection(name=self.settings.chroma_collection_name)
+                    # Clear collection - use vendor-specific collection name
+                    from backend.utils.vendor_manager import get_vendor_manager
+                    vendor_manager = get_vendor_manager()
+                    collection_name = vendor_manager.get_vendor_chroma_collection(self.vendor_id)
+                    self.client.delete_collection(name=collection_name)
+                    
                     # Get company name for metadata
                     try:
-                        from backend.utils.unified_config_manager import get_unified_config_manager
-                        config_manager = get_unified_config_manager()
+                        config_manager = vendor_manager.get_vendor_config_manager(self.vendor_id)
                         unified_config = config_manager.load_config()
                         company_name = unified_config.get("business", {}).get("company_name", "Company")
                         collection_desc = f"{company_name} Knowledge Base"
@@ -127,8 +151,8 @@ class RAGService:
                         collection_desc = "Knowledge Base"
                     
                     self.collection = self.client.get_or_create_collection(
-                        name=self.settings.chroma_collection_name,
-                        metadata={"description": collection_desc}
+                        name=collection_name,
+                        metadata={"description": collection_desc, "vendor_id": self.vendor_id}
                     )
             
             # Process chunks
@@ -223,13 +247,12 @@ class RAGService:
             ).tolist()
             
             # Build where clause for filtering
+            # Note: We don't filter by vendor_id since each vendor has its own collection
+            # The collection itself is vendor-specific, so no need for vendor_id filter
             where_clause = {}
             if filters:
                 where_clause.update(filters)
-            if vendor_id:
-                where_clause["vendor_id"] = vendor_id
-            elif self.settings.multi_vendor_enabled:
-                where_clause["vendor_id"] = self.settings.default_vendor_id
+            # Removed vendor_id filter - collection is already vendor-specific
             
             # Enhanced filtering: if query mentions "rental", prioritize rental chunks
             query_lower = query.lower()
@@ -246,6 +269,12 @@ class RAGService:
             # Format results
             retrieved_chunks = []
             if results["ids"] and len(results["ids"][0]) > 0:
+                # Apply similarity threshold (more lenient)
+                # Lower threshold for better retrieval
+                # Note: ChromaDB uses cosine distance, similarity = 1 - distance
+                # Distance can be > 1, making similarity negative
+                threshold = max(-0.5, self.settings.rag_similarity_threshold - 0.3)  # More lenient for negative similarities
+                
                 for i in range(len(results["ids"][0])):
                     chunk = {
                         "id": results["ids"][0][i],
@@ -255,21 +284,23 @@ class RAGService:
                         "similarity": 1 - results["distances"][0][i] if results.get("distances") else None
                     }
                     
-                    # Apply similarity threshold (more lenient)
-                    # Lower threshold for better retrieval
-                    threshold = max(0.1, self.settings.rag_similarity_threshold - 0.1)
-                    if chunk["similarity"] and chunk["similarity"] >= threshold:
+                    # Accept if similarity meets threshold OR if it's the best match (top result)
+                    if chunk["similarity"] is not None:
+                        if chunk["similarity"] >= threshold or i == 0:  # Always include top result
+                            retrieved_chunks.append(chunk)
+                    elif i == 0:  # Include top result even if similarity is None
                         retrieved_chunks.append(chunk)
-                    # If no chunks meet threshold but we have results, include top result anyway
-                    if not retrieved_chunks and results["ids"] and len(results["ids"][0]) > 0:
-                        chunk = {
-                            "id": results["ids"][0][0],
-                            "content": results["documents"][0][0],
-                            "metadata": results["metadatas"][0][0],
-                            "distance": results["distances"][0][0] if results.get("distances") else None,
-                            "similarity": 1 - results["distances"][0][0] if results.get("distances") else None
-                        }
-                        retrieved_chunks.append(chunk)
+                
+                # If still no chunks, force include top result
+                if not retrieved_chunks and len(results["ids"][0]) > 0:
+                    chunk = {
+                        "id": results["ids"][0][0],
+                        "content": results["documents"][0][0],
+                        "metadata": results["metadatas"][0][0],
+                        "distance": results["distances"][0][0] if results.get("distances") else None,
+                        "similarity": 1 - results["distances"][0][0] if results.get("distances") else None
+                    }
+                    retrieved_chunks.append(chunk)
             
             logger.debug(f"Retrieved {len(retrieved_chunks)} chunks for query: {query[:50]}...")
             return retrieved_chunks
@@ -287,7 +318,8 @@ class RAGService:
         
         # Very short queries or greetings should be allowed to pass through
         # They'll be handled by the LLM with context
-        if len(query_lower) <= 3 or query_lower in ["hi", "hello", "hey", "help"]:
+        greeting_words = ["hi", "hello", "hey", "help", "how are you", "how are", "what's up", "whats up", "good morning", "good afternoon", "good evening"]
+        if len(query_lower) <= 3 or any(greeting in query_lower for greeting in greeting_words):
             return True
         
         # Check if query is clearly out of domain

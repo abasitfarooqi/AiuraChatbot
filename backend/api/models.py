@@ -36,18 +36,23 @@ async def get_available_models(
     provider: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """Get available models."""
+    """Get available models from all providers or specific provider."""
     try:
         llm_service = LLMService(db=db)
-        provider = provider or llm_service.current_provider
         
-        if provider == "ollama":
-            model_manager = ModelManager(db)
-            models = model_manager.list_ollama_models()
+        # Get models from all providers if no provider specified
+        if provider:
+            # Get models for specific provider
+            if provider == "ollama":
+                model_manager = ModelManager(db)
+                models = model_manager.list_ollama_models()
+            else:
+                models = llm_service.get_available_models(provider=provider)
         else:
+            # Get models from all providers
             models = llm_service.get_available_models()
         
-        return {"provider": provider, "models": models}
+        return {"provider": provider or "all", "models": models}
         
     except Exception as e:
         logger.error(f"Error getting available models: {e}")

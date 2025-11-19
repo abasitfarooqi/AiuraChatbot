@@ -19,25 +19,27 @@ settings = get_settings()
 class ChatbotService:
     """Main chatbot service orchestrating all components."""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: Session, vendor_id: Optional[str] = None):
         """Initialize chatbot service."""
         self.db = db
-        self.rag_service = RAGService()
+        self.vendor_id = vendor_id or settings.default_vendor_id
+        self.rag_service = RAGService(vendor_id=self.vendor_id)
         self.llm_service = LLMService(db=db)  # Pass db to load active model
         self.memory_service = MemoryService(db)
         self.settings = settings
         self._load_chatbot_config()
     
     def get_system_prompt(self) -> str:
-        """Get system prompt for LLM from unified config."""
+        """Get system prompt for LLM from vendor-specific unified config."""
         try:
-            from backend.utils.unified_config_manager import get_unified_config_manager
-            config_manager = get_unified_config_manager()
+            from backend.utils.vendor_manager import get_vendor_manager
+            vendor_manager = get_vendor_manager()
+            config_manager = vendor_manager.get_vendor_config_manager(self.vendor_id)
             unified_config = config_manager.load_config()
             prompts = unified_config.get("prompts", {})
             return prompts.get("main_system_prompt", self._get_default_system_prompt())
         except Exception as e:
-            logger.warning(f"Error loading system prompt from config: {e}, using default")
+            logger.warning(f"Error loading system prompt from vendor config: {e}, using default")
             return self._get_default_system_prompt()
     
     def _get_default_system_prompt(self) -> str:
@@ -80,9 +82,12 @@ RESPONSE FORMAT:
             Dict with response and metadata
         """
         try:
+            # Use provided vendor_id or service's default
+            effective_vendor_id = vendor_id or self.vendor_id
+            
             # Get or create user and chat first (needed for response)
-            user = self._get_or_create_user(user_id, vendor_id or settings.default_vendor_id)
-            chat = self._get_or_create_chat(chat_id, user_id, vendor_id or settings.default_vendor_id)
+            user = self._get_or_create_user(user_id, effective_vendor_id)
+            chat = self._get_or_create_chat(chat_id, user_id, effective_vendor_id)
             
             # Save user message
             user_message = self._save_message(chat_id, "user", message)
@@ -167,48 +172,52 @@ RESPONSE FORMAT:
                     for i, chunk in enumerate(retrieved_chunks)
                 ])
             else:
-                # Try a broader search with lower threshold
-                broader_chunks = self.rag_service.retrieve(
-                    query=message,
-                    top_k=5,
-                    vendor_id=vendor_id or settings.default_vendor_id
-                )
-                if broader_chunks:
-                    context_text = "\n\n".join([
-                        f"[{i+1}] {chunk['content']}"
-                        for i, chunk in enumerate(broader_chunks)
-                    ])
+                # For greetings or simple queries, allow without RAG chunks
+                if is_simple_greeting:
+                    context_text = ""  # Greetings don't need RAG context
                 else:
-                    # NO FALLBACK - Return message that information is not available
-                    # This ensures no hallucinations
-                    try:
-                        from backend.utils.unified_config_manager import get_unified_config_manager
-                        config_manager = get_unified_config_manager()
-                        unified_config = config_manager.load_config()
-                        prompts = unified_config.get("prompts", {})
-                        fallback_msg = prompts.get("fallback_message",
-                            f"I don't have that information in my knowledge base. Please contact us at {self.contact_info.get('primary_email', '')} or {self.contact_info.get('primary_phone', '')} for more details.")
-                    except:
-                        email = self.contact_info.get("primary_email", "")
-                        phone = self.contact_info.get("primary_phone", "")
-                        fallback_msg = f"I don't have that information in my knowledge base. Please contact us at {email} or {phone} for more details."
-                    
-                    assistant_message = self._save_message(
-                        chat_id,
-                        "assistant",
-                        fallback_msg,
-                        tokens_used=0
+                    # Try a broader search with lower threshold
+                    broader_chunks = self.rag_service.retrieve(
+                        query=message,
+                        top_k=5,
+                        vendor_id=vendor_id or settings.default_vendor_id
                     )
-                    return {
-                        "response": fallback_msg,
-                        "chat_id": chat_id,
-                        "message_id": assistant_message.message_id,
-                        "is_domain_relevant": True,
-                        "tokens_used": 0,
-                        "credits_used": 0,
-                        "model_used": "",
-                        "retrieved_chunks": 0
-                    }
+                    if broader_chunks:
+                        context_text = "\n\n".join([
+                            f"[{i+1}] {chunk['content']}"
+                            for i, chunk in enumerate(broader_chunks)
+                        ])
+                    else:
+                        # NO FALLBACK - Return message that information is not available
+                        # This ensures no hallucinations
+                        try:
+                            from backend.utils.unified_config_manager import get_unified_config_manager
+                            config_manager = get_unified_config_manager()
+                            unified_config = config_manager.load_config()
+                            prompts = unified_config.get("prompts", {})
+                            fallback_msg = prompts.get("fallback_message",
+                                f"I don't have that information in my knowledge base. Please contact us at {self.contact_info.get('primary_email', '')} or {self.contact_info.get('primary_phone', '')} for more details.")
+                        except:
+                            email = self.contact_info.get("primary_email", "")
+                            phone = self.contact_info.get("primary_phone", "")
+                            fallback_msg = f"I don't have that information in my knowledge base. Please contact us at {email} or {phone} for more details."
+                        
+                        assistant_message = self._save_message(
+                            chat_id,
+                            "assistant",
+                            fallback_msg,
+                            tokens_used=0
+                        )
+                        return {
+                            "response": fallback_msg,
+                            "chat_id": chat_id,
+                            "message_id": assistant_message.message_id,
+                            "is_domain_relevant": True,
+                            "tokens_used": 0,
+                            "credits_used": 0,
+                            "model_used": "",
+                            "retrieved_chunks": 0
+                        }
             
             # Prepare messages for LLM
             messages = []
@@ -219,19 +228,23 @@ RESPONSE FORMAT:
                 messages.extend(context[-max_context:])  # Last N messages for context
             
             # Add current query with STRICT RAG-only instructions
-            if context_text:
+            # For greetings, always process even without context_text
+            if context_text or is_simple_greeting:
                 # Handle simple greetings specially
                 if is_simple_greeting:
-                    # Simple greeting - use prompt from unified config
+                    # Simple greeting - use vendor-specific config
                     try:
-                        from backend.utils.unified_config_manager import get_unified_config_manager
-                        config_manager = get_unified_config_manager()
+                        from backend.utils.vendor_manager import get_vendor_manager
+                        vendor_manager = get_vendor_manager()
+                        config_manager = vendor_manager.get_vendor_config_manager(self.vendor_id)
                         unified_config = config_manager.load_config()
                         prompts = unified_config.get("prompts", {})
+                        company_name = unified_config.get("business", {}).get("company_name", "our company")
                         greeting_template = prompts.get("greeting_prompt", 
-                            f"""The user just said: "{{message}}"\n\nRespond with a friendly greeting and offer to help with {self.business_info.get('company_name', 'our company')} services.\n\nKeep it brief and welcoming. Do not mention any specific information unless asked.""")
+                            f"""The user just said: "{{message}}"\n\nRespond with a friendly greeting and offer to help with {company_name} services.\n\nKeep it brief and welcoming. Do not mention any specific information unless asked.""")
                         user_message_content = greeting_template.format(message=message)
-                    except:
+                    except Exception as e:
+                        logger.warning(f"Error loading greeting prompt from vendor config: {e}")
                         company_name = self.business_info.get("company_name", "our company")
                         user_message_content = f"""The user just said: "{message}"
 
@@ -239,10 +252,11 @@ Respond with a friendly greeting and offer to help with {company_name} services.
 
 Keep it brief and welcoming. Do not mention any specific information unless asked."""
                 else:
-                    # STRICT prompt - use from unified config
+                    # STRICT prompt - use from vendor-specific config
                     try:
-                        from backend.utils.unified_config_manager import get_unified_config_manager
-                        config_manager = get_unified_config_manager()
+                        from backend.utils.vendor_manager import get_vendor_manager
+                        vendor_manager = get_vendor_manager()
+                        config_manager = vendor_manager.get_vendor_config_manager(self.vendor_id)
                         unified_config = config_manager.load_config()
                         prompts = unified_config.get("prompts", {})
                         query_template = prompts.get("query_prompt",
@@ -332,8 +346,9 @@ ANSWER (based ONLY on the information above):"""
             tokens_used = llm_response.get("tokens_used", 0)
             
             # Validate response is based on RAG chunks (prevent hallucinations)
+            # Skip validation for simple greetings as they don't need RAG chunks
             validation_config = self.chatbot_config.get("validation", {})
-            if validation_config.get("enable_response_validation", True):
+            if validation_config.get("enable_response_validation", True) and not is_simple_greeting:
                 if not self._validate_response_from_rag(response_content, retrieved_chunks, message):
                     # Response seems to contain information not in RAG - return safe message
                     logger.warning(f"Response validation failed - possible hallucination detected for query: {message[:50]}")
@@ -1098,18 +1113,19 @@ ANSWER (based ONLY on the information above):"""
         return response
     
     def _load_chatbot_config(self):
-        """Load chatbot service configuration from unified config."""
+        """Load chatbot service configuration from vendor-specific unified config."""
         try:
-            from backend.utils.unified_config_manager import get_unified_config_manager
-            config_manager = get_unified_config_manager()
+            from backend.utils.vendor_manager import get_vendor_manager
+            vendor_manager = get_vendor_manager()
+            config_manager = vendor_manager.get_vendor_config_manager(self.vendor_id)
             unified_config = config_manager.load_config()
             self.chatbot_config = unified_config.get("chatbot_service", {})
             # Also store business and contact info for easy access
             self.business_info = unified_config.get("business", {})
             self.contact_info = unified_config.get("contact", {})
-            logger.info("Chatbot service configuration loaded from unified config")
+            logger.info(f"Chatbot service configuration loaded from vendor {self.vendor_id} config")
         except Exception as e:
-            logger.warning(f"Error loading chatbot service config: {e}, using defaults")
+            logger.warning(f"Error loading chatbot service config for vendor {self.vendor_id}: {e}, using defaults")
             self.chatbot_config = {}
             self.business_info = {}
             self.contact_info = {}

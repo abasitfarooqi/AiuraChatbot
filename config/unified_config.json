@@ -1,95 +1,61 @@
 {
   "metadata": {
     "version": "3.0.0",
-    "last_updated": "2025-01-27",
-    "description": "Unified configuration for multi-vendor, multi-business chatbot",
+    "last_updated": "2025-11-19",
+    "description": "Default unified configuration for AiuraAIChabots - London-based AI chatbot solutions company partnered with mPhenom Ltd UK",
     "vendor_id": "default",
-    "business_type": "motorcycle_dealership"
+    "business_type": "ai_chatbot_platform"
   },
   "business": {
-    "company_name": "Neguinho Motors Ltd",
-    "company_number": "11600635",
-    "trading_names": ["NGN Motors", "Neguinho Motors", "NGN"],
-    "registered_address": "9-13 Catford Hill, London, SE6 4NU",
-    "business_description": "London-based motorcycle business specialising in Honda & Yamaha scooters and motorcycles",
+    "company_name": "AiuraAIChabots",
+    "company_number": "",
+    "trading_names": ["AiuraAI", "AiuraAIChabots", "Aiura Chatbots"],
+    "registered_address": "London, United Kingdom",
+    "business_description": "AiuraAIChabots is a London-based AI chatbot solutions company, partnered with mPhenom Ltd UK, providing intelligent conversational AI platforms and chatbot services for businesses across various industries",
     "core_activities": [
-      "Motorcycle rentals (short & long term)",
-      "New and used motorcycle sales",
-      "Servicing and repairs",
-      "MOT testing",
-      "Nationwide vehicle delivery",
-      "Accident management support",
-      "Online/offline accessories shop"
+      "AI chatbot platform development and deployment",
+      "Custom chatbot solutions for businesses",
+      "Multi-vendor chatbot management systems",
+      "RAG (Retrieval-Augmented Generation) implementation",
+      "LLM integration and optimization",
+      "Chatbot training and knowledge base management",
+      "Enterprise chatbot consulting and support"
     ],
     "services_list": [
-      "bike rentals",
-      "bike sales",
-      "finance",
-      "servicing",
-      "MOT testing",
-      "delivery",
-      "accessories",
-      "motorbike maintenance/repairs"
+      "AI chatbot platform",
+      "custom chatbot development",
+      "multi-vendor chatbot systems",
+      "RAG implementation",
+      "LLM integration",
+      "knowledge base management",
+      "chatbot consulting",
+      "enterprise chatbot solutions"
     ]
   },
   "contact": {
-    "primary_phone": "0208 314 1498",
-    "primary_email": "enquiries@neguinhomotors.co.uk",
-    "customer_service_email": "customerservice@neguinhomotors.co.uk",
+    "primary_phone": "",
+    "primary_email": "info@aiuraaichabots.com",
+    "customer_service_email": "support@aiuraaichabots.com",
     "whatsapp_available": true,
     "contact_format": "Contact: {phone} or {email}"
   },
   "branches": [
     {
-      "name": "Catford",
-      "address": "9-13 Unit 1179 Catford Hill, London SE6 4NU",
-      "phone": "0208 314 1498",
-      "postcode": "SE6 4NU",
+      "name": "London Headquarters",
+      "address": "London, United Kingdom",
+      "phone": "",
+      "postcode": "",
       "opening_hours": {
         "monday": "09:00-18:00",
         "tuesday": "09:00-18:00",
         "wednesday": "09:00-18:00",
         "thursday": "09:00-18:00",
         "friday": "09:00-18:00",
-        "saturday": "09:00-18:00",
+        "saturday": "closed",
         "sunday": "closed"
       },
-      "services": ["sales", "rentals", "servicing", "repairs", "MOT", "delivery"],
-      "parking_available": true
-    },
-    {
-      "name": "Tooting",
-      "address": "4A Penwortham Road, London SW16 6RE",
-      "phone": "0203 409 5478",
-      "postcode": "SW16 6RE",
-      "opening_hours": {
-        "monday": "09:00-18:00",
-        "tuesday": "09:00-18:00",
-        "wednesday": "09:00-18:00",
-        "thursday": "09:00-18:00",
-        "friday": "09:00-18:00",
-        "saturday": "09:00-18:00",
-        "sunday": "closed"
-      },
-      "services": ["sales", "rentals", "servicing", "repairs", "MOT", "delivery"],
-      "parking_available": true
-    },
-    {
-      "name": "Sutton",
-      "address": "329 High St, Sutton SM1 1LW",
-      "phone": "0208 412 9275",
-      "postcode": "SM1 1LW",
-      "opening_hours": {
-        "monday": "09:00-18:00",
-        "tuesday": "09:00-18:00",
-        "wednesday": "09:00-18:00",
-        "thursday": "09:00-18:00",
-        "friday": "09:00-18:00",
-        "saturday": "09:00-18:00",
-        "sunday": "closed"
-      },
-      "services": ["sales", "rentals", "servicing", "repairs", "MOT", "delivery"],
-      "parking_available": true
+      "services": ["chatbot development", "platform access", "consulting", "support"],
+      "parking_available": false
     }
   ],
   "application": {
@@ -147,7 +113,22 @@
   "domain_restriction": {
     "enabled": true,
     "auto_generate_keywords": true,
-    "keywords": []
+    "keywords": [
+      "aiuraaichabots",
+      "aiura",
+      "mphenom",
+      "mPhenom Ltd",
+      "chatbot",
+      "ai assistant",
+      "conversational ai",
+      "rag",
+      "llm",
+      "knowledge base",
+      "multi vendor",
+      "platform",
+      "london",
+      "uk"
+    ]
   },
   "credits": {
     "token_tracking_enabled": true,
@@ -156,7 +137,7 @@
     "credit_cost_per_message": 10
   },
   "multi_vendor": {
-    "enabled": false,
+    "enabled": true,
     "default_vendor_id": "default"
   },
   "logging": {
@@ -177,7 +158,7 @@
     "frontend_url": "http://localhost:5173"
   },
   "prompts": {
-    "main_system_prompt": "You are the {company_name} chatbot assistant. You help customers with {services_list}.\n\nCRITICAL RULES - STRICTLY ENFORCE:\n1. ONLY use information provided in the INFORMATION section below\n2. NEVER make up, guess, or hallucinate any information\n3. NEVER use knowledge from outside the provided information\n4. If information is not in the provided context, say: \"{fallback_message}\"\n5. ONLY answer questions about {company_name} services\n6. For out-of-domain queries, say: \"{out_of_domain_message}\"\n\nRESPONSE FORMAT:\n- Use ONLY facts from the provided INFORMATION section\n- If a detail is not mentioned in the information, do NOT invent it\n- Be accurate and precise\n- Format responses with proper line breaks and structure",
+    "main_system_prompt": "You are the {company_name} chatbot assistant. {company_name} is a London-based AI chatbot solutions company, partnered with mPhenom Ltd UK. You help customers with {services_list}.\n\nCRITICAL RULES - STRICTLY ENFORCE:\n1. ONLY use information provided in the INFORMATION section below\n2. NEVER make up, guess, or hallucinate any information\n3. NEVER use knowledge from outside the provided information\n4. If information is not in the provided context, say: \"{fallback_message}\"\n5. ONLY answer questions about {company_name} services and the chatbot platform\n6. For out-of-domain queries, say: \"{out_of_domain_message}\"\n\nRESPONSE FORMAT:\n- Use ONLY facts from the provided INFORMATION section\n- If a detail is not mentioned in the information, do NOT invent it\n- Be accurate and precise\n- Format responses with proper line breaks and structure\n- Mention the partnership with mPhenom Ltd UK when relevant",
     "greeting_prompt": "The user just said: \"{message}\"\n\nRespond with a friendly greeting and offer to help with {company_name} services ({services_list}).\n\nKeep it brief and welcoming. Do not mention any specific information unless asked.",
     "query_prompt": "CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.\n\nINFORMATION FROM KNOWLEDGE BASE:\n{context_text}\n\nQUESTION: {message}\n\nINSTRUCTIONS:\n- Use ONLY facts from the INFORMATION section above\n- If the answer is not in the information, say: \"{fallback_message}\"\n- DO NOT make up, guess, or invent any information\n- DO NOT use knowledge from outside the provided information\n- Format your answer with proper line breaks and structure\n\nANSWER (based ONLY on the information above):",
     "fallback_message": "I don't have that information in my knowledge base. Please contact us at {contact_email} or {contact_phone} for more details.",
@@ -196,18 +177,18 @@
     },
     "topic_detection": {
       "topic_keywords": {
-        "rental": ["rental", "rent", "hire", "leasing", "weekly", "monthly rental"],
-        "sale": ["sale", "buy", "purchase", "price", "cost", "for sale"],
-        "finance": ["finance", "emi", "payment plan", "installment", "credit", "loan"],
-        "servicing": ["service", "servicing", "repair", "maintenance", "fix"],
-        "mot": ["mot", "test", "certificate"],
-        "delivery": ["delivery", "deliver", "transport", "shipping"],
-        "accessories": ["accessories", "accessory", "helmet", "gear", "equipment"],
-        "accident": ["accident", "crash", "claim", "insurance"],
-        "branch": ["branch", "location", "address", "where"],
-        "opening": ["opening", "hours", "time", "when open"]
+        "chatbot": ["chatbot", "chat bot", "ai assistant", "virtual assistant", "conversational ai"],
+        "platform": ["platform", "system", "software", "solution", "service"],
+        "development": ["development", "create", "build", "setup", "implement"],
+        "integration": ["integration", "integrate", "connect", "api", "endpoint"],
+        "rag": ["rag", "knowledge base", "knowledge", "data", "information"],
+        "llm": ["llm", "model", "ai model", "language model", "gpt", "ollama"],
+        "multi_vendor": ["multi vendor", "vendor", "multiple vendors", "multi-tenant"],
+        "customization": ["customize", "custom", "configure", "settings", "config"],
+        "support": ["support", "help", "assistance", "documentation", "guide"],
+        "pricing": ["pricing", "price", "cost", "fee", "subscription", "plan"]
       },
-      "service_topics": ["rental", "sale", "finance", "servicing", "mot", "delivery", "accessories", "accident"]
+      "service_topics": ["chatbot", "platform", "development", "integration", "rag", "llm", "multi_vendor", "customization", "support", "pricing"]
     },
     "question_analysis": {
       "complete_question_indicators": [
@@ -228,103 +209,109 @@
     },
     "suggestions": {
       "service_suggestions": {
-        "rental": {
+        "chatbot": {
           "primary": [
-            "What are the rental prices for each bike?",
-            "What documents do I need for rental?",
-            "What is the minimum rental period?"
+            "How do I create a chatbot?",
+            "What features does your chatbot platform offer?",
+            "How do I customize my chatbot?"
           ],
-          "cross_sell": "We also offer bike sales and finance - would you like to know more?"
+          "cross_sell": "We also offer multi-vendor systems and RAG implementation - would you like to know more?"
         },
-        "sale": {
+        "platform": {
           "primary": [
-            "What bikes are available for sale?",
-            "Do you offer finance options?",
-            "Can I test ride a bike?"
+            "What is the AiuraAIChabots platform?",
+            "How do I access the platform?",
+            "What are the platform features?"
           ],
-          "cross_sell": "We also offer rentals and servicing - interested?"
+          "cross_sell": "We also offer custom development and integration services - interested?"
         },
-        "finance": {
+        "development": {
           "primary": [
-            "What is the interest rate?",
-            "How long is the finance term?",
-            "What deposit is required?"
+            "How do I develop a custom chatbot?",
+            "What development services do you offer?",
+            "How long does development take?"
           ],
-          "cross_sell": "We also offer bike sales and rentals - want to know more?"
+          "cross_sell": "We also offer platform access and support - want to know more?"
         },
-        "servicing": {
+        "integration": {
           "primary": [
-            "What services do you offer?",
-            "How much does a service cost?",
-            "Do you collect bikes for service?"
+            "How do I integrate the chatbot?",
+            "What APIs are available?",
+            "Do you support Laravel integration?"
           ],
-          "cross_sell": "We also offer MOT testing and repairs - need more info?"
+          "cross_sell": "We also offer development and support services - need more info?"
         },
-        "mot": {
+        "rag": {
           "primary": [
-            "How much does an MOT cost?",
-            "How long does an MOT take?",
-            "Do you offer pre-MOT checks?"
+            "What is RAG implementation?",
+            "How do I manage my knowledge base?",
+            "How does the RAG system work?"
           ],
-          "cross_sell": "We also offer servicing and repairs - want details?"
+          "cross_sell": "We also offer LLM integration and customization - want details?"
         },
-        "delivery": {
+        "multi_vendor": {
           "primary": [
-            "How much does delivery cost?",
-            "How long does delivery take?",
-            "Do you deliver nationwide?"
+            "What is the multi-vendor system?",
+            "How do I create multiple vendors?",
+            "How does vendor management work?"
           ],
-          "cross_sell": "We also offer bike sales and rentals - interested?"
+          "cross_sell": "We also offer platform access and development - interested?"
         }
       },
       "all_services": {
-        "rental": "Tell me about bike rental options",
-        "sale": "What bikes do you have for sale?",
-        "finance": "Do you offer finance options?",
-        "servicing": "What servicing do you offer?",
-        "mot": "Do you do MOT testing?",
-        "delivery": "Do you offer delivery service?",
-        "accessories": "What accessories do you sell?",
-        "accident": "Do you offer accident management?"
+        "chatbot": "Tell me about your chatbot platform",
+        "platform": "What is the AiuraAIChabots platform?",
+        "development": "Do you offer custom chatbot development?",
+        "integration": "How do I integrate the chatbot?",
+        "rag": "What is RAG and knowledge base management?",
+        "llm": "What LLM models do you support?",
+        "multi_vendor": "Tell me about multi-vendor systems",
+        "customization": "How can I customize my chatbot?",
+        "support": "What support do you offer?"
       },
       "default_suggestions": [
-        "What services do you offer?",
-        "Tell me about {primary_service}",
-        "What are your opening hours?",
-        "Where are your branches located?"
+        "What is AiuraAIChabots?",
+        "Tell me about your chatbot platform",
+        "How do I create a chatbot?",
+        "What is your partnership with mPhenom Ltd UK?"
       ],
       "multi_service_message": "We also offer other services - would you like to know more?",
       "max_suggestions": 5,
       "min_services_for_cross_sell": 2,
       "min_messages_for_cross_sell": 3
     },
-    "intelligent_suggestions": {
+      "intelligent_suggestions": {
       "enabled": true,
       "min_questions_for_analysis": 4,
-      "rental_follow_ups": {
-        "deposit": "What deposit is required for rental?",
-        "insurance": "What insurance do I need for rental?",
-        "delivery": "Do you deliver rental bikes?"
+      "chatbot_follow_ups": {
+        "features": "What features does the chatbot have?",
+        "customization": "How can I customize the chatbot?",
+        "pricing": "What are your pricing plans?"
       },
-      "sale_follow_ups": {
-        "finance": "Do you offer finance for bike purchases?",
-        "test_ride": "Can I test ride before buying?",
-        "warranty": "What warranty do you offer on bikes?"
+      "platform_follow_ups": {
+        "access": "How do I access the platform?",
+        "setup": "How do I set up my chatbot?",
+        "management": "How do I manage my chatbot?"
       },
-      "finance_follow_ups": {
-        "interest_rate": "What is the interest rate?",
-        "term": "How long is the finance term?",
-        "deposit": "What deposit is required for finance?"
+      "development_follow_ups": {
+        "timeline": "How long does development take?",
+        "cost": "What are the development costs?",
+        "requirements": "What do I need to get started?"
       },
-      "servicing_follow_ups": {
-        "cost": "How much does a service cost?",
-        "collect": "Do you collect bikes for service?",
-        "mot": "Do you also do MOT testing?"
+      "integration_follow_ups": {
+        "api": "What APIs are available?",
+        "laravel": "How do I integrate with Laravel?",
+        "frontend": "How do I integrate with my frontend?"
       },
-      "multi_service_follow_ups": {
-        "delivery": "Do you offer delivery service?",
-        "accessories": "What accessories do you sell?",
-        "accident": "Do you offer accident management?"
+      "rag_follow_ups": {
+        "knowledge_base": "How do I manage my knowledge base?",
+        "aiura_mind": "What is AiuraMind?",
+        "chunks": "How do knowledge base chunks work?"
+      },
+      "multi_vendor_follow_ups": {
+        "create": "How do I create a new vendor?",
+        "switch": "How do I switch between vendors?",
+        "isolation": "How is data isolated between vendors?"
       }
     },
     "response_formatting": {

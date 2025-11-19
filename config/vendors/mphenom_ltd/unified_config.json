@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "version": "3.0.0",
+    "vendor_id": "mphenom_ltd",
+    "business_type": "other"
+  },
+  "business": {
+    "company_name": "mPhenom Ltd",
+    "services_list": [
+      "service 1",
+      "service 2"
+    ]
+  },
+  "contact": {
+    "primary_phone": "",
+    "primary_email": "",
+    "contact_format": "Contact: {phone} or {email}"
+  },
+  "application": {
+    "api_port": 8000
+  },
+  "prompts": {
+    "main_system_prompt": "You are a helpful assistant.",
+    "fallback_message": "I don't have that information."
+  },
+  "chatbot_service": {
+    "greetings": {
+      "simple_greetings": [
+        "hi",
+        "hello"
+      ]
+    }
+  }
+}

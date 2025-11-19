@@ -51,7 +51,12 @@ async def send_message(
     """Send a message to the chatbot."""
     try:
         import time
-        chatbot_service = ChatbotService(db)
+        from backend.config import get_settings
+        settings = get_settings()
+        
+        # Use provided vendor_id or default
+        effective_vendor_id = request.vendor_id or settings.default_vendor_id
+        chatbot_service = ChatbotService(db, vendor_id=effective_vendor_id)
         
         # Generate chat_id if not provided
         chat_id = request.chat_id or f"chat_{request.user_id}_{int(time.time())}"
@@ -60,7 +65,7 @@ async def send_message(
             user_id=request.user_id,
             chat_id=chat_id,
             message=request.message,
-            vendor_id=request.vendor_id
+            vendor_id=effective_vendor_id
         )
         
         return ChatMessageResponse(
@@ -117,20 +122,28 @@ async def get_chat_history(
 @router.get("/chats/{user_id}")
 async def get_user_chats(
     user_id: str,
+    vendor_id: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """Get all chats for a user."""
+    """Get all chats for a user (vendor-aware)."""
     try:
         from backend.models.database import Chat
+        from backend.config import get_settings
+        settings = get_settings()
         
-        chats = db.query(Chat).filter(
-            Chat.user_id == user_id
-        ).order_by(
-            Chat.updated_at.desc()
-        ).all()
+        # Use provided vendor_id or default
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        
+        # Filter by user_id and vendor_id
+        query = db.query(Chat).filter(Chat.user_id == user_id)
+        if effective_vendor_id:
+            query = query.filter(Chat.vendor_id == effective_vendor_id)
+        
+        chats = query.order_by(Chat.updated_at.desc()).all()
         
         return {
             "user_id": user_id,
+            "vendor_id": effective_vendor_id,
             "chats": [
                 {
                     "chat_id": chat.chat_id,

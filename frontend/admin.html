@@ -147,18 +147,95 @@
 </head>
 <body>
     <div class="container">
-        <h1>Chatbot Admin Panel</h1>
+        <h1>Chatbot Super Admin Panel</h1>
+        
+        <!-- Vendor Selector (Always Visible) -->
+        <div style="background: #ecf0f1; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px; display: flex; align-items: center; gap: 1rem;">
+            <label style="font-weight: 600; color: #2c3e50;">Active Vendor:</label>
+            <select id="vendorSelector" onchange="switchActiveVendor()" style="flex: 1; max-width: 300px; padding: 0.5rem; font-size: 1rem;">
+                <option value="">Loading vendors...</option>
+            </select>
+            <button onclick="loadVendors()" style="background: #27ae60; padding: 0.5rem 1rem;">Refresh</button>
+            <button onclick="showCreateVendorForm()" style="background: #3498db; padding: 0.5rem 1rem;">+ New Vendor</button>
+            <div id="vendorInfo" style="margin-left: auto; padding: 0.5rem 1rem; background: white; border-radius: 4px; font-size: 0.9rem;">
+                <strong id="currentVendorDisplay">No vendor selected</strong>
+            </div>
+        </div>
         
         <div class="tabs">
             <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
+            <button class="tab" onclick="switchTab('vendors')">Vendors</button>
             <button class="tab" onclick="switchTab('models')">Models</button>
             <button class="tab" onclick="switchTab('rag')">RAG</button>
             <button class="tab" onclick="switchTab('memory')">Memory</button>
             <button class="tab" onclick="switchTab('config')">LLM Config</button>
             <button class="tab" onclick="switchTab('unified-config')">Unified Config</button>
             <button class="tab" onclick="switchTab('knowledge-base')">Knowledge Base</button>
+            <button class="tab" onclick="switchTab('aiura-mind')">AiuraMind</button>
             <button class="tab" onclick="switchTab('database')">Database</button>
             <button class="tab" onclick="switchTab('updates')">Updates</button>
+        </div>
+        
+        <!-- Vendors Tab -->
+        <div id="vendors" class="tab-content">
+            <div class="section">
+                <h2>Vendor Management</h2>
+                <p style="color: #666; margin-bottom: 1.5rem;">
+                    Manage multiple vendors. Each vendor has their own configuration, knowledge base, and ChromaDB collection.
+                </p>
+                
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem; align-items: center;">
+                    <button onclick="loadVendors()" style="background: #27ae60;">Refresh Vendors</button>
+                    <button onclick="showCreateVendorForm()" style="background: #3498db;">Create New Vendor</button>
+                    <div id="currentVendor" style="margin-left: auto; padding: 0.5rem 1rem; background: #ecf0f1; border-radius: 4px;">
+                        <strong>Current Vendor:</strong> <span id="currentVendorName">Loading...</span>
+                    </div>
+                </div>
+                
+                <div id="vendorsList" style="background: #f8f9fa; padding: 1rem; margin-bottom: 1rem;">
+                    Loading vendors...
+                </div>
+                
+                <!-- Create Vendor Form (hidden by default) -->
+                <div id="createVendorForm" style="display: none; background: #f8f9fa; padding: 1.5rem; margin-top: 2rem; border: 1px solid #ddd;">
+                    <h3>Create New Vendor</h3>
+                    <div class="form-group">
+                        <label>Vendor ID (unique identifier, lowercase, no spaces):</label>
+                        <input type="text" id="newVendorId" placeholder="e.g., my_company" required>
+                        <small style="color: #666;">This will be used as the vendor identifier in the system.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Vendor Name (display name):</label>
+                        <input type="text" id="newVendorName" placeholder="e.g., My Company Ltd" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Company Name:</label>
+                        <input type="text" id="newCompanyName" placeholder="e.g., My Company Ltd" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Business Type:</label>
+                        <select id="newBusinessType">
+                            <option value="motorcycle_dealership">Motorcycle Dealership</option>
+                            <option value="car_dealership">Car Dealership</option>
+                            <option value="bicycle_shop">Bicycle Shop</option>
+                            <option value="retail">Retail</option>
+                            <option value="service">Service Business</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Copy from existing vendor (optional):</label>
+                        <select id="copyFromVendor">
+                            <option value="">None (create empty vendor)</option>
+                        </select>
+                        <small style="color: #666;">Select a vendor to copy configuration and knowledge base from.</small>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button onclick="createVendor()" style="background: #27ae60;">Create Vendor</button>
+                        <button onclick="hideCreateVendorForm()" style="background: #95a5a6;">Cancel</button>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <!-- Dashboard Tab -->
@@ -387,6 +464,28 @@
                     <strong>Perfect for multi-vendor and multi-business use!</strong>
                 </p>
                 
+                <div class="form-group" style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border: 1px solid #ddd;">
+                    <label style="font-weight: bold; margin-bottom: 0.5rem;">Version Management</label>
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Current Version:</label>
+                            <select id="configVersionSelect" onchange="switchConfigVersion()" style="width: 100%; padding: 0.5rem;">
+                                <option value="current">Current (Active)</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Create New Version:</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="text" id="newConfigVersion" placeholder="e.g., v1.0.1" style="flex: 1; padding: 0.5rem;">
+                                <button onclick="createConfigVersion()" style="padding: 0.5rem 1rem; background: #3498db; color: white; border: none; cursor: pointer;">Create</button>
+                            </div>
+                        </div>
+                    </div>
+                    <small style="display: block; margin-top: 0.5rem; color: #666;">
+                        Switch between versions or create new ones. "Current" is the active version in use.
+                    </small>
+                </div>
+                
                 <div class="form-group">
                     <label>Configuration JSON</label>
                     <textarea id="unifiedConfigJson" rows="35" style="font-family: monospace; font-size: 0.9rem;"></textarea>
@@ -401,9 +500,15 @@
                         <strong>Variables available:</strong> {company_name}, {company_name_lower}, {contact_phone}, {contact_email}, {services_list}, {primary_service}, {contact_format}
                     </small>
                 </div>
-                <button onclick="loadUnifiedConfig()" style="background: #27ae60;">Load Config</button>
-                <button onclick="saveUnifiedConfig()" style="margin-left: 1rem;">Save Config</button>
-                <button onclick="validateUnifiedConfig()" style="margin-left: 1rem; background: #3498db;">Validate JSON</button>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <button onclick="loadUnifiedConfig()" style="background: #27ae60;">Load Config</button>
+                    <button onclick="saveUnifiedConfig()">Save Config</button>
+                    <button onclick="validateUnifiedConfig()" style="background: #3498db;">Validate JSON</button>
+                    <label style="padding: 0.5rem 1rem; background: #9b59b6; color: white; cursor: pointer; border: none;">
+                        📁 Upload Config File
+                        <input type="file" id="configFileUpload" accept=".json" onchange="uploadConfigFile()" style="display: none;">
+                    </label>
+                </div>
                 <div id="unifiedConfigStatus" style="margin-top: 1rem; padding: 0.75rem; background: #ecf0f1; display: none;"></div>
             </div>
         </div>
@@ -416,19 +521,179 @@
                     <label>Knowledge Base Status</label>
                     <div id="kbStatus" style="padding: 0.75rem; background: #ecf0f1; margin-bottom: 1rem;">Loading...</div>
                 </div>
+                
+                <div class="form-group" style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border: 1px solid #ddd;">
+                    <label style="font-weight: bold; margin-bottom: 0.5rem;">Version Management</label>
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Current Version:</label>
+                            <select id="kbVersionSelect" onchange="switchKBVersion()" style="width: 100%; padding: 0.5rem;">
+                                <option value="current">Current (Active)</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Create New Version:</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="text" id="newKBVersion" placeholder="e.g., v1.0.1" style="flex: 1; padding: 0.5rem;">
+                                <button onclick="createKBVersion()" style="padding: 0.5rem 1rem; background: #3498db; color: white; border: none; cursor: pointer;">Create</button>
+                            </div>
+                        </div>
+                    </div>
+                    <small style="display: block; margin-top: 0.5rem; color: #666;">
+                        Switch between versions or create new ones. "Current" is the active version in use. Switching will reload the RAG database.
+                    </small>
+                </div>
+                
                 <div class="form-group">
                     <label>Knowledge Base JSON</label>
                     <textarea id="knowledgeBaseJson" rows="25" style="font-family: monospace; font-size: 0.9rem;"></textarea>
                     <small style="display: block; margin-top: 0.25rem; color: #666;">Edit knowledge base chunks. Changes are saved and automatically reloaded into vector database (ChromaDB).</small>
                 </div>
-                <button onclick="loadKnowledgeBaseEditor()" style="background: #27ae60;">Load Knowledge Base</button>
-                <button onclick="saveKnowledgeBase()" style="margin-left: 1rem;">Save & Reload</button>
-                <button onclick="validateKnowledgeBase()" style="margin-left: 1rem; background: #3498db;">Validate JSON</button>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <button onclick="loadKnowledgeBaseEditor()" style="background: #27ae60;">Load Knowledge Base</button>
+                    <button onclick="saveKnowledgeBase()">Save & Reload</button>
+                    <button onclick="validateKnowledgeBase()" style="background: #3498db;">Validate JSON</button>
+                    <label style="padding: 0.5rem 1rem; background: #9b59b6; color: white; cursor: pointer; border: none;">
+                        📁 Upload KB File
+                        <input type="file" id="kbFileUpload" accept=".json" onchange="uploadKBFile()" style="display: none;">
+                    </label>
+                </div>
                 <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
                     <h3>ChromaDB Management</h3>
                     <div id="chromadbInfo" style="padding: 0.75rem; background: #ecf0f1; margin-bottom: 1rem;">Loading...</div>
                     <button onclick="loadChromaDBInfo()" style="background: #27ae60;">Refresh ChromaDB Info</button>
                     <button onclick="clearChromaDB()" style="margin-left: 1rem; background: #e74c3c; color: white;">Clear ChromaDB</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- AiuraMind Tab -->
+        <div id="aiura-mind" class="tab-content">
+            <div class="section">
+                <h2>AiuraMind - Intelligent Business Data Generator</h2>
+                <p style="margin-bottom: 1.5rem; color: #666;">
+                    Paste your business data (JSON or text) and AiuraMind will automatically generate optimized 
+                    knowledge base chunks and unified configuration. Perfect for quickly setting up a new vendor!
+                </p>
+                
+                <div class="form-group">
+                    <label>Business Data Input</label>
+                    <textarea id="aiuraMindInput" rows="20" style="font-family: monospace; font-size: 0.9rem;" placeholder='Paste business data here (JSON or plain text):
+
+Example JSON:
+{
+  "company_name": "My Company",
+  "services": ["service1", "service2"],
+  "contact": {
+    "phone": "123-456-7890",
+    "email": "info@company.com"
+  },
+  "description": "Company description..."
+}
+
+Or plain text:
+My Company offers service1 and service2. Contact us at 123-456-7890 or info@company.com...'></textarea>
+                    <small style="display: block; margin-top: 0.25rem; color: #666;">
+                        You can paste JSON structured data or plain text. AiuraMind will intelligently extract information and generate optimized RAG chunks and config.
+                    </small>
+                </div>
+                
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>Vendor Information</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Vendor Name:</label>
+                            <input type="text" id="aiuraVendorName" placeholder="e.g., My Company" style="width: 100%; padding: 0.5rem;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Business Type:</label>
+                            <input type="text" id="aiuraBusinessType" placeholder="e.g., motorcycle_dealership" style="width: 100%; padding: 0.5rem;">
+                        </div>
+                    </div>
+                    <small style="display: block; margin-top: 0.5rem; color: #666;">
+                        Vendor ID will be auto-generated from vendor name, or use current vendor if selected.
+                    </small>
+                </div>
+                
+                <div class="form-group" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border: 1px solid #ddd;">
+                    <label style="font-weight: bold; margin-bottom: 0.5rem;">Generation Settings (All Configurable)</label>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Generation Depth:</label>
+                        <select id="aiuraGenerationDepth" style="width: 100%; padding: 0.5rem;">
+                            <option value="basic">Basic (Quick, minimal details)</option>
+                            <option value="standard">Standard (Balanced, recommended)</option>
+                            <option value="comprehensive">Comprehensive (Detailed, thorough)</option>
+                            <option value="extensive" selected>Extensive (Maximum detail, all sections) ⭐ RECOMMENDED</option>
+                        </select>
+                        <small style="display: block; margin-top: 0.25rem; color: #666;">
+                            Controls how detailed and comprehensive the generated config and knowledge base will be.
+                        </small>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Max Tokens (for generation):</label>
+                        <input type="number" id="aiuraMaxTokens" value="32000" min="4000" max="32000" step="2000" style="width: 100%; padding: 0.5rem;">
+                        <small style="display: block; margin-top: 0.25rem; color: #666;">
+                            Maximum tokens for LLM generation. Higher = more detailed but slower. Maximum: 32000 (recommended for extensive).
+                        </small>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Temperature (Creativity):</label>
+                        <input type="number" id="aiuraTemperature" value="0.2" min="0" max="2" step="0.1" style="width: 100%; padding: 0.5rem;">
+                        <small style="display: block; margin-top: 0.25rem; color: #666;">
+                            Lower (0.1-0.3) = more focused/accurate. Higher (0.7-1.0) = more creative. Recommended: 0.2 for config generation.
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border: 1px solid #ddd;">
+                    <label style="font-weight: bold; margin-bottom: 0.5rem;">Model Selection (Optional)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Model Provider:</label>
+                            <select id="aiuraModelProvider" onchange="loadAiuraModels()" style="width: 100%; padding: 0.5rem;">
+                                <option value="">Use Default Model</option>
+                                <option value="ollama">Ollama</option>
+                                <option value="openai">OpenAI</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Model Name:</label>
+                            <select id="aiuraModelName" style="width: 100%; padding: 0.5rem;" disabled>
+                                <option value="">Select provider first</option>
+                            </select>
+                        </div>
+                    </div>
+                    <small style="display: block; margin-top: 0.5rem; color: #666;">
+                        Select a high-intelligence model for better generation quality. If not selected, uses the default chat model.
+                    </small>
+                    <button onclick="loadAiuraModels()" style="margin-top: 0.5rem; padding: 0.5rem 1rem; background: #3498db; color: white; border: none; cursor: pointer;">Refresh Models</button>
+                </div>
+                
+                <button onclick="executeAiuraMind()" style="background: #e74c3c; color: white; padding: 1rem 2rem; font-size: 1.1rem; font-weight: bold;">
+                    🧠 Execute AiuraMind
+                </button>
+                <div id="aiuraMindStatus" style="margin-top: 1rem; padding: 1rem; background: #ecf0f1; display: none;"></div>
+                
+                <div id="aiuraMindResults" style="margin-top: 2rem; display: none;">
+                    <h3>Generated Results</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div>
+                            <h4>Generated Config</h4>
+                            <textarea id="aiuraGeneratedConfig" rows="15" style="font-family: monospace; font-size: 0.85rem; width: 100%;"></textarea>
+                            <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+                                <button onclick="applyGeneratedConfig()" style="background: #27ae60; color: white;">Apply Config</button>
+                                <button onclick="saveGeneratedConfig()" style="background: #28a745; color: white;">💾 Save Config File</button>
+                            </div>
+                        </div>
+                        <div>
+                            <h4>Generated Knowledge Base</h4>
+                            <textarea id="aiuraGeneratedKB" rows="15" style="font-family: monospace; font-size: 0.85rem; width: 100%;"></textarea>
+                            <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+                                <button onclick="applyGeneratedKB()" style="background: #27ae60; color: white;">Apply Knowledge Base</button>
+                                <button onclick="saveGeneratedKB()" style="background: #28a745; color: white;">💾 Save KB File</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -545,12 +810,30 @@
             document.getElementById(tabName).classList.add('active');
             
             if (tabName === 'dashboard') loadDashboardStats();
+            if (tabName === 'vendors') loadVendors();
             if (tabName === 'models') loadModels();
             if (tabName === 'rag') getRAGStats();
             if (tabName === 'memory') loadLLMConfig();
             if (tabName === 'config') loadLLMConfig();
-            if (tabName === 'unified-config') loadUnifiedConfig();
-            if (tabName === 'knowledge-base') loadKnowledgeBaseEditor();
+            if (tabName === 'unified-config') {
+                loadConfigVersions();
+                loadUnifiedConfig();
+            }
+            if (tabName === 'knowledge-base') {
+                loadKBVersions();
+                loadKnowledgeBaseEditor();
+            }
+            if (tabName === 'aiura-mind') {
+                // Auto-fill vendor info if vendor is selected
+                if (currentVendorId) {
+                    const vendor = allVendors?.find(v => v.vendor_id === currentVendorId);
+                    if (vendor) {
+                        document.getElementById('aiuraVendorName').value = vendor.vendor_name || '';
+                    }
+                }
+                // Load available models
+                loadAiuraModels();
+            }
             if (tabName === 'database') {
                 loadDatabaseStats();
             }
@@ -871,34 +1154,60 @@
         // Knowledge Base Editor Functions
         async function loadKnowledgeBaseEditor() {
             try {
-                // Load KB status
-                const statsResponse = await fetch(`${API_BASE}/rag/stats`);
+                // Load KB status (vendor-aware)
+                const statsResponse = await fetch(`${API_BASE}/rag/stats${currentVendorId ? `?vendor_id=${currentVendorId}` : ''}`);
+                if (!statsResponse.ok) {
+                    throw new Error(`Failed to load RAG stats: ${statsResponse.statusText}`);
+                }
                 const stats = await statsResponse.json();
                 document.getElementById('kbStatus').innerHTML = 
                     `<strong>Total Chunks:</strong> ${stats.total_chunks || 0}<br>
                      <strong>Collection:</strong> ${stats.collection_name || 'N/A'}<br>
-                     <strong>Embedding Model:</strong> ${stats.embedding_model || 'N/A'}`;
+                     <strong>Embedding Model:</strong> ${stats.embedding_model || 'N/A'}<br>
+                     <strong>Vendor:</strong> ${currentVendorId || 'Default'}`;
                 
-                // Load KB content
-                const response = await fetch(`${API_BASE}/config/knowledge-base`);
+                // Load KB content - use vendor-specific endpoint
+                let url = `${API_BASE}/config/knowledge-base`;
+                if (currentVendorId) {
+                    url = `${API_BASE}/vendor/${currentVendorId}/knowledge-base`;
+                    if (currentKBVersion && currentKBVersion !== 'current') {
+                        url += `?version=${currentKBVersion}`;
+                    }
+                }
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: response.statusText }));
+                    throw new Error(errorData.detail || `Failed to load knowledge base: ${response.status} ${response.statusText}`);
+                }
                 const data = await response.json();
                 document.getElementById('knowledgeBaseJson').value = JSON.stringify(data, null, 2);
                 
-                // Load ChromaDB info
+                // Load ChromaDB info (vendor-aware)
                 loadChromaDBInfo();
             } catch (error) {
                 console.error('Error loading knowledge base:', error);
-                document.getElementById('kbStatus').innerHTML = `<span style="color: #e74c3c;">Error: ${error.message}</span>`;
-                alert('Error loading knowledge base');
+                const errorMsg = error.message || 'Unknown error';
+                document.getElementById('kbStatus').innerHTML = `<span style="color: #e74c3c;">Error: ${errorMsg}</span>`;
+                // Show helpful error message in JSON editor
+                document.getElementById('knowledgeBaseJson').value = `// Error loading knowledge base: ${errorMsg}\n// Please check:\n// 1. Server is running\n// 2. Vendor is selected (if using multi-vendor)\n// 3. Knowledge base file exists for this vendor\n\n{\n  "metadata": {\n    "version": "2.0.0",\n    "vendor_id": "${currentVendorId || 'default'}",\n    "description": "Knowledge base",\n    "chunking_strategy": "semantic_chunks_with_metadata"\n  },\n  "chunks": []\n}`;
+                alert(`Error loading knowledge base: ${errorMsg}`);
             }
         }
         
         async function loadChromaDBInfo() {
             try {
-                const response = await fetch(`${API_BASE}/rag/chromadb/info`);
+                // Use vendor-specific endpoint
+                let url = `${API_BASE}/rag/chromadb/info`;
+                if (currentVendorId) {
+                    url += `?vendor_id=${currentVendorId}`;
+                }
+                
+                const response = await fetch(url);
                 const data = await response.json();
                 
-                let html = `<strong>Current Collection:</strong> ${data.current_collection.name}<br>`;
+                let html = `<strong>Vendor:</strong> ${data.vendor_id || 'Default'}<br>`;
+                html += `<strong>Current Collection:</strong> ${data.current_collection.name}<br>`;
                 html += `<strong>Chunks:</strong> ${data.current_collection.count}<br>`;
                 html += `<strong>Path:</strong> ${data.current_collection.path}<br>`;
                 html += `<strong>Total Collections:</strong> ${data.total_collections}`;
@@ -906,7 +1215,8 @@
                 if (data.all_collections && data.all_collections.length > 0) {
                     html += '<br><br><strong>All Collections:</strong><ul style="margin-top: 0.5rem;">';
                     data.all_collections.forEach(col => {
-                        html += `<li>${col.name} (${col.count} chunks)</li>`;
+                        const vendor = col.metadata?.vendor_id || 'unknown';
+                        html += `<li>${col.name} (${col.count} chunks) [${vendor}]</li>`;
                     });
                     html += '</ul>';
                 }
@@ -919,18 +1229,25 @@
         }
         
         async function clearChromaDB() {
-            if (!confirm('⚠️ WARNING: This will delete ALL data from ChromaDB!\n\nThis will:\n• Delete all vector embeddings\n• Clear the entire collection\n• Require reloading the knowledge base\n\nAre you sure?')) {
+            const vendorMsg = currentVendorId ? ` for vendor ${currentVendorId}` : '';
+            if (!confirm(`⚠️ WARNING: This will delete ALL data from ChromaDB${vendorMsg}!\n\nThis will:\n• Delete all vector embeddings\n• Clear the entire collection\n• Require reloading the knowledge base\n\nAre you sure?`)) {
                 return;
             }
             
             try {
-                const response = await fetch(`${API_BASE}/rag/clear`, {
+                // Use vendor-specific endpoint
+                let url = `${API_BASE}/rag/clear`;
+                if (currentVendorId) {
+                    url += `?vendor_id=${currentVendorId}`;
+                }
+                
+                const response = await fetch(url, {
                     method: 'POST'
                 });
                 
                 const data = await response.json();
                 if (data.status === 'success') {
-                    alert('ChromaDB cleared successfully! Please reload the knowledge base.');
+                    alert(`ChromaDB cleared successfully${vendorMsg}! Please reload the knowledge base.`);
                     loadChromaDBInfo();
                     loadKnowledgeBaseEditor();
                 } else {
@@ -947,22 +1264,48 @@
                 const jsonText = document.getElementById('knowledgeBaseJson').value;
                 const kb = JSON.parse(jsonText);
                 
-                const response = await fetch(`${API_BASE}/config/knowledge-base`, {
+                // Use vendor-specific endpoint if vendor is selected
+                let url = `${API_BASE}/config/knowledge-base`;
+                if (currentVendorId) {
+                    url = `${API_BASE}/vendor/${currentVendorId}/knowledge-base`;
+                    // Ensure vendor_id is set
+                    if (kb.metadata) {
+                        kb.metadata.vendor_id = currentVendorId;
+                    }
+                    if (kb.chunks) {
+                        kb.chunks.forEach(chunk => {
+                            if (chunk.metadata) {
+                                chunk.metadata.vendor_id = currentVendorId;
+                            }
+                        });
+                    }
+                }
+                
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(kb)
                 });
                 
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `HTTP ${response.status}`);
+                }
+                
                 const result = await response.json();
                 if (result.status === 'success') {
-                    alert('Knowledge base saved and reloaded successfully!');
+                    const message = result.reload_status === 'success' 
+                        ? `Knowledge base saved and reloaded successfully${currentVendorId ? ` for vendor ${currentVendorId}` : ''}!`
+                        : `Knowledge base saved${currentVendorId ? ` for vendor ${currentVendorId}` : ''}, but ${result.reload_message}`;
+                    alert(message);
+                    loadKnowledgeBaseEditor(); // Reload to show updated data
                     getRAGStats();
                 } else {
-                    alert('Warning: ' + result.message);
+                    alert('Warning: ' + (result.message || 'Save failed'));
                 }
             } catch (error) {
                 console.error('Error saving knowledge base:', error);
-                alert('Error: Invalid JSON or save failed');
+                alert('Error: ' + error.message);
             }
         }
         
@@ -1093,17 +1436,235 @@
             }
         }
         
-        // Unified Config Functions
+        // Unified Config Functions (Vendor-Aware)
+        let currentConfigVersion = 'current';
+        let currentKBVersion = 'current';
+        
+        async function loadConfigVersions() {
+            if (!currentVendorId) {
+                document.getElementById('configVersionSelect').innerHTML = '<option value="current">Current (Active)</option>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/versions/config`);
+                const data = await response.json();
+                
+                const select = document.getElementById('configVersionSelect');
+                select.innerHTML = '';
+                data.versions.forEach(version => {
+                    const option = document.createElement('option');
+                    option.value = version;
+                    option.textContent = version === 'current' ? 'Current (Active)' : version;
+                    if (version === data.current) {
+                        option.selected = true;
+                        currentConfigVersion = version;
+                    }
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading config versions:', error);
+            }
+        }
+        
+        async function loadKBVersions() {
+            if (!currentVendorId) {
+                document.getElementById('kbVersionSelect').innerHTML = '<option value="current">Current (Active)</option>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/versions/knowledge-base`);
+                const data = await response.json();
+                
+                const select = document.getElementById('kbVersionSelect');
+                select.innerHTML = '';
+                data.versions.forEach(version => {
+                    const option = document.createElement('option');
+                    option.value = version;
+                    option.textContent = version === 'current' ? 'Current (Active)' : version;
+                    if (version === data.current) {
+                        option.selected = true;
+                        currentKBVersion = version;
+                    }
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading KB versions:', error);
+            }
+        }
+        
+        async function createConfigVersion() {
+            if (!currentVendorId) {
+                alert('Please select a vendor first');
+                return;
+            }
+            
+            const version = document.getElementById('newConfigVersion').value.trim();
+            if (!version) {
+                alert('Please enter a version name (e.g., v1.0.1)');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/versions/config/create`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        version: version,
+                        copy_from: currentConfigVersion
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert(`Config version ${version} created successfully!`);
+                    document.getElementById('newConfigVersion').value = '';
+                    await loadConfigVersions();
+                } else {
+                    alert('Error creating config version: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error creating config version:', error);
+                alert('Error creating config version: ' + error.message);
+            }
+        }
+        
+        async function createKBVersion() {
+            if (!currentVendorId) {
+                alert('Please select a vendor first');
+                return;
+            }
+            
+            const version = document.getElementById('newKBVersion').value.trim();
+            if (!version) {
+                alert('Please enter a version name (e.g., v1.0.1)');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/versions/knowledge-base/create`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        version: version,
+                        copy_from: currentKBVersion
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert(`Knowledge base version ${version} created successfully!`);
+                    document.getElementById('newKBVersion').value = '';
+                    await loadKBVersions();
+                } else {
+                    alert('Error creating KB version: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error creating KB version:', error);
+                alert('Error creating KB version: ' + error.message);
+            }
+        }
+        
+        async function switchConfigVersion() {
+            if (!currentVendorId) {
+                return;
+            }
+            
+            const select = document.getElementById('configVersionSelect');
+            const version = select.value;
+            
+            if (version === currentConfigVersion) {
+                return; // Already on this version
+            }
+            
+            if (!confirm(`Switch to config version "${version}"?\n\nThis will replace the current active config with this version.`)) {
+                select.value = currentConfigVersion;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/versions/config/switch`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ version: version })
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    currentConfigVersion = version;
+                    alert(`Switched to config version ${version} successfully!`);
+                    await loadUnifiedConfig(); // Reload the config
+                } else {
+                    alert('Error switching config version: ' + (result.detail || 'Unknown error'));
+                    select.value = currentConfigVersion;
+                }
+            } catch (error) {
+                console.error('Error switching config version:', error);
+                alert('Error switching config version: ' + error.message);
+                select.value = currentConfigVersion;
+            }
+        }
+        
+        async function switchKBVersion() {
+            if (!currentVendorId) {
+                return;
+            }
+            
+            const select = document.getElementById('kbVersionSelect');
+            const version = select.value;
+            
+            if (version === currentKBVersion) {
+                return; // Already on this version
+            }
+            
+            if (!confirm(`Switch to knowledge base version "${version}"?\n\nThis will replace the current active KB with this version and reload the RAG database.`)) {
+                select.value = currentKBVersion;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/versions/knowledge-base/switch`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ version: version })
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    currentKBVersion = version;
+                    alert(`Switched to knowledge base version ${version} successfully! RAG database reloaded.`);
+                    await loadKnowledgeBaseEditor(); // Reload the KB
+                } else {
+                    alert('Error switching KB version: ' + (result.detail || 'Unknown error'));
+                    select.value = currentKBVersion;
+                }
+            } catch (error) {
+                console.error('Error switching KB version:', error);
+                alert('Error switching KB version: ' + error.message);
+                select.value = currentKBVersion;
+            }
+        }
+        
         async function loadUnifiedConfig() {
             try {
-                const response = await fetch(`${API_BASE}/config/unified`);
+                // Use vendor-specific config if vendor is selected
+                let url = `${API_BASE}/config/unified`;
+                if (currentVendorId) {
+                    url = `${API_BASE}/vendor/${currentVendorId}/config`;
+                    if (currentConfigVersion && currentConfigVersion !== 'current') {
+                        url += `?version=${currentConfigVersion}`;
+                    }
+                }
+                
+                const response = await fetch(url);
                 const data = await response.json();
                 document.getElementById('unifiedConfigJson').value = JSON.stringify(data, null, 2);
                 const statusDiv = document.getElementById('unifiedConfigStatus');
                 statusDiv.style.display = 'block';
                 statusDiv.style.background = '#d4edda';
                 statusDiv.style.color = '#155724';
-                statusDiv.textContent = '✓ Configuration loaded successfully';
+                statusDiv.textContent = `✓ Configuration loaded successfully${currentVendorId ? ` (Vendor: ${currentVendorId}, Version: ${currentConfigVersion})` : ' (Default)'}`;
             } catch (error) {
                 console.error('Error loading unified config:', error);
                 alert('Error loading unified config');
@@ -1120,7 +1681,17 @@
                 const jsonText = document.getElementById('unifiedConfigJson').value;
                 const config = JSON.parse(jsonText);
                 
-                const response = await fetch(`${API_BASE}/config/unified`, {
+                // Use vendor-specific config endpoint if vendor is selected
+                let url = `${API_BASE}/config/unified`;
+                if (currentVendorId) {
+                    url = `${API_BASE}/vendor/${currentVendorId}/config`;
+                    // Ensure vendor_id in metadata matches
+                    if (config.metadata) {
+                        config.metadata.vendor_id = currentVendorId;
+                    }
+                }
+                
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(config)
@@ -1133,7 +1704,7 @@
                 if (result.status === 'success') {
                     statusDiv.style.background = '#d4edda';
                     statusDiv.style.color = '#155724';
-                    statusDiv.textContent = '✓ Configuration saved successfully! Restart server for full effect.';
+                    statusDiv.textContent = `✓ Configuration saved successfully${currentVendorId ? ` for vendor ${currentVendorId}` : ''}! Restart server for full effect.`;
                 } else {
                     statusDiv.style.background = '#f8d7da';
                     statusDiv.style.color = '#721c24';
@@ -1405,6 +1976,568 @@
             loadOfflineModels();
             loadSystemPrompts();
         }
+        
+        // Super Admin - Vendor Management
+        let currentVendorId = null;
+        let allVendors = [];
+        
+        async function loadVendors() {
+            try {
+                const response = await fetch(`${API_BASE}/vendor/list`);
+                const data = await response.json();
+                allVendors = data.vendors || [];
+                
+                // Update vendor selector dropdown
+                const selector = document.getElementById('vendorSelector');
+                selector.innerHTML = '<option value="">Select a vendor...</option>';
+                
+                allVendors.forEach(vendor => {
+                    const option = document.createElement('option');
+                    option.value = vendor.vendor_id;
+                    option.textContent = `${vendor.vendor_name} (${vendor.vendor_id})`;
+                    if (vendor.is_active) {
+                        option.textContent += ' ✓';
+                    }
+                    selector.appendChild(option);
+                });
+                
+                // Set default vendor if none selected
+                if (!currentVendorId && allVendors.length > 0) {
+                    const activeVendor = allVendors.find(v => v.is_active) || allVendors[0];
+                    currentVendorId = activeVendor.vendor_id;
+                    selector.value = currentVendorId;
+                    updateVendorDisplay(activeVendor);
+                } else if (currentVendorId) {
+                    selector.value = currentVendorId;
+                    const vendor = allVendors.find(v => v.vendor_id === currentVendorId);
+                    if (vendor) updateVendorDisplay(vendor);
+                }
+                
+                // Update vendors list in Vendors tab
+                if (allVendors.length > 0) {
+                    let html = '<table><thead><tr><th>Vendor ID</th><th>Vendor Name</th><th>Company</th><th>Business Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+                    
+                    allVendors.forEach(vendor => {
+                        const status = vendor.is_active ? '<span style="color: #27ae60;">Active</span>' : '<span style="color: #e74c3c;">Inactive</span>';
+                        const isCurrent = vendor.vendor_id === currentVendorId ? ' style="background: #e8f5e9;"' : '';
+                        html += `<tr${isCurrent}>
+                            <td><strong>${vendor.vendor_id}</strong></td>
+                            <td>${vendor.vendor_name}</td>
+                            <td>${vendor.company_name || 'N/A'}</td>
+                            <td>${vendor.business_type || 'N/A'}</td>
+                            <td>${status}</td>
+                            <td>
+                                <button onclick="switchActiveVendorById('${vendor.vendor_id}')" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: #3498db; margin-right: 0.5rem;">Switch</button>
+                                <button onclick="editVendorConfig('${vendor.vendor_id}')" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: #f39c12; margin-right: 0.5rem;">Config</button>
+                                <button onclick="manageVendorRAG('${vendor.vendor_id}')" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: #9b59b6;">RAG</button>
+                            </td>
+                        </tr>`;
+                    });
+                    
+                    html += '</tbody></table>';
+                    document.getElementById('vendorsList').innerHTML = html;
+                    
+                    // Populate copy from dropdown
+                    const copySelect = document.getElementById('copyFromVendor');
+                    if (copySelect) {
+                        copySelect.innerHTML = '<option value="">None (create empty vendor)</option>';
+                        allVendors.forEach(v => {
+                            copySelect.innerHTML += `<option value="${v.vendor_id}">${v.vendor_name}</option>`;
+                        });
+                    }
+                } else {
+                    document.getElementById('vendorsList').innerHTML = '<p style="color: #666;">No vendors found. Create your first vendor!</p>';
+                }
+            } catch (error) {
+                console.error('Error loading vendors:', error);
+                document.getElementById('vendorsList').innerHTML = `<span style="color: #e74c3c;">Error: ${error.message}</span>`;
+            }
+        }
+        
+        function updateVendorDisplay(vendor) {
+            document.getElementById('currentVendorDisplay').textContent = 
+                `${vendor.vendor_name} (${vendor.vendor_id})`;
+            // Reload vendor-specific data
+            if (document.getElementById('unified-config').classList.contains('active')) {
+                loadUnifiedConfig();
+            }
+            if (document.getElementById('knowledge-base').classList.contains('active')) {
+                loadKnowledgeBaseEditor();
+            }
+            if (document.getElementById('rag').classList.contains('active')) {
+                getRAGStats();
+            }
+        }
+        
+        function switchActiveVendor() {
+            const selector = document.getElementById('vendorSelector');
+            const vendorId = selector.value;
+            if (vendorId) {
+                switchActiveVendorById(vendorId);
+            }
+        }
+        
+        async function switchActiveVendorById(vendorId) {
+            currentVendorId = vendorId;
+            currentConfigVersion = 'current';
+            currentKBVersion = 'current';
+            const vendor = allVendors.find(v => v.vendor_id === vendorId);
+            if (vendor) {
+                document.getElementById('vendorSelector').value = vendorId;
+                updateVendorDisplay(vendor);
+                // Update current vendor name in vendors tab
+                document.getElementById('currentVendorName').textContent = vendor.vendor_name;
+            }
+            // Reload all vendor-specific tabs
+            loadVendors();
+            
+            // Reload versions and data for the new vendor
+            if (document.getElementById('unified-config').style.display !== 'none') {
+                await loadConfigVersions();
+                loadUnifiedConfig();
+            }
+            if (document.getElementById('knowledge-base').style.display !== 'none') {
+                await loadKBVersions();
+                loadKnowledgeBaseEditor();
+            }
+        }
+        
+        // AiuraMind Functions
+        async function loadAiuraModels() {
+            const provider = document.getElementById('aiuraModelProvider').value;
+            const modelSelect = document.getElementById('aiuraModelName');
+            
+            try {
+                // Load all available models
+                const response = await fetch(`${API_BASE}/models/available`);
+                const data = await response.json();
+                
+                if (!provider) {
+                    // No provider selected - show all models grouped
+                    modelSelect.innerHTML = '<option value="">Select provider first</option>';
+                    modelSelect.disabled = true;
+                    return;
+                }
+                
+                // Filter models by selected provider
+                const providerModels = data.models.filter(m => m.provider === provider);
+                
+                if (providerModels.length === 0) {
+                    modelSelect.innerHTML = '<option value="">No models available for this provider</option>';
+                    modelSelect.disabled = true;
+                    return;
+                }
+                
+                modelSelect.innerHTML = '<option value="">Use Default Model</option>';
+                providerModels.forEach(model => {
+                    const option = document.createElement('option');
+                    option.value = model.name;
+                    // Format size display
+                    let sizeText = '';
+                    if (model.size && model.size > 0) {
+                        const sizeGB = model.size / 1024 / 1024 / 1024;
+                        if (sizeGB >= 1) {
+                            sizeText = ` (${sizeGB.toFixed(2)}GB)`;
+                        } else {
+                            const sizeMB = model.size / 1024 / 1024;
+                            sizeText = ` (${sizeMB.toFixed(2)}MB)`;
+                        }
+                    }
+                    option.textContent = `${model.name}${sizeText}`;
+                    modelSelect.appendChild(option);
+                });
+                
+                modelSelect.disabled = false;
+            } catch (error) {
+                console.error('Error loading models:', error);
+                modelSelect.innerHTML = '<option value="">Error loading models</option>';
+                modelSelect.disabled = true;
+            }
+        }
+        
+        async function executeAiuraMind() {
+            if (!currentVendorId) {
+                alert('Please select a vendor first');
+                return;
+            }
+            
+            const businessData = document.getElementById('aiuraMindInput').value.trim();
+            if (!businessData) {
+                alert('Please enter business data');
+                return;
+            }
+            
+            const vendorName = document.getElementById('aiuraVendorName').value.trim();
+            const businessType = document.getElementById('aiuraBusinessType').value.trim() || 'general';
+            
+            if (!vendorName) {
+                alert('Please enter vendor name');
+                return;
+            }
+            
+            // Get model selection
+            const modelProvider = document.getElementById('aiuraModelProvider').value || null;
+            const modelName = document.getElementById('aiuraModelName').value || null;
+            
+            // Get generation settings
+            const generationDepth = document.getElementById('aiuraGenerationDepth').value || 'extensive';
+            const maxTokens = parseInt(document.getElementById('aiuraMaxTokens').value) || 32000;
+            const temperature = parseFloat(document.getElementById('aiuraTemperature').value) || 0.2;
+            
+            // Get company name from vendor or input
+            const vendor = allVendors?.find(v => v.vendor_id === currentVendorId);
+            const companyName = vendor?.company_name || vendorName;
+            
+            const statusDiv = document.getElementById('aiuraMindStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = '#fff3cd';
+            statusDiv.style.color = '#856404';
+            const modelInfo = modelProvider && modelName ? ` using ${modelProvider}/${modelName}` : '';
+            statusDiv.innerHTML = `🧠 Processing with AiuraMind${modelInfo}... This may take a minute.`;
+            
+            try {
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/aiura-mind/generate`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        business_data: businessData,
+                        vendor_name: vendorName,
+                        company_name: companyName,
+                        business_type: businessType,
+                        model_provider: modelProvider,
+                        model_name: modelName,
+                        generation_depth: generationDepth,
+                        max_tokens: maxTokens,
+                        temperature: temperature
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    statusDiv.style.background = '#d4edda';
+                    statusDiv.style.color = '#155724';
+                    let message = '✅ Successfully generated config and knowledge base!';
+                    if (result.additional_files) {
+                        message += '<br>📁 Also generated: system_prompts.json, chatbot_service_config.json, app_config.json';
+                    }
+                    statusDiv.innerHTML = message;
+                    
+                    // Show results
+                    document.getElementById('aiuraGeneratedConfig').value = JSON.stringify(result.unified_config, null, 2);
+                    document.getElementById('aiuraGeneratedKB').value = JSON.stringify(result.knowledge_base, null, 2);
+                    document.getElementById('aiuraMindResults').style.display = 'block';
+                } else {
+                    statusDiv.style.background = '#f8d7da';
+                    statusDiv.style.color = '#721c24';
+                    statusDiv.innerHTML = '❌ Error: ' + (result.detail || 'Generation failed');
+                }
+            } catch (error) {
+                console.error('Error executing AiuraMind:', error);
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.innerHTML = '❌ Error: ' + error.message;
+            }
+        }
+        
+        async function applyGeneratedConfig() {
+            if (!currentVendorId) {
+                alert('Please select a vendor first');
+                return;
+            }
+            
+            const configText = document.getElementById('aiuraGeneratedConfig').value;
+            try {
+                const config = JSON.parse(configText);
+                
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/config`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(config)
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('Config applied successfully!');
+                    loadUnifiedConfig();
+                } else {
+                    alert('Error applying config: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Invalid JSON: ' + error.message);
+            }
+        }
+        
+        async function applyGeneratedKB() {
+            if (!currentVendorId) {
+                alert('Please select a vendor first');
+                return;
+            }
+            
+            const kbText = document.getElementById('aiuraGeneratedKB').value;
+            try {
+                const kb = JSON.parse(kbText);
+                
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/knowledge-base`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(kb)
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('Knowledge base applied successfully! RAG database reloaded.');
+                    loadKnowledgeBaseEditor();
+                } else {
+                    alert('Error applying knowledge base: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Invalid JSON: ' + error.message);
+            }
+        }
+        
+        async function saveGeneratedConfig() {
+            if (!currentVendorId) {
+                alert('Please select a vendor first');
+                return;
+            }
+            
+            const configText = document.getElementById('aiuraGeneratedConfig').value;
+            if (!configText.trim()) {
+                alert('No config to save. Please generate a config first.');
+                return;
+            }
+            
+            try {
+                const config = JSON.parse(configText);
+                
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/config/save-generated`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(config)
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('✅ Config file saved successfully to vendor folder!');
+                } else {
+                    alert('Error saving config: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Invalid JSON: ' + error.message);
+            }
+        }
+        
+        async function saveGeneratedKB() {
+            if (!currentVendorId) {
+                alert('Please select a vendor first');
+                return;
+            }
+            
+            const kbText = document.getElementById('aiuraGeneratedKB').value;
+            if (!kbText.trim()) {
+                alert('No knowledge base to save. Please generate a KB first.');
+                return;
+            }
+            
+            try {
+                const kb = JSON.parse(kbText);
+                
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/knowledge-base/save-generated`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(kb)
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('✅ Knowledge base file saved successfully to vendor folder!');
+                } else {
+                    alert('Error saving knowledge base: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Invalid JSON: ' + error.message);
+            }
+        }
+        
+        // File Upload Functions
+        async function uploadConfigFile() {
+            const fileInput = document.getElementById('configFileUpload');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+            
+            if (!currentVendorId) {
+                alert('Please select a vendor first');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/config/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('Config file uploaded successfully!');
+                    loadUnifiedConfig();
+                } else {
+                    alert('Error uploading config: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error uploading config: ' + error.message);
+            }
+            
+            // Reset file input
+            fileInput.value = '';
+        }
+        
+        async function uploadKBFile() {
+            const fileInput = document.getElementById('kbFileUpload');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+            
+            if (!currentVendorId) {
+                alert('Please select a vendor first');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/knowledge-base/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert('Knowledge base file uploaded successfully! ' + (result.reload_message || ''));
+                    loadKnowledgeBaseEditor();
+                } else {
+                    alert('Error uploading knowledge base: ' + (result.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Error uploading knowledge base: ' + error.message);
+            }
+            
+            // Reset file input
+            fileInput.value = '';
+        }
+        
+        // Vendor API Endpoints
+        async function loadVendorAPIEndpoints() {
+            if (!currentVendorId) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/api-endpoints`);
+                const data = await response.json();
+                
+                // Display endpoints (you can add a UI element for this)
+                console.log('Vendor API Endpoints:', data);
+                
+                // Optionally show in a modal or dedicated section
+                const endpointsText = JSON.stringify(data, null, 2);
+                alert('Vendor API Endpoints:\n\n' + endpointsText);
+            } catch (error) {
+                console.error('Error loading API endpoints:', error);
+            }
+        }
+        
+        
+        function showCreateVendorForm() {
+            document.getElementById('createVendorForm').style.display = 'block';
+            document.getElementById('newVendorId').value = '';
+            document.getElementById('newVendorName').value = '';
+            document.getElementById('newCompanyName').value = '';
+            document.getElementById('newBusinessType').value = 'motorcycle_dealership';
+            document.getElementById('copyFromVendor').value = '';
+        }
+        
+        function hideCreateVendorForm() {
+            document.getElementById('createVendorForm').style.display = 'none';
+        }
+        
+        async function createVendor() {
+            const vendorId = document.getElementById('newVendorId').value.trim();
+            const vendorName = document.getElementById('newVendorName').value.trim();
+            const companyName = document.getElementById('newCompanyName').value.trim();
+            const businessType = document.getElementById('newBusinessType').value;
+            const copyFrom = document.getElementById('copyFromVendor').value;
+            
+            if (!vendorId || !vendorName || !companyName) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // Validate vendor ID format
+            if (!/^[a-z0-9_]+$/.test(vendorId)) {
+                alert('Vendor ID must be lowercase letters, numbers, and underscores only');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/vendor/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        vendor_id: vendorId,
+                        vendor_name: vendorName,
+                        company_name: companyName,
+                        business_type: businessType,
+                        copy_from_vendor: copyFrom || null
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.status === 'success') {
+                    alert(`Vendor ${vendorId} created successfully!`);
+                    hideCreateVendorForm();
+                    loadVendors();
+                } else {
+                    alert(`Error: ${data.detail || 'Failed to create vendor'}`);
+                }
+            } catch (error) {
+                console.error('Error creating vendor:', error);
+                alert(`Error creating vendor: ${error.message}`);
+            }
+        }
+        
+        function editVendorConfig(vendorId) {
+            // Switch to the vendor first, then open unified config
+            switchActiveVendorById(vendorId);
+            setTimeout(() => {
+                switchTab('unified-config');
+            }, 100);
+        }
+        
+        function manageVendorRAG(vendorId) {
+            // Switch to the vendor first, then open knowledge base
+            switchActiveVendorById(vendorId);
+            setTimeout(() => {
+                switchTab('knowledge-base');
+            }, 100);
+        }
+        
+        // Load vendors on page load and set default vendor
+        loadVendors().then(() => {
+            // Auto-select first vendor if available
+            if (allVendors.length > 0 && !currentVendorId) {
+                const activeVendor = allVendors.find(v => v.is_active) || allVendors[0];
+                if (activeVendor) {
+                    switchActiveVendorById(activeVendor.vendor_id);
+                }
+            }
+        });
     </script>
 </body>
 </html>

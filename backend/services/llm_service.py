@@ -283,15 +283,18 @@ class LLMService:
         logger.warning("M4 provider not fully implemented, using Ollama fallback")
         return await self._generate_ollama(messages, system_prompt, **kwargs)
     
-    def get_available_models(self) -> List[Dict[str, Any]]:
-        """Get list of available models for current provider."""
-        try:
-            if self.current_provider == "ollama":
+    def get_available_models(self, provider: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get list of available models for specified provider or all providers."""
+        all_models = []
+        
+        # Get Ollama models
+        if not provider or provider == "ollama":
+            try:
                 with httpx.Client(timeout=10.0) as client:
                     response = client.get(f"{self.settings.llm_base_url}/api/tags")
                     if response.status_code == 200:
                         data = response.json()
-                        return [
+                        ollama_models = [
                             {
                                 "name": model["name"],
                                 "provider": "ollama",
@@ -300,15 +303,19 @@ class LLMService:
                             }
                             for model in data.get("models", [])
                         ]
-            elif self.current_provider == "openai":
-                # OpenAI models would be listed here
-                return [
-                    {"name": "gpt-4-turbo-preview", "provider": "openai"},
-                    {"name": "gpt-3.5-turbo", "provider": "openai"}
-                ]
-            
-            return []
-        except Exception as e:
-            logger.error(f"Error getting available models: {e}")
-            return []
+                        all_models.extend(ollama_models)
+            except Exception as e:
+                logger.warning(f"Error getting Ollama models: {e}")
+        
+        # Get OpenAI models
+        if not provider or provider == "openai":
+            # OpenAI models (static list for now)
+            openai_models = [
+                {"name": "gpt-4-turbo-preview", "provider": "openai", "size": 0},
+                {"name": "gpt-4", "provider": "openai", "size": 0},
+                {"name": "gpt-3.5-turbo", "provider": "openai", "size": 0}
+            ]
+            all_models.extend(openai_models)
+        
+        return all_models
 

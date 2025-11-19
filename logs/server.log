@@ -88,3 +88,59 @@ INFO:     46.183.110.17:0 - "GET /api/v1/config/models/offline HTTP/1.1" 200 OK
 INFO:     46.183.110.17:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
 INFO:     46.183.110.17:0 - "GET /standalone-widget.html HTTP/1.1" 404 Not Found
 INFO:     46.183.110.17:0 - "GET /frontend/standalone-widget.html HTTP/1.1" 200 OK
+INFO:     92.40.176.242:0 - "GET / HTTP/1.1" 200 OK
+INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1k11tz9t7 HTTP/1.1" 200 OK
+INFO:     92.40.176.242:0 - "GET /api/v1/config/unified HTTP/1.1" 200 OK
+INFO:     92.40.176.242:0 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+2025-11-19 04:08:10 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 04:08:10 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-19 04:08:10 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
+2025-11-19 04:08:10 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-19 04:08:10 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-19 04:08:10 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 04:08:10 | INFO     | backend.services.chatbot_service:_load_chatbot_config - Chatbot service configuration loaded from unified config
+INFO:     92.40.176.242:0 - "POST /api/v1/chat/message HTTP/1.1" 200 OK
+INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1k11tz9t7 HTTP/1.1" 200 OK
+2025-11-19 04:08:24 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 04:08:24 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-19 04:08:24 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
+2025-11-19 04:08:24 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-19 04:08:24 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-19 04:08:24 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 04:08:24 | INFO     | backend.services.chatbot_service:_load_chatbot_config - Chatbot service configuration loaded from unified config
+INFO:     92.40.176.242:0 - "POST /api/v1/chat/message HTTP/1.1" 200 OK
+INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1k11tz9t7 HTTP/1.1" 200 OK
+2025-11-19 04:08:32 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 04:08:32 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-19 04:08:32 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
+2025-11-19 04:08:32 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-19 04:08:32 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-19 04:08:32 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 04:08:32 | INFO     | backend.services.chatbot_service:_load_chatbot_config - Chatbot service configuration loaded from unified config
+INFO:     92.40.176.242:0 - "POST /api/v1/chat/message HTTP/1.1" 200 OK
+INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1k11tz9t7 HTTP/1.1" 200 OK
+INFO:     92.40.176.242:0 - "DELETE /api/v1/chat/delete/chat_1763507290613_ri1y1wrzn HTTP/1.1" 200 OK
+INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1k11tz9t7 HTTP/1.1" 200 OK
+INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1k11tz9t7 HTTP/1.1" 200 OK
+INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1763507459027_1boc8odaf HTTP/1.1" 200 OK
+2025-11-19 04:11:06 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-19 04:11:06 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-19 04:11:06 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
+2025-11-19 04:11:06 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-19 04:11:06 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-19 04:11:06 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-19 04:11:06 | INFO     | backend.services.chatbot_service:_load_chatbot_config - Chatbot service configuration loaded from unified config
+INFO:     92.40.176.242:0 - "POST /api/v1/chat/message HTTP/1.1" 200 OK
+INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1763507459027_1boc8odaf HTTP/1.1" 200 OK
+INFO:     46.183.110.17:0 - "GET /frontend/standalone-widget.html HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55708 - "POST /api/v1/vendor/create HTTP/1.1" 404 Not Found
+INFO:     149.12.167.128:0 - "HEAD /health HTTP/1.1" 405 Method Not Allowed
+INFO:     127.0.0.1:56597 - "GET /api/v1/vendor/list HTTP/1.1" 404 Not Found

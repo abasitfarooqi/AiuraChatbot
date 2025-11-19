@@ -1,119 +1,135 @@
-# ✅ Server is Running! Chat is Ready!
+# 🚀 Quick Start Guide
 
-## 🎉 Status: Server is Active
+## One Command to Go Live
 
-The chatbot server is now running on **http://localhost:8000**
+```bash
+./scripts/manage.sh expose
+```
+
+This single command will:
+1. ✅ Start the chatbot server
+2. ✅ Start Cloudflare tunnel
+3. ✅ Give you a public HTTPS URL
+4. ✅ Show all API endpoints
+
+**That's it! Your chatbot is now live and accessible from anywhere!**
 
 ---
 
-## 📱 How to Use the Chat
+## Management Commands
 
-### Step 1: Open Chat Interface
-
-**Option A: Double-click**
-- Open Finder
-- Navigate to: `/Users/abdulbasit/Projects/HybridApps/AiuraChatbot/frontend/`
-- Double-click `index.html`
-
-**Option B: Copy this link to your browser:**
-```
-file:///Users/abdulbasit/Projects/HybridApps/AiuraChatbot/frontend/index.html
-```
-
-### Step 2: Start Chatting!
-
-The chat interface should now work. Try:
-- "What is the rental price for Honda PCX 125?"
-- "Do you offer finance options?"
-- "What are your opening hours?"
+| Command | Description |
+|---------|-------------|
+| `./scripts/manage.sh expose` | **Start everything** (server + tunnel) - Recommended! |
+| `./scripts/manage.sh start` | Start server only |
+| `./scripts/manage.sh stop` | Stop server |
+| `./scripts/manage.sh restart` | Restart server |
+| `./scripts/manage.sh status` | Check server and tunnel status |
+| `./scripts/manage.sh tunnel start` | Start tunnel only |
+| `./scripts/manage.sh tunnel stop` | Stop tunnel only |
 
 ---
 
-## 🔧 Server Management
+## What You Get
 
-### Server is Currently Running
-- **Status**: ✅ Active
-- **URL**: http://localhost:8000
-- **PID**: Check with `ps aux | grep uvicorn`
+After running `./scripts/manage.sh expose`:
 
-### To Restart Server (if needed)
+```
+✅ Server started successfully
+📍 Server URL: http://localhost:8000
+📚 API Docs: http://localhost:8000/docs
 
-**Easy way:**
-```bash
-./START_SERVER.sh
+✅ Tunnel started successfully
+🌍 Public URL: https://abc123.trycloudflare.com
+🔗 API Base: https://abc123.trycloudflare.com/api/v1
 ```
 
-**Manual way:**
-```bash
-cd /Users/abdulbasit/Projects/HybridApps/AiuraChatbot
-source venv/bin/activate
-uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-### To Stop Server
-Press `Ctrl+C` in the terminal where server is running.
-
-Or:
-```bash
-pkill -f "uvicorn backend.app.main:app"
-```
+**Use the Public URL in your Laravel/frontend!**
 
 ---
 
-## ✅ Verify Server is Working
+## Laravel Integration
 
-Open a terminal and run:
-```bash
-curl http://localhost:8000/health
+1. **Get your public URL** (from `./scripts/manage.sh expose`)
+
+2. **Add to Laravel .env:**
+```env
+CHATBOT_API_URL=https://abc123.trycloudflare.com
+CHATBOT_API_BASE=https://abc123.trycloudflare.com/api/v1
 ```
 
-Should return:
-```json
-{"status":"healthy","version":"1.0.0"}
+3. **Use in Laravel:**
+```php
+use Illuminate\Support\Facades\Http;
+
+$response = Http::post(env('CHATBOT_API_BASE') . '/chat/message', [
+    'user_id' => 'user_001',
+    'message' => 'What is the rental price?'
+]);
+
+$data = $response->json();
+echo $data['response'];
 ```
+
+**Full Laravel guide**: See `others/documentation/CLOUDFLARE_SETUP.md`
 
 ---
 
-## 🎯 Quick Test
+## API Quick Reference
 
-Test the API directly:
+### Send Message
 ```bash
-curl -X POST http://localhost:8000/api/v1/chat/message \
+curl -X POST https://your-tunnel-url.trycloudflare.com/api/v1/chat/message \
   -H "Content-Type: application/json" \
-  -d '{"user_id":"test","message":"hi"}'
+  -d '{
+    "user_id": "user_001",
+    "message": "What is the rental price?"
+  }'
+```
+
+### Health Check
+```bash
+curl https://your-tunnel-url.trycloudflare.com/health
+```
+
+### API Documentation
+Visit: `https://your-tunnel-url.trycloudflare.com/docs`
+
+**Full API reference**: See `others/documentation/API_REFERENCE.md`
+
+---
+
+## Troubleshooting
+
+### Check Status
+```bash
+./scripts/manage.sh status
+```
+
+### View Logs
+```bash
+tail -f logs/server.log
+tail -f logs/tunnel.log
+```
+
+### Server Won't Start?
+```bash
+# Kill existing process
+pkill -f "uvicorn backend.app.main:app"
+
+# Try again
+./scripts/manage.sh start
 ```
 
 ---
 
-## 📋 All Frontend Links
+## Documentation
 
-**Chat Interface:**
-```
-file:///Users/abdulbasit/Projects/HybridApps/AiuraChatbot/frontend/index.html
-```
-
-**Admin Panel:**
-```
-file:///Users/abdulbasit/Projects/HybridApps/AiuraChatbot/frontend/admin.html
-```
-
-**API Documentation:**
-```
-http://localhost:8000/docs
-```
+- **Cloudflare Setup**: `others/documentation/CLOUDFLARE_SETUP.md`
+- **API Reference**: `others/documentation/API_REFERENCE.md`
+- **Full Documentation**: `README.md`
 
 ---
 
-## ⚠️ Important
-
-**The server must be running for the chat to work!**
-
-If you see "Failed to fetch" error:
-1. Check server is running: `curl http://localhost:8000/health`
-2. If not running, start it using instructions above
-3. Refresh the chat page (Cmd+R or F5)
-
----
-
-**🎉 Everything is ready! Open the chat interface and start chatting!**
+**🎉 Ready to go! Run `./scripts/manage.sh expose` and you're live!**
 

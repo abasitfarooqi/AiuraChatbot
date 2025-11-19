@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "version": "3.0.0",
+    "vendor_id": "final_test",
+    "business_type": "service",
+    "last_updated": "2025-11-19"
+  },
+  "business": {
+    "company_name": "Final Test Company Ltd",
+    "services_list": [
+      "service 1",
+      "service 2",
+      "service 3"
+    ],
+    "core_activities": [
+      "Final Test Company Ltd provides quality services"
+    ]
+  },
+  "contact": {
+    "primary_phone": "0000 000 0000",
+    "primary_email": "info@finaltest.com",
+    "contact_format": "Contact: {phone} or {email}"
+  },
+  "application": {
+    "api_port": 8000
+  },
+  "prompts": {
+    "main_system_prompt": "You are the Final Test Company Ltd chatbot assistant. You help customers with their inquiries.\n\nCRITICAL RULES:\n1. ONLY use information provided in the INFORMATION section\n2. NEVER make up or guess information\n3. Be helpful, friendly, and professional\n4. If you don't know something, direct customers to contact us\n\nRESPONSE FORMAT:\n- Use clear, concise language\n- Format responses with proper structure\n- Always be polite and professional",
+    "fallback_message": "I don't have that information. Please contact us for more details.",
+    "out_of_domain_message": "I can help you with Final Test Company Ltd services. How can I assist you?"
+  },
+  "chatbot_service": {
+    "greetings": {
+      "simple_greetings": [
+        "hi",
+        "hello"
+      ]
+    }
+  }
+}

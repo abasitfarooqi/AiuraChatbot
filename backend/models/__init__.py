@@ -1,6 +1,7 @@
 """Models module."""
 from .database import (
     Base,
+    Vendor,
     User,
     Chat,
     Message,
@@ -14,6 +15,7 @@ from .database import (
 
 __all__ = [
     "Base",
+    "Vendor",
     "User",
     "Chat",
     "Message",

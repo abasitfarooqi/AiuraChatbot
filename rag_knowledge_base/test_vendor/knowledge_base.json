@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "version": "2.0.0",
+    "vendor_id": "test_vendor",
+    "description": "Knowledge base for Test Vendor Ltd",
+    "chunking_strategy": "semantic_chunks_with_metadata"
+  },
+  "chunks": [
+    {
+      "symbol": "COMPANY_001",
+      "keyword": "company_info",
+      "tags": [
+        "company",
+        "business",
+        "about"
+      ],
+      "mapping": {
+        "category": "company",
+        "subcategory": "general",
+        "priority": "high",
+        "domain": "test_vendor"
+      },
+      "metadata": {
+        "source": "company",
+        "vendor_id": "test_vendor",
+        "confidence": "high"
+      },
+      "content": "Test Vendor Ltd is a retail business. We provide quality services to our customers. Contact us for more information."
+    },
+    {
+      "symbol": "SERVICE_001",
+      "keyword": "services",
+      "tags": [
+        "services",
+        "what we do"
+      ],
+      "mapping": {
+        "category": "services",
+        "subcategory": "general",
+        "priority": "high",
+        "domain": "test_vendor"
+      },
+      "metadata": {
+        "source": "company",
+        "vendor_id": "test_vendor",
+        "confidence": "high"
+      },
+      "content": "Test Vendor Ltd offers various services. Please contact us to learn more about our service offerings."
+    },
+    {
+      "symbol": "CONTACT_001",
+      "keyword": "contact",
+      "tags": [
+        "contact",
+        "phone",
+        "email"
+      ],
+      "mapping": {
+        "category": "contact",
+        "subcategory": "general",
+        "priority": "high",
+        "domain": "test_vendor"
+      },
+      "metadata": {
+        "source": "company",
+        "vendor_id": "test_vendor",
+        "confidence": "high"
+      },
+      "content": "Contact Test Vendor Ltd: Phone: 0000 000 0000, Email: info@testvendor.com. We are here to help!"
+    }
+  ]
+}

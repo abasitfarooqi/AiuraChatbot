@@ -12,18 +12,41 @@ settings = get_settings()
 Base = declarative_base()
 
 
+class Vendor(Base):
+    """Vendor model for multi-vendor support."""
+    __tablename__ = "vendors"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    vendor_id = Column(String, unique=True, index=True, nullable=False)
+    vendor_name = Column(String, nullable=False)
+    company_name = Column(String, nullable=True)
+    business_type = Column(String, nullable=True)  # motorcycle_dealership, car_dealership, etc.
+    is_active = Column(Boolean, default=True)
+    config_path = Column(String, nullable=True)  # Path to vendor-specific config
+    rag_path = Column(String, nullable=True)  # Path to vendor-specific RAG KB
+    chroma_collection = Column(String, nullable=True)  # Vendor-specific ChromaDB collection
+    vendor_metadata = Column(JSON, default=dict)  # Additional vendor metadata
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    users = relationship("User", back_populates="vendor", cascade="all, delete-orphan")
+    chats = relationship("Chat", back_populates="vendor", cascade="all, delete-orphan")
+
+
 class User(Base):
     """User model for multi-user support."""
     __tablename__ = "users"
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(String, unique=True, index=True, nullable=False)
-    vendor_id = Column(String, default=settings.default_vendor_id)
+    vendor_id = Column(String, ForeignKey("vendors.vendor_id"), default=settings.default_vendor_id, nullable=False, index=True)
     credits = Column(Integer, default=settings.default_user_credits)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
+    vendor = relationship("Vendor", back_populates="users")
     chats = relationship("Chat", back_populates="user", cascade="all, delete-orphan")
 
 
@@ -34,13 +57,14 @@ class Chat(Base):
     id = Column(Integer, primary_key=True, index=True)
     chat_id = Column(String, unique=True, index=True, nullable=False)
     user_id = Column(String, ForeignKey("users.user_id"), nullable=False)
-    vendor_id = Column(String, default=settings.default_vendor_id)
+    vendor_id = Column(String, ForeignKey("vendors.vendor_id"), default=settings.default_vendor_id, nullable=False, index=True)
     title = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
     user = relationship("User", back_populates="chats")
+    vendor = relationship("Vendor", back_populates="chats")
     messages = relationship("Message", back_populates="chat", cascade="all, delete-orphan", order_by="Message.created_at")
 
 

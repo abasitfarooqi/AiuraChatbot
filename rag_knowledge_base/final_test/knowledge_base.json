@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "version": "2.0.0",
+    "vendor_id": "final_test",
+    "description": "Knowledge base for Final Test Company Ltd",
+    "chunking_strategy": "semantic_chunks_with_metadata",
+    "last_updated": "2025-11-19"
+  },
+  "chunks": [
+    {
+      "symbol": "COMPANY_001",
+      "keyword": "company_info",
+      "tags": [
+        "company",
+        "business",
+        "about",
+        "information"
+      ],
+      "mapping": {
+        "category": "company",
+        "subcategory": "general",
+        "priority": "high",
+        "domain": "final_test"
+      },
+      "metadata": {
+        "source": "company",
+        "last_verified": "2025-11-19",
+        "confidence": "high",
+        "requires_update": false,
+        "vendor_id": "final_test"
+      },
+      "content": "Final Test Company Ltd is a service. We provide quality services to our customers. Contact us for more information."
+    },
+    {
+      "symbol": "SERVICE_001",
+      "keyword": "services",
+      "tags": [
+        "services",
+        "what we do",
+        "offerings"
+      ],
+      "mapping": {
+        "category": "services",
+        "subcategory": "general",
+        "priority": "high",
+        "domain": "final_test"
+      },
+      "metadata": {
+        "source": "company",
+        "last_verified": "2025-11-19",
+        "confidence": "high",
+        "requires_update": false,
+        "vendor_id": "final_test"
+      },
+      "content": "Final Test Company Ltd offers various services. Please contact us to learn more about our service offerings and how we can help you."
+    },
+    {
+      "symbol": "CONTACT_001",
+      "keyword": "contact",
+      "tags": [
+        "contact",
+        "phone",
+        "email",
+        "reach us"
+      ],
+      "mapping": {
+        "category": "contact",
+        "subcategory": "general",
+        "priority": "high",
+        "domain": "final_test"
+      },
+      "metadata": {
+        "source": "company",
+        "last_verified": "2025-11-19",
+        "confidence": "high",
+        "requires_update": false,
+        "vendor_id": "final_test"
+      },
+      "content": "Contact Final Test Company Ltd: Phone: 0000 000 0000, Email: info@finaltest.com. We're here to help!"
+    }
+  ]
+}

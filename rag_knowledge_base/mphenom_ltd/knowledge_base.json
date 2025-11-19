@@ -1,0 +1,9 @@
+{
+  "metadata": {
+    "version": "2.0.0",
+    "vendor_id": "mphenom_ltd",
+    "description": "Knowledge base for mPhenom Ltd",
+    "chunking_strategy": "semantic_chunks_with_metadata"
+  },
+  "chunks": []
+}

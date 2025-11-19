@@ -212,6 +212,14 @@
             <div class="disclaimer" id="disclaimer">
                 <strong>⚠️ Disclaimer:</strong> I'm a chatbot and may make mistakes. Information provided might be incorrect. Please always verify important details by contacting us.
             </div>
+            <!-- Vendor Selector -->
+            <div style="background: #34495e; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid #2c3e50;">
+                <label style="color: white; font-size: 0.9rem; font-weight: 500;">Vendor:</label>
+                <select id="vendorSelector" onchange="switchVendor()" style="flex: 1; max-width: 250px; padding: 0.4rem; font-size: 0.9rem; border: 1px solid #2c3e50; background: white;">
+                    <option value="">Loading vendors...</option>
+                </select>
+                <span id="currentVendorDisplay" style="color: #ecf0f1; font-size: 0.85rem; margin-left: auto;"></span>
+            </div>
             <div class="chat-header">
                 <h2 id="chatbotTitle">Chatbot</h2>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
@@ -226,7 +234,7 @@
             
             <div class="chat-messages" id="messagesContainer">
                 <div class="message assistant">
-                    Hello! I'm the Neguinho Motors chatbot. I can help you with bike rentals, sales, finance, servicing, and more. How can I assist you today?
+                    Hello! How can I help you today?
                 </div>
             </div>
             
@@ -247,6 +255,10 @@
         // Use relative URL since frontend is served from same server
         const API_BASE = '/api/v1';
         
+        // Vendor management
+        let currentVendorId = localStorage.getItem('chatbot_vendorId') || null;
+        let allVendors = [];
+        
         // Load userId from localStorage or create new one
         let userId = localStorage.getItem('chatbot_userId');
         if (!userId) {
@@ -258,13 +270,93 @@
         // Load currentChatId from localStorage
         let currentChatId = localStorage.getItem('chatbot_currentChatId');
         
-        // Load user chats on load
-        loadUserChats().then(() => {
-            // If we have a saved chatId, load it
-            if (currentChatId) {
-                loadChat(currentChatId);
-            }
+        // Load vendors and set default
+        loadVendors().then(() => {
+            // Load business info for selected vendor
+            loadBusinessInfo();
+            // Load user chats after vendor is set
+            loadUserChats().then(() => {
+                // If we have a saved chatId, load it
+                if (currentChatId) {
+                    loadChat(currentChatId);
+                }
+            });
         });
+        
+        // Vendor functions
+        async function loadVendors() {
+            try {
+                const response = await fetch(`${API_BASE}/vendor/list`);
+                const data = await response.json();
+                allVendors = data.vendors || [];
+                
+                const selector = document.getElementById('vendorSelector');
+                selector.innerHTML = '<option value="">Select vendor...</option>';
+                
+                allVendors.forEach(vendor => {
+                    const option = document.createElement('option');
+                    option.value = vendor.vendor_id;
+                    option.textContent = `${vendor.vendor_name} (${vendor.vendor_id})`;
+                    if (vendor.is_active) {
+                        option.textContent += ' ✓';
+                    }
+                    selector.appendChild(option);
+                });
+                
+                // Set default vendor if none selected
+                if (!currentVendorId && allVendors.length > 0) {
+                    const activeVendor = allVendors.find(v => v.is_active) || allVendors[0];
+                    currentVendorId = activeVendor.vendor_id;
+                    selector.value = currentVendorId;
+                    updateVendorDisplay(activeVendor);
+                    localStorage.setItem('chatbot_vendorId', currentVendorId);
+                } else if (currentVendorId) {
+                    selector.value = currentVendorId;
+                    const vendor = allVendors.find(v => v.vendor_id === currentVendorId);
+                    if (vendor) {
+                        updateVendorDisplay(vendor);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading vendors:', error);
+                document.getElementById('currentVendorDisplay').textContent = 'Error loading vendors';
+            }
+        }
+        
+        function switchVendor() {
+            const selector = document.getElementById('vendorSelector');
+            const vendorId = selector.value;
+            if (vendorId) {
+                currentVendorId = vendorId;
+                localStorage.setItem('chatbot_vendorId', vendorId);
+                const vendor = allVendors.find(v => v.vendor_id === vendorId);
+                if (vendor) {
+                    updateVendorDisplay(vendor);
+                    // Reload business info for the new vendor
+                    loadBusinessInfo();
+                    // Clear current chat to start fresh with new vendor
+                    currentChatId = null;
+                    localStorage.removeItem('chatbot_currentChatId');
+                    updateChatIdDisplay();
+                    // Clear messages with vendor-specific greeting
+                    const container = document.getElementById('messagesContainer');
+                    container.innerHTML = '<div class="message assistant">Hello! How can I help you today?</div>';
+                    // Reload chats for new vendor (will be filtered by vendor_id)
+                    loadUserChats();
+                }
+            } else {
+                // No vendor selected - clear everything
+                currentVendorId = null;
+                localStorage.removeItem('chatbot_vendorId');
+                document.getElementById('currentVendorDisplay').textContent = '';
+                loadUserChats();
+            }
+        }
+        
+        function updateVendorDisplay(vendor) {
+            document.getElementById('currentVendorDisplay').textContent = 
+                `Active: ${vendor.vendor_name}`;
+        }
         
         function generateChatId() {
             return 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -301,6 +393,11 @@
                     requestBody.chat_id = currentChatId;
                 }
                 
+                // Add vendor_id if selected
+                if (currentVendorId) {
+                    requestBody.vendor_id = currentVendorId;
+                }
+                
                 const response = await fetch(`${API_BASE}/chat/message`, {
                     method: 'POST',
                     headers: {
@@ -335,7 +432,8 @@
                 loadUserChats();
                 
             } catch (error) {
-                console.error('Error:', error);
+                console.error('Error sending message:', error);
+                console.error('Request body was:', JSON.stringify(requestBody, null, 2));
                 addMessage('assistant', `Sorry, I encountered an error: ${error.message}. Please check if the server is running at http://localhost:8000`);
             } finally {
                 sendButton.disabled = false;
@@ -410,7 +508,12 @@
         
         async function loadUserChats() {
             try {
-                const response = await fetch(`${API_BASE}/chat/chats/${userId}`);
+                // Include vendor_id in query if selected
+                let url = `${API_BASE}/chat/chats/${userId}`;
+                if (currentVendorId) {
+                    url += `?vendor_id=${currentVendorId}`;
+                }
+                const response = await fetch(url);
                 const data = await response.json();
                 
                 const container = document.getElementById('chatsContainer');
@@ -550,14 +653,21 @@
                         addMessage(msg.role, msg.content);
                     });
                 } else {
-                    addMessage('assistant', 'Hello! I\'m the Neguinho Motors chatbot. How can I help you today?');
+                    // Use vendor-specific greeting
+                    const greeting = currentVendorId 
+                        ? 'Hello! How can I help you today?'
+                        : 'Hello! I\'m the chatbot. How can I help you today?';
+                    addMessage('assistant', greeting);
                 }
                 
                 // Reload chat list to update active state
                 loadUserChats();
             } catch (error) {
                 console.error('Error loading chat:', error);
-                addMessage('assistant', 'Hello! I\'m the Neguinho Motors chatbot. How can I help you today?');
+                const greeting = currentVendorId 
+                    ? 'Hello! How can I help you today?'
+                    : 'Hello! I\'m the chatbot. How can I help you today?';
+                addMessage('assistant', greeting);
             }
         }
         
@@ -647,35 +757,45 @@
             }
         }
         
-        // Load business info for dynamic content
+        // Load business info for dynamic content (vendor-aware)
         async function loadBusinessInfo() {
             try {
-                const response = await fetch(`${API_BASE}/config/unified`);
+                // Use vendor-specific config if vendor is selected
+                let url = `${API_BASE}/config/unified`;
+                if (currentVendorId) {
+                    url = `${API_BASE}/vendor/${currentVendorId}/config`;
+                }
+                
+                const response = await fetch(url);
                 const config = await response.json();
                 const business = config.business || {};
                 const contact = config.contact || {};
-                
+
                 // Update title
                 const title = document.getElementById('chatbotTitle');
                 if (business.company_name) {
                     title.textContent = business.company_name + ' Chatbot';
+                } else {
+                    title.textContent = 'Chatbot';
                 }
-                
+
                 // Update disclaimer
                 const disclaimer = document.getElementById('disclaimer');
                 const phone = contact.primary_phone || '';
                 const email = contact.primary_email || '';
                 if (phone || email) {
                     disclaimer.innerHTML = `<strong>⚠️ Disclaimer:</strong> I'm a chatbot and may make mistakes. Information provided might be incorrect. Please always verify important details by contacting us${phone ? ` at <strong>${phone}</strong>` : ''}${email ? (phone ? ' or ' : ' at ') + `<strong>${email}</strong>` : ''}.`;
+                } else {
+                    disclaimer.innerHTML = `<strong>⚠️ Disclaimer:</strong> I'm a chatbot and may make mistakes. Information provided might be incorrect. Please always verify important details by contacting us.`;
                 }
             } catch (error) {
                 console.error('Error loading business info:', error);
             }
         }
         
-        // Initialize chat ID display and load business info
+        // Initialize chat ID display
         updateChatIdDisplay();
-        loadBusinessInfo();
+        // loadBusinessInfo will be called after vendor is loaded
     </script>
 </body>
 </html>

@@ -31,17 +31,24 @@ class RAGQueryRequest(BaseModel):
 
 @router.post("/query")
 async def query_rag(request: RAGQueryRequest):
-    """Query the RAG system."""
+    """Query the RAG system (vendor-aware)."""
     try:
-        rag_service = RAGService()
+        from backend.config import get_settings
+        settings = get_settings()
+        
+        # Use vendor-specific RAG service
+        effective_vendor_id = request.vendor_id or settings.default_vendor_id
+        rag_service = RAGService(vendor_id=effective_vendor_id)
+        
         results = rag_service.retrieve(
             query=request.query,
             top_k=request.top_k,
-            vendor_id=request.vendor_id
+            vendor_id=effective_vendor_id
         )
         
         return {
             "query": request.query,
+            "vendor_id": effective_vendor_id,
             "results": results,
             "count": len(results)
         }
@@ -52,15 +59,26 @@ async def query_rag(request: RAGQueryRequest):
 
 
 @router.post("/load")
-async def load_knowledge_base(kb_path: str = "rag_knowledge_base.json"):
-    """Load knowledge base into vector database."""
+async def load_knowledge_base(vendor_id: Optional[str] = None, kb_path: Optional[str] = None):
+    """Load knowledge base into vector database (vendor-aware)."""
     try:
-        rag_service = RAGService()
-        success = rag_service.load_knowledge_base(kb_path)
+        from backend.config import get_settings
+        settings = get_settings()
+        
+        # Use vendor-specific RAG service if vendor_id provided
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        rag_service = RAGService(vendor_id=effective_vendor_id)
+        
+        # If no path provided, use vendor-specific path
+        if kb_path is None:
+            success = rag_service.load_knowledge_base()
+        else:
+            success = rag_service.load_knowledge_base(kb_path)
         
         return {
             "status": "success" if success else "failed",
-            "kb_path": kb_path
+            "vendor_id": effective_vendor_id,
+            "kb_path": kb_path or f"vendor {effective_vendor_id} default"
         }
         
     except Exception as e:
@@ -69,11 +87,19 @@ async def load_knowledge_base(kb_path: str = "rag_knowledge_base.json"):
 
 
 @router.get("/stats")
-async def get_rag_stats():
-    """Get RAG statistics."""
+async def get_rag_stats(vendor_id: Optional[str] = None):
+    """Get RAG statistics (vendor-aware)."""
     try:
-        rag_service = RAGService()
+        from backend.config import get_settings
+        settings = get_settings()
+        
+        # Use vendor-specific RAG service if vendor_id provided
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        rag_service = RAGService(vendor_id=effective_vendor_id)
         stats = rag_service.get_collection_stats()
+        
+        # Add vendor info to stats
+        stats["vendor_id"] = effective_vendor_id
         return stats
         
     except Exception as e:
@@ -82,29 +108,44 @@ async def get_rag_stats():
 
 
 @router.post("/clear")
-async def clear_chromadb():
-    """Clear all data from ChromaDB collection."""
+async def clear_chromadb(vendor_id: Optional[str] = None):
+    """Clear all data from ChromaDB collection (vendor-aware)."""
     try:
-        rag_service = RAGService()
         from backend.config import get_settings
         settings = get_settings()
         
-        # Delete collection
-        rag_service.client.delete_collection(name=settings.chroma_collection_name)
+        # Use vendor-specific RAG service
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        rag_service = RAGService(vendor_id=effective_vendor_id)
         
-        # Recreate collection
-        from backend.utils.unified_config_manager import get_unified_config_manager
-        config_manager = get_unified_config_manager()
-        unified_config = config_manager.load_config()
-        company_name = unified_config.get("business", {}).get("company_name", "Company")
-        collection_desc = f"{company_name} Knowledge Base"
+        # Get vendor-specific collection name
+        from backend.utils.vendor_manager import get_vendor_manager
+        vendor_manager = get_vendor_manager()
+        collection_name = vendor_manager.get_vendor_chroma_collection(effective_vendor_id)
+        
+        # Delete collection
+        rag_service.client.delete_collection(name=collection_name)
+        
+        # Recreate collection with vendor-specific info
+        try:
+            config_manager = vendor_manager.get_vendor_config_manager(effective_vendor_id)
+            unified_config = config_manager.load_config()
+            company_name = unified_config.get("business", {}).get("company_name", "Company")
+            collection_desc = f"{company_name} Knowledge Base"
+        except:
+            collection_desc = "Knowledge Base"
         
         rag_service.collection = rag_service.client.get_or_create_collection(
-            name=settings.chroma_collection_name,
-            metadata={"description": collection_desc}
+            name=collection_name,
+            metadata={"description": collection_desc, "vendor_id": effective_vendor_id}
         )
         
-        return {"status": "success", "message": "ChromaDB collection cleared"}
+        return {
+            "status": "success",
+            "message": f"ChromaDB collection cleared for vendor {effective_vendor_id}",
+            "vendor_id": effective_vendor_id,
+            "collection_name": collection_name
+        }
         
     except Exception as e:
         logger.error(f"Error clearing ChromaDB: {e}")
@@ -112,16 +153,23 @@ async def clear_chromadb():
 
 
 @router.get("/chromadb/info")
-async def get_chromadb_info():
-    """Get detailed ChromaDB information."""
+async def get_chromadb_info(vendor_id: Optional[str] = None):
+    """Get detailed ChromaDB information (vendor-aware)."""
     try:
-        rag_service = RAGService()
         from backend.config import get_settings
         settings = get_settings()
         
+        # Use vendor-specific RAG service
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        rag_service = RAGService(vendor_id=effective_vendor_id)
+        
+        # Get vendor-specific collection name
+        from backend.utils.vendor_manager import get_vendor_manager
+        vendor_manager = get_vendor_manager()
+        collection_name = vendor_manager.get_vendor_chroma_collection(effective_vendor_id)
+        
         # Get collection info
         count = rag_service.collection.count()
-        collection_name = settings.chroma_collection_name
         db_path = settings.chroma_db_path
         
         # Get all collections
@@ -135,6 +183,7 @@ async def get_chromadb_info():
             })
         
         return {
+            "vendor_id": effective_vendor_id,
             "current_collection": {
                 "name": collection_name,
                 "count": count,

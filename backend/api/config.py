@@ -5,6 +5,7 @@ Allows reading and updating JSON-based configuration.
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Any, Dict, Optional
+from datetime import datetime
 from backend.utils.config_manager import get_config_manager
 from loguru import logger
 import json
@@ -26,11 +27,54 @@ class ConfigSectionRequest(BaseModel):
 
 
 @router.get("/")
-async def get_config():
-    """Get full application configuration."""
+async def get_config(vendor_id: Optional[str] = None):
+    """Get full application configuration (vendor-aware)."""
     try:
-        config_manager = get_config_manager()
-        config = config_manager.load_app_config()
+        from backend.config import get_settings
+        settings = get_settings()
+        from backend.utils.vendor_manager import get_vendor_manager
+        
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        
+        # Try vendor-specific file first
+        vendor_manager = get_vendor_manager()
+        app_config_path = vendor_manager.get_vendor_app_config_path(effective_vendor_id)
+        
+        if app_config_path.exists():
+            with open(app_config_path, "r", encoding="utf-8") as f:
+                config = json.load(f)
+            return config
+        
+        # Fallback to unified config
+        config_manager = vendor_manager.get_vendor_config_manager(effective_vendor_id)
+        unified_config = config_manager.load_config()
+        
+        # Convert unified config to app_config format
+        config = {
+            "application": unified_config.get("application", {}),
+            "database": unified_config.get("database", {}),
+            "vector_database": unified_config.get("vector_database", {}),
+            "embedding": unified_config.get("embedding", {}),
+            "llm": unified_config.get("llm", {}),
+            "openai": unified_config.get("openai", {}),
+            "rag": unified_config.get("rag", {}),
+            "memory": unified_config.get("memory", {}),
+            "domain_restriction": unified_config.get("domain_restriction", {}),
+            "credits": unified_config.get("credits", {}),
+            "multi_vendor": unified_config.get("multi_vendor", {}),
+            "logging": unified_config.get("logging", {}),
+            "cors": unified_config.get("cors", {}),
+            "security": unified_config.get("security", {}),
+            "frontend": unified_config.get("frontend", {}),
+            "contact": unified_config.get("contact", {}),
+            "company": {
+                "name": unified_config.get("business", {}).get("company_name", ""),
+                "company_number": unified_config.get("business", {}).get("company_number", ""),
+                "registered_address": unified_config.get("business", {}).get("registered_address", ""),
+                "trading_names": unified_config.get("business", {}).get("trading_names", [])
+            },
+            "branches": unified_config.get("branches", [])
+        }
         return config
     except Exception as e:
         logger.error(f"Error getting config: {e}")
@@ -53,11 +97,51 @@ async def update_config(request: ConfigUpdateRequest):
 
 
 @router.post("/section")
-async def update_config_section(request: ConfigSectionRequest):
-    """Update an entire configuration section or full config."""
+async def update_config_section(request: ConfigSectionRequest, vendor_id: Optional[str] = None):
+    """Update an entire configuration section or full config (vendor-aware)."""
     try:
-        config_manager = get_config_manager()
-        config = config_manager.load_app_config()
+        from backend.config import get_settings
+        settings = get_settings()
+        from backend.utils.vendor_manager import get_vendor_manager
+        
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        vendor_manager = get_vendor_manager()
+        app_config_path = vendor_manager.get_vendor_app_config_path(effective_vendor_id)
+        
+        # Load existing config or create from unified config
+        if app_config_path.exists():
+            with open(app_config_path, "r", encoding="utf-8") as f:
+                config = json.load(f)
+        else:
+            # Create from unified config
+            config_manager = vendor_manager.get_vendor_config_manager(effective_vendor_id)
+            unified_config = config_manager.load_config()
+            business = unified_config.get("business", {})
+            config = {
+                "application": unified_config.get("application", {}),
+                "database": unified_config.get("database", {}),
+                "vector_database": unified_config.get("vector_database", {}),
+                "embedding": unified_config.get("embedding", {}),
+                "llm": unified_config.get("llm", {}),
+                "openai": unified_config.get("openai", {}),
+                "rag": unified_config.get("rag", {}),
+                "memory": unified_config.get("memory", {}),
+                "domain_restriction": unified_config.get("domain_restriction", {}),
+                "credits": unified_config.get("credits", {}),
+                "multi_vendor": unified_config.get("multi_vendor", {}),
+                "logging": unified_config.get("logging", {}),
+                "cors": unified_config.get("cors", {}),
+                "security": unified_config.get("security", {}),
+                "frontend": unified_config.get("frontend", {}),
+                "contact": unified_config.get("contact", {}),
+                "company": {
+                    "name": business.get("company_name", ""),
+                    "company_number": business.get("company_number", ""),
+                    "registered_address": business.get("registered_address", ""),
+                    "trading_names": business.get("trading_names", [])
+                },
+                "branches": unified_config.get("branches", [])
+            }
         
         # If section is "all", replace entire config
         if request.section == "all":
@@ -65,11 +149,12 @@ async def update_config_section(request: ConfigSectionRequest):
         else:
             config[request.section] = request.data
         
-        success = config_manager.save_app_config(config)
-        if success:
-            return {"status": "success", "section": request.section}
-        else:
-            raise HTTPException(status_code=500, detail="Failed to update config section")
+        # Save to vendor-specific file
+        app_config_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(app_config_path, "w", encoding="utf-8") as f:
+            json.dump(config, f, indent=2, ensure_ascii=False)
+        
+        return {"status": "success", "section": request.section, "vendor_id": effective_vendor_id}
     except Exception as e:
         logger.error(f"Error updating config section: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -88,11 +173,26 @@ async def reload_config():
 
 
 @router.get("/prompts")
-async def get_system_prompts():
-    """Get system prompts configuration from unified config."""
+async def get_system_prompts(vendor_id: Optional[str] = None):
+    """Get system prompts configuration (vendor-aware)."""
     try:
-        from backend.utils.unified_config_manager import get_unified_config_manager
-        config_manager = get_unified_config_manager()
+        from backend.config import get_settings
+        settings = get_settings()
+        from backend.utils.vendor_manager import get_vendor_manager
+        
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        
+        # Try vendor-specific file first
+        vendor_manager = get_vendor_manager()
+        prompts_path = vendor_manager.get_vendor_system_prompts_path(effective_vendor_id)
+        
+        if prompts_path.exists():
+            with open(prompts_path, "r", encoding="utf-8") as f:
+                prompts = json.load(f)
+            return prompts
+        
+        # Fallback to unified config
+        config_manager = vendor_manager.get_vendor_config_manager(effective_vendor_id)
         unified_config = config_manager.load_config()
         prompts = unified_config.get("prompts", {})
         return prompts
@@ -102,33 +202,83 @@ async def get_system_prompts():
 
 
 @router.post("/prompts")
-async def update_system_prompts(prompts: Dict[str, Any]):
-    """Update system prompts configuration in unified config."""
+async def update_system_prompts(prompts: Dict[str, Any], vendor_id: Optional[str] = None):
+    """Update system prompts (vendor-aware)."""
     try:
-        from backend.utils.unified_config_manager import get_unified_config_manager
-        config_manager = get_unified_config_manager()
+        from backend.config import get_settings
+        settings = get_settings()
+        from backend.utils.vendor_manager import get_vendor_manager
+        
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        vendor_manager = get_vendor_manager()
+        
+        # Save to vendor-specific file
+        prompts_path = vendor_manager.get_vendor_system_prompts_path(effective_vendor_id)
+        prompts_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        with open(prompts_path, "w", encoding="utf-8") as f:
+            json.dump(prompts, f, indent=2, ensure_ascii=False)
+        
+        # Also update unified config
+        config_manager = vendor_manager.get_vendor_config_manager(effective_vendor_id)
         unified_config = config_manager.load_config()
         unified_config["prompts"] = prompts
-        success = config_manager.save_config(unified_config)
-        if success:
-            return {"status": "success", "message": "System prompts updated. Restart server for full effect."}
-        else:
-            raise HTTPException(status_code=500, detail="Failed to update system prompts")
+        config_manager.save_config(unified_config)
+        
+        return {"status": "success", "message": f"System prompts updated for vendor {effective_vendor_id}"}
     except Exception as e:
         logger.error(f"Error updating system prompts: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/knowledge-base")
-async def get_knowledge_base():
-    """Get knowledge base content."""
+async def get_knowledge_base(vendor_id: Optional[str] = None):
+    """Get knowledge base content (vendor-aware)."""
     try:
+        # If vendor_id provided, use vendor-specific endpoint logic
+        if vendor_id:
+            from backend.utils.vendor_manager import get_vendor_manager
+            vendor_manager = get_vendor_manager()
+            
+            # Check if vendor exists
+            existing = vendor_manager.get_vendor(vendor_id)
+            if not existing:
+                raise HTTPException(status_code=404, detail=f"Vendor {vendor_id} not found")
+            
+            rag_path = vendor_manager.get_vendor_rag_path(vendor_id)
+            
+            if not rag_path.exists():
+                # Return empty structure if file doesn't exist
+                return {
+                    "metadata": {
+                        "version": "2.0.0",
+                        "vendor_id": vendor_id,
+                        "description": f"Knowledge base for vendor {vendor_id}",
+                        "chunking_strategy": "semantic_chunks_with_metadata"
+                    },
+                    "chunks": []
+                }
+            
+            with open(rag_path, "r", encoding="utf-8") as f:
+                kb_data = json.load(f)
+            
+            return kb_data
+        
+        # Default: use settings path
         from backend.config import get_settings
         settings = get_settings()
         kb_path = Path(settings.rag_knowledge_base_path)
         
         if not kb_path.exists():
-            raise HTTPException(status_code=404, detail="Knowledge base file not found")
+            # Return empty structure if file doesn't exist
+            return {
+                "metadata": {
+                    "version": "2.0.0",
+                    "description": "Default knowledge base",
+                    "chunking_strategy": "semantic_chunks_with_metadata"
+                },
+                "chunks": []
+            }
         
         with open(kb_path, "r", encoding="utf-8") as f:
             kb_data = json.load(f)
@@ -243,13 +393,29 @@ async def update_unified_config(config: Dict[str, Any]):
 
 
 @router.get("/chatbot-service")
-async def get_chatbot_service_config():
-    """Get chatbot service configuration from unified config."""
+async def get_chatbot_service_config(vendor_id: Optional[str] = None):
+    """Get chatbot service configuration (vendor-aware)."""
     try:
-        from backend.utils.unified_config_manager import get_unified_config_manager
-        config_manager = get_unified_config_manager()
+        from backend.config import get_settings
+        settings = get_settings()
+        from backend.utils.vendor_manager import get_vendor_manager
+        
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        
+        # Try vendor-specific file first
+        vendor_manager = get_vendor_manager()
+        config_path = vendor_manager.get_vendor_chatbot_service_config_path(effective_vendor_id)
+        
+        if config_path.exists():
+            with open(config_path, "r", encoding="utf-8") as f:
+                chatbot_service = json.load(f)
+            return chatbot_service
+        
+        # Fallback to unified config
+        config_manager = vendor_manager.get_vendor_config_manager(effective_vendor_id)
         unified_config = config_manager.load_config()
-        return unified_config.get("chatbot_service", {})
+        chatbot_service = unified_config.get("chatbot_service", {})
+        return chatbot_service
     except Exception as e:
         logger.error(f"Error getting chatbot service config: {e}")
         raise HTTPException(status_code=500, detail=str(e))
