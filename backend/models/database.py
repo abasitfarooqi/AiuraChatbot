@@ -134,6 +134,47 @@ class ModelConfig(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
+class MainCache(Base):
+    """Main persistent cache for Q&A pairs per vendor."""
+    __tablename__ = "main_cache"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    cache_id = Column(String, unique=True, index=True, nullable=False)
+    vendor_id = Column(String, ForeignKey("vendors.vendor_id"), nullable=False, index=True)
+    question = Column(Text, nullable=False)
+    answer = Column(Text, nullable=False)
+    question_embedding = Column(JSON, nullable=True)  # Store embedding for similarity search
+    similarity_threshold = Column(Float, default=0.85)  # Minimum similarity to match
+    usage_count = Column(Integer, default=0)  # How many times this cache was used
+    tokens_saved = Column(Integer, default=0)  # Total tokens saved by using this cache
+    credits_saved = Column(Integer, default=0)  # Total credits saved
+    is_active = Column(Boolean, default=True)  # Can be disabled from admin
+    cache_metadata = Column(JSON, default=dict)  # Additional metadata (topics, tags, etc.)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_used_at = Column(DateTime, nullable=True)  # Last time this cache was used
+
+
+class TemporaryCache(Base):
+    """Temporary cache for Q&A pairs per chat session."""
+    __tablename__ = "temporary_cache"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    cache_id = Column(String, unique=True, index=True, nullable=False)
+    chat_id = Column(String, ForeignKey("chats.chat_id"), nullable=False, index=True)
+    vendor_id = Column(String, ForeignKey("vendors.vendor_id"), nullable=False, index=True)
+    question = Column(Text, nullable=False)
+    answer = Column(Text, nullable=False)
+    question_embedding = Column(JSON, nullable=True)  # Store embedding for similarity search
+    similarity_threshold = Column(Float, default=0.85)  # Minimum similarity to match
+    usage_count = Column(Integer, default=0)  # How many times this cache was used in this chat
+    tokens_saved = Column(Integer, default=0)  # Tokens saved in this chat
+    cache_metadata = Column(JSON, default=dict)  # Additional metadata
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_used_at = Column(DateTime, nullable=True)  # Last time this cache was used
+
+
 # Database setup
 def get_database_engine():
     """Get database engine."""

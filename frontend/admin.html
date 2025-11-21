@@ -173,6 +173,7 @@
             <button class="tab" onclick="switchTab('knowledge-base')">Knowledge Base</button>
             <button class="tab" onclick="switchTab('aiura-mind')">AiuraMind</button>
             <button class="tab" onclick="switchTab('database')">Database</button>
+            <button class="tab" onclick="switchTab('caching')">Caching</button>
             <button class="tab" onclick="switchTab('updates')">Updates</button>
         </div>
         
@@ -598,6 +599,8 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                     </small>
                 </div>
                 
+                <div id="aiuraVendorInfo"></div>
+                
                 <div class="form-group" style="margin-top: 1rem;">
                     <label>Vendor Information</label>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -607,7 +610,7 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                         </div>
                         <div>
                             <label style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Business Type:</label>
-                            <input type="text" id="aiuraBusinessType" placeholder="e.g., motorcycle_dealership" style="width: 100%; padding: 0.5rem;">
+                            <input type="text" id="aiuraBusinessType" placeholder="e.g., general" style="width: 100%; padding: 0.5rem;">
                         </div>
                     </div>
                     <small style="display: block; margin-top: 0.5rem; color: #666;">
@@ -761,6 +764,152 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
             </div>
         </div>
         
+        <!-- Caching Tab -->
+        <div id="caching" class="tab-content">
+            <div class="section">
+                <h2>Cache Management</h2>
+                <p style="margin-bottom: 1.5rem; color: #666;">
+                    Manage Q&A caching to reduce LLM usage and optimise costs. Main cache is persistent per vendor, temporary cache is per chat session.
+                </p>
+                
+                <div class="form-group">
+                    <h3>Cache Control</h3>
+                    <div style="padding: 1rem; background: #f8f9fa; margin-bottom: 1rem; border: 1px solid #ddd;">
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                            <label style="font-weight: 600; color: #2c3e50; flex: 1;">Use Cache for Responses:</label>
+                            <label style="display: flex; align-items: center; cursor: pointer; gap: 0.5rem;">
+                                <input type="checkbox" id="useCacheToggle" onchange="toggleCacheUsage()" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span id="cacheToggleLabel" style="font-weight: 500;">Loading...</span>
+                            </label>
+                        </div>
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+                            <strong>ON:</strong> Use cached answers when available (saves LLM costs)<br>
+                            <strong>OFF:</strong> Always use LLM to generate fresh responses (no cache lookup)
+                        </p>
+                        
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ddd;">
+                            <label style="font-weight: 600; color: #2c3e50; flex: 1;">Fallback to LLM on Cache Miss:</label>
+                            <label style="display: flex; align-items: center; cursor: pointer; gap: 0.5rem;">
+                                <input type="checkbox" id="fallbackToLLMToggle" onchange="toggleFallbackToLLM()" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span id="fallbackToggleLabel" style="font-weight: 500;">Loading...</span>
+                            </label>
+                        </div>
+                        <p style="color: #666; font-size: 0.9rem; margin: 0;">
+                            <strong>ON:</strong> If question not in cache, use LLM to generate answer<br>
+                            <strong>OFF:</strong> If question not in cache, return "not in cache" message (no LLM call)
+                        </p>
+                        
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #e74c3c;">
+                            <label style="font-weight: 600; color: #e74c3c; flex: 1;">🚫 Disable LLM Completely (Cache Only):</label>
+                            <label style="display: flex; align-items: center; cursor: pointer; gap: 0.5rem;">
+                                <input type="checkbox" id="disableLLMToggle" onchange="toggleDisableLLM()" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span id="disableLLMLabel" style="font-weight: 500;">Loading...</span>
+                            </label>
+                        </div>
+                        <p style="color: #e74c3c; font-size: 0.9rem; margin: 0; font-weight: 600;">
+                            <strong>⚠️ TESTING MODE:</strong> When ON, LLM is completely disabled. Only cache responses will be used.<br>
+                            <strong>ON:</strong> Cache-only mode (NO LLM calls, perfect for testing cache performance)<br>
+                            <strong>OFF:</strong> Normal mode (LLM available when needed)
+                        </p>
+                        
+                        <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #3498db;">
+                            <label style="font-weight: 600; color: #3498db; flex: 1;">⚡ Use Lightweight Model for Cache:</label>
+                            <label style="display: flex; align-items: center; cursor: pointer; gap: 0.5rem;">
+                                <input type="checkbox" id="useLightweightModelToggle" onchange="toggleUseLightweightModel()" style="width: 20px; height: 20px; cursor: pointer;">
+                                <span id="useLightweightModelLabel" style="font-weight: 500;">Loading...</span>
+                            </label>
+                        </div>
+                        <p style="color: #3498db; font-size: 0.9rem; margin: 0;">
+                            <strong>ON:</strong> Use a lightweight/cheaper model (e.g., Ollama) when generating responses that will be saved to cache<br>
+                            <strong>OFF:</strong> Use the default/main LLM model for all responses
+                        </p>
+                        
+                        <div id="cacheModelSelection" style="margin-top: 1rem; padding: 1rem; background: #f0f8ff; border: 1px solid #3498db; border-radius: 4px; display: none;">
+                            <h4 style="margin-top: 0; color: #2980b9;">Select Cache Model (Lightweight LLM)</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Provider:</label>
+                                    <select id="cacheModelProvider" style="width: 100%; padding: 0.5rem;">
+                                        <option value="">Select Provider</option>
+                                        <option value="ollama">Ollama</option>
+                                        <option value="openai">OpenAI</option>
+                                        <option value="m4">M4</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Model:</label>
+                                    <select id="cacheModelName" style="width: 100%; padding: 0.5rem;">
+                                        <option value="">Select Model</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="loadCacheModels()" style="background: #3498db; margin-right: 0.5rem;">Load Models</button>
+                            <button onclick="saveCacheModel()" style="background: #27ae60;">Save Cache Model</button>
+                            <p style="color: #666; font-size: 0.85rem; margin-top: 0.5rem;">
+                                Select a lightweight model (e.g., Ollama) to use when generating responses that will be cached. This saves costs while maintaining quality for cached responses.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <h3>Cache Statistics</h3>
+                    <div id="cacheStats" style="padding: 1rem; background: #f8f9fa; margin-bottom: 1rem;">Loading...</div>
+                    <button onclick="loadCacheStats()" style="background: #27ae60;">Refresh Stats</button>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                    <!-- Main Cache Section -->
+                    <div>
+                        <h3>Main Cache (Persistent)</h3>
+                        <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">
+                            Persistent cache shared across all users for this vendor. Used to answer similar questions without LLM.
+                        </p>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <button onclick="loadMainCache()" style="background: #3498db; margin-right: 0.5rem;">Load Entries</button>
+                            <button onclick="clearMainCache()" style="background: #e74c3c;">Clear All</button>
+                        </div>
+                        
+                        <div id="mainCacheList" style="background: #f8f9fa; padding: 1rem; max-height: 500px; overflow-y: auto;">
+                            <p style="color: #666;">Click "Load Entries" to view main cache</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Temporary Cache Section -->
+                    <div>
+                        <h3>Temporary Cache (Per Chat)</h3>
+                        <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">
+                            Session-based cache that is deleted when chat ends. Shows active chats with cached Q&A pairs.
+                        </p>
+                        
+                        <div style="margin-bottom: 1rem;">
+                            <input type="text" id="tempCacheChatId" placeholder="Filter by Chat ID (optional)" style="width: 200px; padding: 0.5rem; margin-right: 0.5rem;">
+                            <button onclick="loadTemporaryCache()" style="background: #3498db; margin-right: 0.5rem;">Load Entries</button>
+                            <button onclick="clearTemporaryCache()" style="background: #e74c3c;">Clear All</button>
+                        </div>
+                        
+                        <div id="temporaryCacheList" style="background: #f8f9fa; padding: 1rem; max-height: 500px; overflow-y: auto;">
+                            <p style="color: #666;">Click "Load Entries" to view temporary cache</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
+                    <h3>Cache Actions</h3>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button onclick="promoteTempToMain()" style="background: #9b59b6;">Promote Temp to Main</button>
+                        <button onclick="toggleCacheEntry()" style="background: #f39c12;">Toggle Entry Status</button>
+                        <button onclick="deleteCacheEntry()" style="background: #e74c3c;">Delete Entry</button>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <input type="text" id="cacheActionId" placeholder="Enter Cache ID" style="width: 300px; padding: 0.75rem; margin-right: 0.5rem;">
+                        <small style="display: block; margin-top: 0.5rem; color: #666;">Enter cache ID for actions above</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Updates Tab -->
         <div id="updates" class="tab-content">
             <div class="section">
@@ -824,11 +973,43 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                 loadKnowledgeBaseEditor();
             }
             if (tabName === 'aiura-mind') {
-                // Auto-fill vendor info if vendor is selected
+                // Auto-fill vendor info if vendor is selected - ALWAYS verify current vendor
                 if (currentVendorId) {
                     const vendor = allVendors?.find(v => v.vendor_id === currentVendorId);
                     if (vendor) {
                         document.getElementById('aiuraVendorName').value = vendor.vendor_name || '';
+                        // Display current vendor info clearly
+                        const vendorInfoDiv = document.getElementById('aiuraVendorInfo');
+                        if (vendorInfoDiv) {
+                            vendorInfoDiv.innerHTML = `
+                                <div style="padding: 0.75rem; background: #e8f5e9; border-left: 4px solid #27ae60; margin-bottom: 1rem;">
+                                    <strong>Current Vendor:</strong> ${vendor.vendor_name} (${vendor.vendor_id})<br>
+                                    <small style="color: #666;">Company: ${vendor.company_name || 'N/A'}</small>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        // Vendor not found - clear and show warning
+                        document.getElementById('aiuraVendorName').value = '';
+                        const vendorInfoDiv = document.getElementById('aiuraVendorInfo');
+                        if (vendorInfoDiv) {
+                            vendorInfoDiv.innerHTML = `
+                                <div style="padding: 0.75rem; background: #fff3cd; border-left: 4px solid #ffc107; margin-bottom: 1rem;">
+                                    <strong>⚠️ Warning:</strong> Vendor ${currentVendorId} not found. Please select a valid vendor.
+                                </div>
+                            `;
+                        }
+                    }
+                } else {
+                    // No vendor selected
+                    document.getElementById('aiuraVendorName').value = '';
+                    const vendorInfoDiv = document.getElementById('aiuraVendorInfo');
+                    if (vendorInfoDiv) {
+                        vendorInfoDiv.innerHTML = `
+                            <div style="padding: 0.75rem; background: #f8d7da; border-left: 4px solid #e74c3c; margin-bottom: 1rem;">
+                                <strong>⚠️ No Vendor Selected:</strong> Please select a vendor from the dropdown above.
+                            </div>
+                        `;
                     }
                 }
                 // Load available models
@@ -836,6 +1017,10 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
             }
             if (tabName === 'database') {
                 loadDatabaseStats();
+            }
+            if (tabName === 'caching') {
+                loadCacheStats();
+                loadCacheSettings();
             }
             if (tabName === 'updates') {
                 loadOfflineModels();
@@ -2087,6 +2272,21 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                 updateVendorDisplay(vendor);
                 // Update current vendor name in vendors tab
                 document.getElementById('currentVendorName').textContent = vendor.vendor_name;
+                
+                // Update vendor info in aiura-mind tab if it's visible
+                if (document.getElementById('aiura-mind').style.display !== 'none') {
+                    const vendorInfoDiv = document.getElementById('aiuraVendorInfo');
+                    if (vendorInfoDiv) {
+                        vendorInfoDiv.innerHTML = `
+                            <div style="padding: 0.75rem; background: #e8f5e9; border-left: 4px solid #27ae60; margin-bottom: 1rem;">
+                                <strong>Current Vendor:</strong> ${vendor.vendor_name} (${vendor.vendor_id})<br>
+                                <small style="color: #666;">Company: ${vendor.company_name || 'N/A'}</small>
+                            </div>
+                        `;
+                    }
+                    // Update vendor name field
+                    document.getElementById('aiuraVendorName').value = vendor.vendor_name || '';
+                }
             }
             // Reload all vendor-specific tabs
             loadVendors();
@@ -2193,7 +2393,38 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
             statusDiv.style.background = '#fff3cd';
             statusDiv.style.color = '#856404';
             const modelInfo = modelProvider && modelName ? ` using ${modelProvider}/${modelName}` : '';
-            statusDiv.innerHTML = `🧠 Processing with AiuraMind${modelInfo}... This may take a minute.`;
+            
+            // Show initial progress with estimated time
+            const startTime = Date.now();
+            let progressInterval;
+            const estimatedTime = generationDepth === 'extensive' ? 120 : generationDepth === 'comprehensive' ? 90 : generationDepth === 'standard' ? 60 : 30;
+            
+            function updateProgressDisplay(elapsed) {
+                const percentage = Math.min(95, Math.floor((elapsed / estimatedTime) * 100));
+                const remaining = Math.max(0, estimatedTime - elapsed);
+                statusDiv.innerHTML = `
+                    <div style="margin-bottom: 0.5rem;">
+                        <strong>🧠 Processing with AiuraMind${modelInfo}...</strong>
+                    </div>
+                    <div style="background: #e9ecef; height: 20px; border-radius: 4px; overflow: hidden; margin-bottom: 0.5rem;">
+                        <div style="background: linear-gradient(90deg, #ffc107, #ff9800); height: 100%; width: ${percentage}%; transition: width 0.3s;"></div>
+                    </div>
+                    <div style="font-size: 0.9rem; display: flex; justify-content: space-between;">
+                        <span>Progress: ~${percentage}%</span>
+                        <span>Elapsed: ${Math.floor(elapsed)}s</span>
+                        <span>Est. remaining: ~${Math.floor(remaining)}s</span>
+                    </div>
+                    <div style="font-size: 0.85rem; margin-top: 0.5rem; color: #666;">
+                        ⏳ This may take ${estimatedTime}-${estimatedTime + 30} seconds. Please wait...
+                    </div>
+                `;
+            }
+            
+            updateProgressDisplay(0);
+            progressInterval = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                updateProgressDisplay(elapsed);
+            }, 1000);
             
             try {
                 const response = await fetch(`${API_BASE}/vendor/${currentVendorId}/aiura-mind/generate`, {
@@ -2212,14 +2443,30 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                     })
                 });
                 
+                clearInterval(progressInterval);
+                const totalTime = (Date.now() - startTime) / 1000;
                 const result = await response.json();
                 
                 if (result.status === 'success') {
                     statusDiv.style.background = '#d4edda';
                     statusDiv.style.color = '#155724';
                     let message = '✅ Successfully generated config and knowledge base!';
+                    
+                    // Add progress/timing information if available
+                    if (result.progress) {
+                        message += `<br><br><strong>⏱️ Generation Statistics:</strong>`;
+                        message += `<br>• Total time: ${result.progress.total_time_seconds.toFixed(1)}s`;
+                        message += `<br>• Config generation: ${result.progress.config_generation_time.toFixed(1)}s`;
+                        message += `<br>• KB generation: ${result.progress.kb_generation_time.toFixed(1)}s`;
+                        message += `<br>• Chunks created: ${result.progress.chunks_created}`;
+                        message += `<br>• Config sections: ${result.progress.config_sections}`;
+                        if (result.progress.additional_files_created > 0) {
+                            message += `<br>• Additional files: ${result.progress.additional_files_created}`;
+                        }
+                    }
+                    
                     if (result.additional_files) {
-                        message += '<br>📁 Also generated: system_prompts.json, chatbot_service_config.json, app_config.json';
+                        message += '<br><br>📁 Also generated: system_prompts.json, chatbot_service_config.json, app_config.json';
                     }
                     statusDiv.innerHTML = message;
                     
@@ -2228,15 +2475,18 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                     document.getElementById('aiuraGeneratedKB').value = JSON.stringify(result.knowledge_base, null, 2);
                     document.getElementById('aiuraMindResults').style.display = 'block';
                 } else {
+                    clearInterval(progressInterval);
                     statusDiv.style.background = '#f8d7da';
                     statusDiv.style.color = '#721c24';
                     statusDiv.innerHTML = '❌ Error: ' + (result.detail || 'Generation failed');
                 }
             } catch (error) {
+                clearInterval(progressInterval);
                 console.error('Error executing AiuraMind:', error);
                 statusDiv.style.background = '#f8d7da';
                 statusDiv.style.color = '#721c24';
-                statusDiv.innerHTML = '❌ Error: ' + error.message;
+                const totalTime = (Date.now() - startTime) / 1000;
+                statusDiv.innerHTML = `❌ Error after ${totalTime.toFixed(1)}s: ${error.message}`;
             }
         }
         
@@ -2527,6 +2777,670 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                 switchTab('knowledge-base');
             }, 100);
         }
+        
+        // Cache Management Functions
+        async function loadCacheSettings() {
+            try {
+                let url = `${API_BASE}/cache/settings`;
+                if (currentVendorId) {
+                    url += `?vendor_id=${currentVendorId}`;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                // Cache usage toggle
+                const toggle = document.getElementById('useCacheToggle');
+                const label = document.getElementById('cacheToggleLabel');
+                
+                if (data.use_cache_for_responses !== undefined) {
+                    toggle.checked = data.use_cache_for_responses;
+                    label.textContent = data.use_cache_for_responses ? 'ON (Using Cache)' : 'OFF (Always Use LLM)';
+                    label.style.color = data.use_cache_for_responses ? '#27ae60' : '#e74c3c';
+                } else {
+                    toggle.checked = true; // Default to ON
+                    label.textContent = 'ON (Using Cache)';
+                    label.style.color = '#27ae60';
+                }
+                
+                // Fallback to LLM toggle
+                const fallbackToggle = document.getElementById('fallbackToLLMToggle');
+                const fallbackLabel = document.getElementById('fallbackToggleLabel');
+                
+                if (data.fallback_to_llm_on_cache_miss !== undefined) {
+                    fallbackToggle.checked = data.fallback_to_llm_on_cache_miss;
+                    fallbackLabel.textContent = data.fallback_to_llm_on_cache_miss ? 'ON (Use LLM)' : 'OFF (Return Message)';
+                    fallbackLabel.style.color = data.fallback_to_llm_on_cache_miss ? '#27ae60' : '#e74c3c';
+                } else {
+                    fallbackToggle.checked = true; // Default to ON
+                    fallbackLabel.textContent = 'ON (Use LLM)';
+                    fallbackLabel.style.color = '#27ae60';
+                }
+                
+                // Disable LLM completely toggle
+                const disableLLMToggle = document.getElementById('disableLLMToggle');
+                const disableLLMLabel = document.getElementById('disableLLMLabel');
+                
+                if (data.disable_llm_completely !== undefined) {
+                    disableLLMToggle.checked = data.disable_llm_completely;
+                    disableLLMLabel.textContent = data.disable_llm_completely ? 'ON (Cache Only Mode)' : 'OFF (LLM Available)';
+                    disableLLMLabel.style.color = data.disable_llm_completely ? '#e74c3c' : '#27ae60';
+                    
+                    // If LLM is disabled, disable the fallback toggle and set it to false
+                    if (data.disable_llm_completely) {
+                        fallbackToggle.checked = false;
+                        fallbackToggle.disabled = true;
+                        fallbackLabel.textContent = 'OFF (LLM Disabled)';
+                        fallbackLabel.style.color = '#95a5a6';
+                        toggle.checked = true;
+                        toggle.disabled = true;
+                        label.textContent = 'ON (Required for Cache-Only)';
+                        label.style.color = '#95a5a6';
+                    } else {
+                        fallbackToggle.disabled = false;
+                        toggle.disabled = false;
+                    }
+                } else {
+                    disableLLMToggle.checked = false; // Default to OFF
+                    disableLLMLabel.textContent = 'OFF (LLM Available)';
+                    disableLLMLabel.style.color = '#27ae60';
+                    fallbackToggle.disabled = false;
+                    toggle.disabled = false;
+                }
+                
+                // Use lightweight model for cache toggle
+                const useLightweightToggle = document.getElementById('useLightweightModelToggle');
+                const useLightweightLabel = document.getElementById('useLightweightModelLabel');
+                const cacheModelSelection = document.getElementById('cacheModelSelection');
+                
+                if (data.use_lightweight_model_for_cache !== undefined) {
+                    useLightweightToggle.checked = data.use_lightweight_model_for_cache;
+                    useLightweightLabel.textContent = data.use_lightweight_model_for_cache ? 'ON (Using Lightweight Model)' : 'OFF (Using Default Model)';
+                    useLightweightLabel.style.color = data.use_lightweight_model_for_cache ? '#3498db' : '#95a5a6';
+                    cacheModelSelection.style.display = data.use_lightweight_model_for_cache ? 'block' : 'none';
+                } else {
+                    useLightweightToggle.checked = false;
+                    useLightweightLabel.textContent = 'OFF (Using Default Model)';
+                    useLightweightLabel.style.color = '#95a5a6';
+                    cacheModelSelection.style.display = 'none';
+                }
+                
+                // Load cache model settings
+                if (data.cache_model_provider) {
+                    document.getElementById('cacheModelProvider').value = data.cache_model_provider;
+                }
+                if (data.cache_model_name) {
+                    document.getElementById('cacheModelName').value = data.cache_model_name;
+                }
+                
+                // Load models if provider is selected
+                if (data.cache_model_provider) {
+                    loadCacheModels();
+                }
+            } catch (error) {
+                console.error('Error loading cache settings:', error);
+                document.getElementById('cacheToggleLabel').textContent = 'Error loading settings';
+                document.getElementById('cacheToggleLabel').style.color = '#e74c3c';
+                document.getElementById('fallbackToggleLabel').textContent = 'Error loading settings';
+                document.getElementById('fallbackToggleLabel').style.color = '#e74c3c';
+                document.getElementById('disableLLMLabel').textContent = 'Error loading settings';
+                document.getElementById('disableLLMLabel').style.color = '#e74c3c';
+            }
+        }
+        
+        async function toggleDisableLLM() {
+            const toggle = document.getElementById('disableLLMToggle');
+            const label = document.getElementById('disableLLMLabel');
+            const disableLLM = toggle.checked;
+            
+            if (disableLLM && !confirm('⚠️ WARNING: This will completely disable LLM for this vendor!\n\nOnly cache responses will be used. Questions not in cache will return a "not in cache" message.\n\nThis is perfect for testing cache performance.\n\nContinue?')) {
+                toggle.checked = false;
+                return;
+            }
+            
+            try {
+                let url = `${API_BASE}/cache/settings`;
+                if (currentVendorId) {
+                    url += `?vendor_id=${currentVendorId}`;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        disable_llm_completely: disableLLM
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: `HTTP ${response.status}: ${response.statusText}` }));
+                    throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    label.textContent = disableLLM ? 'ON (Cache Only Mode)' : 'OFF (LLM Available)';
+                    label.style.color = disableLLM ? '#e74c3c' : '#27ae60';
+                    
+                    // Update other toggles based on LLM disable state
+                    const fallbackToggle = document.getElementById('fallbackToLLMToggle');
+                    const fallbackLabel = document.getElementById('fallbackToggleLabel');
+                    const useCacheToggle = document.getElementById('useCacheToggle');
+                    const cacheLabel = document.getElementById('cacheToggleLabel');
+                    
+                    if (disableLLM) {
+                        // LLM disabled - force cache on and fallback off
+                        fallbackToggle.checked = false;
+                        fallbackToggle.disabled = true;
+                        fallbackLabel.textContent = 'OFF (LLM Disabled)';
+                        fallbackLabel.style.color = '#95a5a6';
+                        useCacheToggle.checked = true;
+                        useCacheToggle.disabled = true;
+                        cacheLabel.textContent = 'ON (Required for Cache-Only)';
+                        cacheLabel.style.color = '#95a5a6';
+                    } else {
+                        // LLM enabled - allow normal operation
+                        fallbackToggle.disabled = false;
+                        useCacheToggle.disabled = false;
+                        // Reload settings to get current values
+                        loadCacheSettings();
+                    }
+                } else {
+                    // Revert toggle on error
+                    toggle.checked = !disableLLM;
+                    alert('Error updating LLM disable setting: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                // Revert toggle on error
+                toggle.checked = !disableLLM;
+                console.error('Error toggling LLM disable:', error);
+                alert('Error updating LLM disable setting: ' + error.message);
+            }
+        }
+        
+        async function toggleFallbackToLLM() {
+            const toggle = document.getElementById('fallbackToLLMToggle');
+            const label = document.getElementById('fallbackToggleLabel');
+            const fallbackEnabled = toggle.checked;
+            
+            try {
+                let url = `${API_BASE}/cache/settings`;
+                if (currentVendorId) {
+                    url += `?vendor_id=${currentVendorId}`;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        fallback_to_llm_on_cache_miss: fallbackEnabled
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: `HTTP ${response.status}: ${response.statusText}` }));
+                    throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    label.textContent = fallbackEnabled ? 'ON (Use LLM)' : 'OFF (Return Message)';
+                    label.style.color = fallbackEnabled ? '#27ae60' : '#e74c3c';
+                } else {
+                    // Revert toggle on error
+                    toggle.checked = !fallbackEnabled;
+                    alert('Error updating fallback setting: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                // Revert toggle on error
+                toggle.checked = !fallbackEnabled;
+                console.error('Error toggling fallback to LLM:', error);
+                alert('Error updating fallback setting: ' + error.message);
+            }
+        }
+        
+        async function toggleCacheUsage() {
+            const toggle = document.getElementById('useCacheToggle');
+            const label = document.getElementById('cacheToggleLabel');
+            const useCache = toggle.checked;
+            
+            try {
+                let url = `${API_BASE}/cache/settings`;
+                if (currentVendorId) {
+                    url += `?vendor_id=${currentVendorId}`;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        use_cache_for_responses: useCache
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: `HTTP ${response.status}: ${response.statusText}` }));
+                    throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    label.textContent = useCache ? 'ON (Using Cache)' : 'OFF (Always Use LLM)';
+                    label.style.color = useCache ? '#27ae60' : '#e74c3c';
+                } else {
+                    // Revert toggle on error
+                    toggle.checked = !useCache;
+                    alert('Error updating cache setting: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                // Revert toggle on error
+                toggle.checked = !useCache;
+                console.error('Error toggling cache usage:', error);
+                alert('Error updating cache setting: ' + error.message);
+            }
+        }
+        
+        async function loadCacheStats() {
+            try {
+                let url = `${API_BASE}/cache/stats`;
+                if (currentVendorId) {
+                    url += `?vendor_id=${currentVendorId}`;
+                }
+                
+                const response = await fetch(url);
+                const stats = await response.json();
+                
+                let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">';
+                html += '<div><strong>Main Cache:</strong><br>';
+                html += `Total: ${stats.main_cache?.total_entries || 0}<br>`;
+                html += `Active: ${stats.main_cache?.active_entries || 0}<br>`;
+                html += `Usage: ${stats.main_cache?.total_usage_count || 0}<br>`;
+                html += `Tokens Saved: ${(stats.main_cache?.total_tokens_saved || 0).toLocaleString()}<br>`;
+                html += `Credits Saved: ${(stats.main_cache?.total_credits_saved || 0).toLocaleString()}</div>`;
+                html += '<div><strong>Temporary Cache:</strong><br>';
+                html += `Total: ${stats.temporary_cache?.total_entries || 0}<br>`;
+                html += `Active Chats: ${stats.temporary_cache?.active_chats || 0}<br>`;
+                html += `Usage: ${stats.temporary_cache?.total_usage_count || 0}<br>`;
+                html += `Tokens Saved: ${(stats.temporary_cache?.total_tokens_saved || 0).toLocaleString()}</div>`;
+                html += '</div>';
+                
+                document.getElementById('cacheStats').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading cache stats:', error);
+                document.getElementById('cacheStats').innerHTML = `<span style="color: #e74c3c;">Error: ${error.message}</span>`;
+            }
+        }
+        
+        async function loadMainCache() {
+            try {
+                let url = `${API_BASE}/cache/main?limit=50&active_only=true`;
+                if (currentVendorId) {
+                    url += `&vendor_id=${currentVendorId}`;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.entries && data.entries.length > 0) {
+                    let html = `<div style="margin-bottom: 0.5rem;"><strong>Total: ${data.total} entries</strong></div>`;
+                    html += '<div style="max-height: 400px; overflow-y: auto;">';
+                    
+                    data.entries.forEach(entry => {
+                        html += `<div style="padding: 1rem; margin-bottom: 1rem; background: white; border: 1px solid #ddd; border-left: 4px solid ${entry.is_active ? '#27ae60' : '#95a5a6'};">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <strong style="color: #2c3e50;">${entry.cache_id}</strong>
+                                <span style="font-size: 0.85rem; color: #666;">${entry.is_active ? '✓ Active' : '✗ Inactive'}</span>
+                            </div>
+                            <div style="margin-bottom: 0.5rem;"><strong>Q:</strong> ${entry.question.substring(0, 100)}${entry.question.length > 100 ? '...' : ''}</div>
+                            <div style="margin-bottom: 0.5rem;"><strong>A:</strong> ${entry.answer.substring(0, 150)}${entry.answer.length > 150 ? '...' : ''}</div>
+                            <div style="display: flex; gap: 1rem; font-size: 0.85rem; color: #666;">
+                                <span>Used: ${entry.usage_count}x</span>
+                                <span>Tokens Saved: ${entry.tokens_saved.toLocaleString()}</span>
+                                <span>Credits Saved: ${entry.credits_saved.toLocaleString()}</span>
+                            </div>
+                            <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #999;">
+                                Last used: ${entry.last_used_at ? new Date(entry.last_used_at).toLocaleString() : 'Never'}
+                            </div>
+                        </div>`;
+                    });
+                    
+                    html += '</div>';
+                    document.getElementById('mainCacheList').innerHTML = html;
+                } else {
+                    document.getElementById('mainCacheList').innerHTML = '<p style="color: #666; padding: 2rem; text-align: center;">No main cache entries found</p>';
+                }
+            } catch (error) {
+                console.error('Error loading main cache:', error);
+                document.getElementById('mainCacheList').innerHTML = `<span style="color: #e74c3c;">Error: ${error.message}</span>`;
+            }
+        }
+        
+        async function loadTemporaryCache() {
+            try {
+                const chatId = document.getElementById('tempCacheChatId').value.trim();
+                let url = `${API_BASE}/cache/temporary?limit=50`;
+                if (currentVendorId) {
+                    url += `&vendor_id=${currentVendorId}`;
+                }
+                if (chatId) {
+                    url += `&chat_id=${chatId}`;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.entries && data.entries.length > 0) {
+                    let html = `<div style="margin-bottom: 0.5rem;"><strong>Total: ${data.total} entries</strong></div>`;
+                    html += '<div style="max-height: 400px; overflow-y: auto;">';
+                    
+                    data.entries.forEach(entry => {
+                        html += `<div style="padding: 1rem; margin-bottom: 1rem; background: white; border: 1px solid #ddd; border-left: 4px solid #3498db;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <strong style="color: #2c3e50;">${entry.cache_id}</strong>
+                                <span style="font-size: 0.85rem; color: #666;">Chat: ${entry.chat_id.substring(0, 20)}...</span>
+                            </div>
+                            <div style="margin-bottom: 0.5rem;"><strong>Q:</strong> ${entry.question.substring(0, 100)}${entry.question.length > 100 ? '...' : ''}</div>
+                            <div style="margin-bottom: 0.5rem;"><strong>A:</strong> ${entry.answer.substring(0, 150)}${entry.answer.length > 150 ? '...' : ''}</div>
+                            <div style="display: flex; gap: 1rem; font-size: 0.85rem; color: #666;">
+                                <span>Used: ${entry.usage_count}x</span>
+                                <span>Tokens Saved: ${entry.tokens_saved.toLocaleString()}</span>
+                            </div>
+                            <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #999;">
+                                Created: ${new Date(entry.created_at).toLocaleString()}
+                            </div>
+                        </div>`;
+                    });
+                    
+                    html += '</div>';
+                    document.getElementById('temporaryCacheList').innerHTML = html;
+                } else {
+                    document.getElementById('temporaryCacheList').innerHTML = '<p style="color: #666; padding: 2rem; text-align: center;">No temporary cache entries found</p>';
+                }
+            } catch (error) {
+                console.error('Error loading temporary cache:', error);
+                document.getElementById('temporaryCacheList').innerHTML = `<span style="color: #e74c3c;">Error: ${error.message}</span>`;
+            }
+        }
+        
+        async function clearMainCache() {
+            if (!confirm('⚠️ WARNING: This will delete ALL main cache entries for this vendor!\n\nAre you sure?')) {
+                return;
+            }
+            
+            try {
+                const vendorId = currentVendorId || 'default';
+                const response = await fetch(`${API_BASE}/cache/main/vendor/${vendorId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert(`Cleared ${data.deleted_count} main cache entries`);
+                    loadMainCache();
+                    loadCacheStats();
+                } else {
+                    alert('Error clearing main cache');
+                }
+            } catch (error) {
+                console.error('Error clearing main cache:', error);
+                alert('Error clearing main cache: ' + error.message);
+            }
+        }
+        
+        async function clearTemporaryCache() {
+            if (!confirm('⚠️ WARNING: This will delete ALL temporary cache entries for this vendor!\n\nAre you sure?')) {
+                return;
+            }
+            
+            try {
+                const vendorId = currentVendorId || 'default';
+                const response = await fetch(`${API_BASE}/cache/temporary/vendor/${vendorId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert(`Cleared ${data.deleted_count} temporary cache entries`);
+                    loadTemporaryCache();
+                    loadCacheStats();
+                } else {
+                    alert('Error clearing temporary cache');
+                }
+            } catch (error) {
+                console.error('Error clearing temporary cache:', error);
+                alert('Error clearing temporary cache: ' + error.message);
+            }
+        }
+        
+        async function promoteTempToMain() {
+            const cacheId = document.getElementById('cacheActionId').value.trim();
+            if (!cacheId) {
+                alert('Please enter a temporary cache ID');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/cache/promote`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({temp_cache_id: cacheId})
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert(`Promoted temporary cache ${cacheId} to main cache ${data.main_cache_id}`);
+                    document.getElementById('cacheActionId').value = '';
+                    loadMainCache();
+                    loadTemporaryCache();
+                    loadCacheStats();
+                } else {
+                    alert('Error promoting cache: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error promoting cache:', error);
+                alert('Error promoting cache: ' + error.message);
+            }
+        }
+        
+        async function toggleCacheEntry() {
+            const cacheId = document.getElementById('cacheActionId').value.trim();
+            if (!cacheId) {
+                alert('Please enter a cache ID');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/cache/main/${cacheId}/toggle`, {
+                    method: 'PUT'
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert(`Cache entry ${data.is_active ? 'activated' : 'deactivated'}`);
+                    document.getElementById('cacheActionId').value = '';
+                    loadMainCache();
+                    loadCacheStats();
+                } else {
+                    alert('Error toggling cache entry');
+                }
+            } catch (error) {
+                console.error('Error toggling cache entry:', error);
+                alert('Error toggling cache entry: ' + error.message);
+            }
+        }
+        
+        async function deleteCacheEntry() {
+            const cacheId = document.getElementById('cacheActionId').value.trim();
+            if (!cacheId) {
+                alert('Please enter a cache ID');
+                return;
+            }
+            
+            if (!confirm(`Delete cache entry ${cacheId}?`)) {
+                return;
+            }
+            
+            try {
+                // Try main cache first
+                let response = await fetch(`${API_BASE}/cache/main/${cacheId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    alert('Main cache entry deleted');
+                    document.getElementById('cacheActionId').value = '';
+                    loadMainCache();
+                    loadCacheStats();
+                    return;
+                }
+                
+                // Try temporary cache
+                response = await fetch(`${API_BASE}/cache/temporary/${cacheId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    alert('Temporary cache entry deleted');
+                    document.getElementById('cacheActionId').value = '';
+                    loadTemporaryCache();
+                    loadCacheStats();
+                } else {
+                    alert('Cache entry not found');
+                }
+            } catch (error) {
+                console.error('Error deleting cache entry:', error);
+                alert('Error deleting cache entry: ' + error.message);
+            }
+        }
+        
+        async function toggleUseLightweightModel() {
+            const toggle = document.getElementById('useLightweightModelToggle');
+            const label = document.getElementById('useLightweightModelLabel');
+            const cacheModelSelection = document.getElementById('cacheModelSelection');
+            const useLightweight = toggle.checked;
+            
+            try {
+                let url = `${API_BASE}/cache/settings`;
+                if (currentVendorId) {
+                    url += `?vendor_id=${currentVendorId}`;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        use_lightweight_model_for_cache: useLightweight
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: `HTTP ${response.status}: ${response.statusText}` }));
+                    throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    label.textContent = useLightweight ? 'ON (Using Lightweight Model)' : 'OFF (Using Default Model)';
+                    label.style.color = useLightweight ? '#3498db' : '#95a5a6';
+                    cacheModelSelection.style.display = useLightweight ? 'block' : 'none';
+                    
+                    if (useLightweight) {
+                        // Load models when enabled
+                        loadCacheModels();
+                    }
+                } else {
+                    toggle.checked = !useLightweight;
+                    alert('Error updating lightweight model setting: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                toggle.checked = !useLightweight;
+                console.error('Error toggling lightweight model:', error);
+                alert('Error updating lightweight model setting: ' + error.message);
+            }
+        }
+        
+        async function loadCacheModels() {
+            const provider = document.getElementById('cacheModelProvider').value;
+            const modelSelect = document.getElementById('cacheModelName');
+            
+            if (!provider) {
+                modelSelect.innerHTML = '<option value="">Select Provider First</option>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/models/available?provider=${provider}`);
+                const data = await response.json();
+                
+                modelSelect.innerHTML = '<option value="">Select Model</option>';
+                
+                if (data.models && data.models.length > 0) {
+                    data.models.forEach(model => {
+                        const option = document.createElement('option');
+                        option.value = model.name || model;
+                        option.textContent = model.name || model;
+                        modelSelect.appendChild(option);
+                    });
+                } else {
+                    modelSelect.innerHTML = '<option value="">No models available</option>';
+                }
+            } catch (error) {
+                console.error('Error loading cache models:', error);
+                modelSelect.innerHTML = '<option value="">Error loading models</option>';
+                alert('Error loading models: ' + error.message);
+            }
+        }
+        
+        async function saveCacheModel() {
+            const provider = document.getElementById('cacheModelProvider').value;
+            const model = document.getElementById('cacheModelName').value;
+            
+            if (!provider || !model) {
+                alert('Please select both provider and model');
+                return;
+            }
+            
+            try {
+                let url = `${API_BASE}/cache/settings`;
+                if (currentVendorId) {
+                    url += `?vendor_id=${currentVendorId}`;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        cache_model_provider: provider,
+                        cache_model_name: model
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: `HTTP ${response.status}: ${response.statusText}` }));
+                    throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert(`Cache model saved: ${model} (${provider})`);
+                } else {
+                    alert('Error saving cache model: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error saving cache model:', error);
+                alert('Error saving cache model: ' + error.message);
+            }
+        }
+        
+        // Load models when provider changes
+        document.addEventListener('DOMContentLoaded', function() {
+            const providerSelect = document.getElementById('cacheModelProvider');
+            if (providerSelect) {
+                providerSelect.addEventListener('change', loadCacheModels);
+            }
+        });
         
         // Load vendors on page load and set default vendor
         loadVendors().then(() => {

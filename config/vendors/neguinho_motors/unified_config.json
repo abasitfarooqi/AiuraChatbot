@@ -132,7 +132,7 @@
   },
   "vector_database": {
     "chroma_db_path": "./data/chroma_db",
-    "chroma_collection_name": "{company_name_lower}_kb"
+    "chroma_collection_name": "neguinho_motors_ltd_kb"
   },
   "embedding": {
     "model": "sentence-transformers/all-MiniLM-L6-v2",
@@ -220,12 +220,12 @@
     "frontend_url": "http://localhost:5173"
   },
   "prompts": {
-    "main_system_prompt": "You are the {company_name} chatbot assistant. You help customers with {services_list}.\n\nCRITICAL RULES - STRICTLY ENFORCE:\n1. ONLY use information provided in the INFORMATION section below\n2. NEVER make up, guess, or hallucinate any information\n3. NEVER use knowledge from outside the provided information\n4. If information is not in the provided context, say: \"{fallback_message}\"\n5. ONLY answer questions about {company_name} services\n6. For out-of-domain queries, say: \"{out_of_domain_message}\"\n\nRESPONSE FORMAT:\n- Use ONLY facts from the provided INFORMATION section\n- If a detail is not mentioned in the information, do NOT invent it\n- Be accurate and precise\n- Format responses with proper line breaks and structure",
-    "greeting_prompt": "The user just said: \"{message}\"\n\nRespond with a friendly greeting and offer to help with {company_name} services ({services_list}).\n\nKeep it brief and welcoming. Do not mention any specific information unless asked.",
-    "query_prompt": "CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.\n\nINFORMATION FROM KNOWLEDGE BASE:\n{context_text}\n\nQUESTION: {message}\n\nINSTRUCTIONS:\n- Use ONLY facts from the INFORMATION section above\n- If the answer is not in the information, say: \"{fallback_message}\"\n- DO NOT make up, guess, or invent any information\n- DO NOT use knowledge from outside the provided information\n- Format your answer with proper line breaks and structure\n\nANSWER (based ONLY on the information above):",
-    "fallback_message": "I don't have that information in my knowledge base. Please contact us at {contact_email} or {contact_phone} for more details.",
-    "out_of_domain_message": "I can only assist with {services_list} related to {company_name}. How can I help you with our services?",
-    "error_message": "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at {contact_email}"
+    "main_system_prompt": "You are the Neguinho Motors Ltd chatbot assistant. You help customers with bike rentals, bike sales, finance, servicing, MOT testing, delivery, accessories, motorbike maintenance/repairs.\n\nCRITICAL RULES - STRICTLY ENFORCE:\n1. ONLY use information provided in the INFORMATION section below\n2. NEVER make up, guess, or hallucinate any information\n3. NEVER use knowledge from outside the provided information\n4. If information is not in the provided context, say: \"I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.\"\n5. ONLY answer questions about Neguinho Motors Ltd services\n6. For out-of-domain queries, say: \"I can only assist with bike rentals, bike sales, finance, servicing, MOT testing, delivery, accessories, motorbike maintenance/repairs related to Neguinho Motors Ltd. How can I help you with our services?\"\n\nRESPONSE FORMAT:\n- Use ONLY facts from the provided INFORMATION section\n- If a detail is not mentioned in the information, do NOT invent it\n- Be accurate and precise\n- Format responses with proper line breaks and structure",
+    "greeting_prompt": "The user just said: \"{message}\"\n\nRespond with a friendly greeting and offer to help with Neguinho Motors Ltd services (bike rentals, bike sales, finance, servicing, MOT testing, delivery, accessories, motorbike maintenance/repairs).\n\nKeep it brief and welcoming. Do not mention any specific information unless asked.",
+    "query_prompt": "CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.\n\nINFORMATION FROM KNOWLEDGE BASE:\n{context_text}\n\nQUESTION: {message}\n\nINSTRUCTIONS:\n- Use ONLY facts from the INFORMATION section above\n- If the answer is not in the information, say: \"I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.\"\n- DO NOT make up, guess, or invent any information\n- DO NOT use knowledge from outside the provided information\n- Format your answer with proper line breaks and structure\n\nANSWER (based ONLY on the information above):",
+    "fallback_message": "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details.",
+    "out_of_domain_message": "I can only assist with bike rentals, bike sales, finance, servicing, MOT testing, delivery, accessories, motorbike maintenance/repairs related to Neguinho Motors Ltd. How can I help you with our services?",
+    "error_message": "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at enquiries@neguinhomotors.co.uk"
   },
   "chatbot_service": {
     "greetings": {
@@ -240,7 +240,7 @@
       ],
       "initial_suggestions": [
         "What services do you offer?",
-        "Tell me about {primary_service}",
+        "Tell me about bike rentals",
         "What are your opening hours?",
         "Where are your branches located?"
       ]
@@ -556,7 +556,7 @@
       },
       "default_suggestions": [
         "What services do you offer?",
-        "Tell me about {primary_service}",
+        "Tell me about bike rentals",
         "What are your opening hours?",
         "Where are your branches located?"
       ],
@@ -607,7 +607,7 @@
         "help"
       ],
       "min_response_length_for_contact": 50,
-      "contact_info": "{contact_format}",
+      "contact_info": "Contact: 0208 314 1498 or enquiries@neguinhomotors.co.uk",
       "default_empty_response": "I'm here to help! How can I assist you today?"
     },
     "context_management": {
@@ -617,7 +617,20 @@
     },
     "validation": {
       "enable_response_validation": true,
-      "fallback_message": "I don't have that information in my knowledge base. Please contact us at {contact_email} or {contact_phone} for more details."
+      "fallback_message": "I don't have that information in my knowledge base. Please contact us at enquiries@neguinhomotors.co.uk or 0208 314 1498 for more details."
+    },
+    "caching": {
+      "enabled": true,
+      "use_cache_for_responses": false,
+      "fallback_to_llm_on_cache_miss": false,
+      "similarity_threshold": 0.85,
+      "save_to_temporary_cache": true,
+      "save_to_main_cache": true,
+      "min_question_length_for_main_cache": 10,
+      "cache_miss_message": "I don't have that information in my cache. Please try rephrasing your question or contact us for assistance.",
+      "description": "Cache Q&A pairs to reduce LLM usage. Main cache is persistent per vendor, temporary cache is per chat session. use_cache_for_responses controls whether to use cache or always use LLM. fallback_to_llm_on_cache_miss controls whether to use LLM when cache doesn't match.",
+      "use_lightweight_model_for_cache": false,
+      "disable_llm_completely": false
     }
   }
 }

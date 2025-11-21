@@ -1,4 +1,4 @@
-2025-11-19 03:54:03.273 | INFO     | backend.utils.unified_config_manager:load_config:30 - Loaded unified config from config/unified_config.json
+2025-11-20 03:59:40.006 | INFO     | backend.utils.unified_config_manager:load_config:30 - Loaded unified config from config/unified_config.json
 /Users/abdulbasit/Projects/HybridApps/AiuraChatbot/venv/lib/python3.11/site-packages/pydantic/_internal/_fields.py:149: UserWarning: Field "model_used" has conflict with protected namespace "model_".
 
 You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
@@ -7,140 +7,312 @@ You may be able to resolve this warning by setting `model_config['protected_name
 
 You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
   warnings.warn(
-INFO:     Started server process [11025]
+/Users/abdulbasit/Projects/HybridApps/AiuraChatbot/venv/lib/python3.11/site-packages/pydantic/_internal/_fields.py:149: UserWarning: Field "model_provider" has conflict with protected namespace "model_".
+
+You may be able to resolve this warning by setting `model_config['protected_namespaces'] = ()`.
+  warnings.warn(
+INFO:     Started server process [38696]
 INFO:     Waiting for application startup.
-2025-11-19 03:54:05 | INFO     | backend.app.main:startup_event - Starting up application...
-2025-11-19 03:54:05 | INFO     | backend.app.main:startup_event - Database initialized
-2025-11-19 03:54:05 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
-2025-11-19 03:54:05 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-20 03:59:43 | INFO     | backend.app.main:startup_event - Starting up application...
+2025-11-20 03:59:43 | INFO     | backend.app.main:startup_event - Database initialized
+2025-11-20 03:59:43 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:43 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
 Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:43 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/default/unified_config.json
 Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
-2025-11-19 03:54:05 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
-2025-11-19 03:54:05 | INFO     | backend.services.rag_service:load_knowledge_base - Collection already has 38 chunks. Skipping load.
-2025-11-19 03:54:05 | INFO     | backend.app.main:startup_event - Knowledge base loaded
+2025-11-20 03:59:43 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor default
+2025-11-20 03:59:43 | WARNING  | backend.services.rag_service:load_knowledge_base - Knowledge base file not found: rag_knowledge_base/default/knowledge_base.json
+2025-11-20 03:59:43 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor default (collection: default_kb, chunks: 0)
+2025-11-20 03:59:43 | WARNING  | backend.services.rag_service:load_knowledge_base - Knowledge base file not found: rag_knowledge_base/default/knowledge_base.json
+2025-11-20 03:59:43 | INFO     | backend.app.main:startup_event - Knowledge base loaded
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     46.183.110.17:0 - "GET /health HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /health HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /health HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /health HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /favicon.ico HTTP/1.1" 404 Not Found
-INFO:     46.183.110.17:0 - "GET / HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /api/v1/chat/chats/user_m0loia59x HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /api/v1/config/unified HTTP/1.1" 200 OK
-2025-11-19 03:57:08 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
-2025-11-19 03:57:08 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+INFO:     127.0.0.1:55712 - "GET /admin HTTP/1.1" 200 OK
+2025-11-20 03:59:47 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:47 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
 Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:47 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/default/unified_config.json
 Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
-2025-11-19 03:57:08 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
-2025-11-19 03:57:08 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
-2025-11-19 03:57:08 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
-2025-11-19 03:57:08 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
-2025-11-19 03:57:08 | INFO     | backend.services.chatbot_service:_load_chatbot_config - Chatbot service configuration loaded from unified config
-Failed to send telemetry event CollectionQueryEvent: capture() takes 1 positional argument but 3 were given
-INFO:     46.183.110.17:0 - "POST /api/v1/chat/message HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /api/v1/chat/chats/user_m0loia59x HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /admin HTTP/1.1" 200 OK
-2025-11-19 03:58:13 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
-2025-11-19 03:58:13 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
-2025-11-19 03:58:13 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
-INFO:     46.183.110.17:0 - "GET /api/v1/models/available HTTP/1.1" 200 OK
-2025-11-19 03:58:13 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
-2025-11-19 03:58:13 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-20 03:59:47 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor default
+2025-11-20 03:59:47 | WARNING  | backend.services.rag_service:load_knowledge_base - Knowledge base file not found: rag_knowledge_base/default/knowledge_base.json
+2025-11-20 03:59:47 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor default (collection: default_kb, chunks: 0)
+INFO:     127.0.0.1:55714 - "GET /api/v1/rag/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55718 - "GET /api/v1/models/config HTTP/1.1" 200 OK
+2025-11-20 03:59:47 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 03:59:47 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 03:59:47 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     127.0.0.1:55720 - "GET /api/v1/vendor/list HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55712 - "GET /api/v1/models/available HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55719 - "GET /api/v1/database/stats HTTP/1.1" 200 OK
+2025-11-20 03:59:47 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 03:59:47 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 03:59:47 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-20 03:59:47 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:47 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
 Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:47 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/default/unified_config.json
 Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
-2025-11-19 03:58:13 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
-INFO:     46.183.110.17:0 - "GET /api/v1/rag/stats HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /api/v1/models/config HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /api/v1/database/stats HTTP/1.1" 200 OK
-2025-11-19 03:58:13 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
-2025-11-19 03:58:13 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
-2025-11-19 03:58:13 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
-INFO:     46.183.110.17:0 - "GET /api/v1/models/current HTTP/1.1" 200 OK
-2025-11-19 03:58:14 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
-2025-11-19 03:58:14 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-20 03:59:47 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor default
+2025-11-20 03:59:47 | WARNING  | backend.services.rag_service:load_knowledge_base - Knowledge base file not found: rag_knowledge_base/default/knowledge_base.json
+2025-11-20 03:59:47 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor default (collection: default_kb, chunks: 0)
+INFO:     127.0.0.1:55712 - "GET /api/v1/rag/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55719 - "GET /api/v1/models/current HTTP/1.1" 200 OK
+2025-11-20 03:59:47 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 03:59:47 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 03:59:47 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     127.0.0.1:55719 - "GET /api/v1/models/current HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55719 - "GET /admin HTTP/1.1" 200 OK
+2025-11-20 03:59:48 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:48 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
 Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:48 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/default/unified_config.json
 Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
-2025-11-19 03:58:14 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
-INFO:     46.183.110.17:0 - "GET /api/v1/rag/stats HTTP/1.1" 200 OK
-2025-11-19 03:58:14 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
-2025-11-19 03:58:14 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
-2025-11-19 03:58:14 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
-INFO:     46.183.110.17:0 - "GET /api/v1/models/current HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /admin HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /api/v1/config/unified HTTP/1.1" 200 OK
-2025-11-19 03:58:40 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
-2025-11-19 03:58:40 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-20 03:59:49 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor default
+2025-11-20 03:59:49 | WARNING  | backend.services.rag_service:load_knowledge_base - Knowledge base file not found: rag_knowledge_base/default/knowledge_base.json
+2025-11-20 03:59:49 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor default (collection: default_kb, chunks: 0)
+INFO:     127.0.0.1:55712 - "GET /api/v1/rag/stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55720 - "GET /api/v1/models/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55714 - "GET /api/v1/vendor/list HTTP/1.1" 200 OK
+2025-11-20 03:59:49 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 03:59:49 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 03:59:49 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     127.0.0.1:55719 - "GET /api/v1/models/available HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55718 - "GET /api/v1/database/stats HTTP/1.1" 200 OK
+2025-11-20 03:59:49 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:49 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
 Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:49 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/default/unified_config.json
 Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
-2025-11-19 03:58:41 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
-INFO:     46.183.110.17:0 - "GET /api/v1/rag/stats HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /api/v1/config/knowledge-base HTTP/1.1" 200 OK
-2025-11-19 03:58:42 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
-2025-11-19 03:58:42 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-20 03:59:49 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor default
+2025-11-20 03:59:49 | WARNING  | backend.services.rag_service:load_knowledge_base - Knowledge base file not found: rag_knowledge_base/default/knowledge_base.json
+2025-11-20 03:59:49 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor default (collection: default_kb, chunks: 0)
+INFO:     127.0.0.1:55719 - "GET /api/v1/rag/stats HTTP/1.1" 200 OK
+2025-11-20 03:59:49 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 03:59:49 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 03:59:49 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     127.0.0.1:55718 - "GET /api/v1/models/current HTTP/1.1" 200 OK
+2025-11-20 03:59:49 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 03:59:49 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 03:59:49 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     127.0.0.1:55718 - "GET /api/v1/models/current HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55718 - "GET /api/v1/vendor/neguinho_motors/versions/knowledge-base HTTP/1.1" 200 OK
+2025-11-20 03:59:50 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:50 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
 Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:50 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/neguinho_motors/unified_config.json
 Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
-2025-11-19 03:58:42 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
-INFO:     46.183.110.17:0 - "GET /api/v1/rag/chromadb/info HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /api/v1/database/stats HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /api/v1/database/stats HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /api/v1/config/models/offline HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /api/v1/config/prompts HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /standalone-widget.html HTTP/1.1" 404 Not Found
-INFO:     46.183.110.17:0 - "GET /frontend/standalone-widget.html HTTP/1.1" 200 OK
-INFO:     92.40.176.242:0 - "GET / HTTP/1.1" 200 OK
-INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1k11tz9t7 HTTP/1.1" 200 OK
-INFO:     92.40.176.242:0 - "GET /api/v1/config/unified HTTP/1.1" 200 OK
-INFO:     92.40.176.242:0 - "GET /favicon.ico HTTP/1.1" 404 Not Found
-2025-11-19 04:08:10 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
-2025-11-19 04:08:10 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-20 03:59:50 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor neguinho_motors (collection: neguinho_motors_kb, chunks: 38)
+INFO:     127.0.0.1:55719 - "GET /api/v1/rag/stats?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55719 - "GET /api/v1/vendor/neguinho_motors/knowledge-base HTTP/1.1" 200 OK
+2025-11-20 03:59:50 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:50 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
 Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:50 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/neguinho_motors/unified_config.json
 Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
-2025-11-19 04:08:10 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
-2025-11-19 04:08:10 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
-2025-11-19 04:08:10 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
-2025-11-19 04:08:10 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
-2025-11-19 04:08:10 | INFO     | backend.services.chatbot_service:_load_chatbot_config - Chatbot service configuration loaded from unified config
-INFO:     92.40.176.242:0 - "POST /api/v1/chat/message HTTP/1.1" 200 OK
-INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1k11tz9t7 HTTP/1.1" 200 OK
-2025-11-19 04:08:24 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
-2025-11-19 04:08:24 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-20 03:59:50 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor neguinho_motors (collection: neguinho_motors_kb, chunks: 38)
+INFO:     127.0.0.1:55719 - "GET /api/v1/rag/chromadb/info?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:57 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
 Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:57 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/mphenom_ltd/unified_config.json
 Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
-2025-11-19 04:08:24 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
-2025-11-19 04:08:24 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
-2025-11-19 04:08:24 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
-2025-11-19 04:08:24 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
-2025-11-19 04:08:24 | INFO     | backend.services.chatbot_service:_load_chatbot_config - Chatbot service configuration loaded from unified config
-INFO:     92.40.176.242:0 - "POST /api/v1/chat/message HTTP/1.1" 200 OK
-INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1k11tz9t7 HTTP/1.1" 200 OK
-2025-11-19 04:08:32 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
-2025-11-19 04:08:32 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor mphenom_ltd
+2025-11-20 03:59:57 | WARNING  | backend.services.rag_service:load_knowledge_base - No chunks found in knowledge base
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor mphenom_ltd (collection: mphenom_ltd_kb, chunks: 0)
+INFO:     127.0.0.1:55735 - "GET /api/v1/rag/stats?vendor_id=mphenom_ltd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55736 - "GET /api/v1/vendor/list HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55735 - "GET /api/v1/vendor/mphenom_ltd/knowledge-base HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55737 - "GET /api/v1/vendor/mphenom_ltd/versions/config HTTP/1.1" 200 OK
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:57 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
 Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:57 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/mphenom_ltd/unified_config.json
 Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
-2025-11-19 04:08:32 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
-2025-11-19 04:08:32 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
-2025-11-19 04:08:32 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
-2025-11-19 04:08:32 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
-2025-11-19 04:08:32 | INFO     | backend.services.chatbot_service:_load_chatbot_config - Chatbot service configuration loaded from unified config
-INFO:     92.40.176.242:0 - "POST /api/v1/chat/message HTTP/1.1" 200 OK
-INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1k11tz9t7 HTTP/1.1" 200 OK
-INFO:     92.40.176.242:0 - "DELETE /api/v1/chat/delete/chat_1763507290613_ri1y1wrzn HTTP/1.1" 200 OK
-INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1k11tz9t7 HTTP/1.1" 200 OK
-INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1k11tz9t7 HTTP/1.1" 200 OK
-INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1763507459027_1boc8odaf HTTP/1.1" 200 OK
-2025-11-19 04:11:06 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
-2025-11-19 04:11:06 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor mphenom_ltd
+2025-11-20 03:59:57 | WARNING  | backend.services.rag_service:load_knowledge_base - No chunks found in knowledge base
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor mphenom_ltd (collection: mphenom_ltd_kb, chunks: 0)
+INFO:     127.0.0.1:55736 - "GET /api/v1/rag/stats?vendor_id=mphenom_ltd HTTP/1.1" 200 OK
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:57 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
 Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:57 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/mphenom_ltd/unified_config.json
 Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
-2025-11-19 04:11:06 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully
-2025-11-19 04:11:06 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
-2025-11-19 04:11:06 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
-2025-11-19 04:11:06 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
-2025-11-19 04:11:06 | INFO     | backend.services.chatbot_service:_load_chatbot_config - Chatbot service configuration loaded from unified config
-INFO:     92.40.176.242:0 - "POST /api/v1/chat/message HTTP/1.1" 200 OK
-INFO:     92.40.176.242:0 - "GET /api/v1/chat/chats/user_1763507459027_1boc8odaf HTTP/1.1" 200 OK
-INFO:     46.183.110.17:0 - "GET /frontend/standalone-widget.html HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55708 - "POST /api/v1/vendor/create HTTP/1.1" 404 Not Found
-INFO:     149.12.167.128:0 - "HEAD /health HTTP/1.1" 405 Method Not Allowed
-INFO:     127.0.0.1:56597 - "GET /api/v1/vendor/list HTTP/1.1" 404 Not Found
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor mphenom_ltd
+2025-11-20 03:59:57 | WARNING  | backend.services.rag_service:load_knowledge_base - No chunks found in knowledge base
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor mphenom_ltd (collection: mphenom_ltd_kb, chunks: 0)
+INFO:     127.0.0.1:55737 - "GET /api/v1/rag/chromadb/info?vendor_id=mphenom_ltd HTTP/1.1" 200 OK
+2025-11-20 03:59:57 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/mphenom_ltd/unified_config.json
+INFO:     127.0.0.1:55735 - "GET /api/v1/vendor/mphenom_ltd/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55736 - "GET /api/v1/vendor/mphenom_ltd/knowledge-base HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55739 - "GET /api/v1/vendor/mphenom_ltd/versions/knowledge-base HTTP/1.1" 200 OK
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:57 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:57 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/mphenom_ltd/unified_config.json
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor mphenom_ltd
+2025-11-20 03:59:57 | WARNING  | backend.services.rag_service:load_knowledge_base - No chunks found in knowledge base
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor mphenom_ltd (collection: mphenom_ltd_kb, chunks: 0)
+INFO:     127.0.0.1:55739 - "GET /api/v1/rag/chromadb/info?vendor_id=mphenom_ltd HTTP/1.1" 200 OK
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:57 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:57 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/mphenom_ltd/unified_config.json
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor mphenom_ltd
+2025-11-20 03:59:57 | WARNING  | backend.services.rag_service:load_knowledge_base - No chunks found in knowledge base
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor mphenom_ltd (collection: mphenom_ltd_kb, chunks: 0)
+INFO:     127.0.0.1:55736 - "GET /api/v1/rag/stats?vendor_id=mphenom_ltd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55736 - "GET /api/v1/vendor/mphenom_ltd/knowledge-base HTTP/1.1" 200 OK
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:57 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:57 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/mphenom_ltd/unified_config.json
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor mphenom_ltd
+2025-11-20 03:59:57 | WARNING  | backend.services.rag_service:load_knowledge_base - No chunks found in knowledge base
+2025-11-20 03:59:57 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor mphenom_ltd (collection: mphenom_ltd_kb, chunks: 0)
+INFO:     127.0.0.1:55736 - "GET /api/v1/rag/chromadb/info?vendor_id=mphenom_ltd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55736 - "GET /api/v1/vendor/list HTTP/1.1" 200 OK
+2025-11-20 03:59:59 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:59 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:59 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/mphenom_ltd/unified_config.json
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:59 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor mphenom_ltd
+2025-11-20 03:59:59 | WARNING  | backend.services.rag_service:load_knowledge_base - No chunks found in knowledge base
+2025-11-20 03:59:59 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor mphenom_ltd (collection: mphenom_ltd_kb, chunks: 0)
+INFO:     127.0.0.1:55736 - "GET /api/v1/rag/stats?vendor_id=mphenom_ltd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55736 - "GET /api/v1/vendor/mphenom_ltd/knowledge-base HTTP/1.1" 200 OK
+2025-11-20 03:59:59 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 03:59:59 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:59 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/mphenom_ltd/unified_config.json
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 03:59:59 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor mphenom_ltd
+2025-11-20 03:59:59 | WARNING  | backend.services.rag_service:load_knowledge_base - No chunks found in knowledge base
+2025-11-20 03:59:59 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor mphenom_ltd (collection: mphenom_ltd_kb, chunks: 0)
+INFO:     127.0.0.1:55736 - "GET /api/v1/rag/chromadb/info?vendor_id=mphenom_ltd HTTP/1.1" 200 OK
+2025-11-20 04:00:01 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 04:00:01 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 04:00:01 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     127.0.0.1:55736 - "GET /api/v1/models/available HTTP/1.1" 200 OK
+2025-11-20 04:00:38 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 04:00:39 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 04:00:39 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     127.0.0.1:55746 - "GET /api/v1/models/available HTTP/1.1" 200 OK
+2025-11-20 04:01:04 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 04:01:04 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 04:01:04 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-20 04:01:04 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] parsing_input_data - 5% - 0.0s elapsed
+2025-11-20 04:01:04 | INFO     | backend.services.aiura_mind:generate_from_business_data - ✅ Parsed input data for vendor mphenom_ltd
+2025-11-20 04:01:04 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] generating_config - 10% - 0.0s elapsed
+2025-11-20 04:01:04 | INFO     | backend.services.aiura_mind:generate_from_business_data - 🔄 Generating unified config for vendor mphenom_ltd (this may take 30-60 seconds)
+2025-11-20 04:01:04 | INFO     | backend.services.llm_service:switch_model - Switched to provider: ollama, model: Mistral:latest
+2025-11-20 04:01:04 | INFO     | backend.services.aiura_mind:_generate_unified_config - AiuraMind using model: ollama/Mistral:latest for config generation
+2025-11-20 04:01:52 | INFO     | backend.services.llm_service:switch_model - Switched to provider: ollama, model: mistral
+2025-11-20 04:01:52 | WARNING  | backend.services.aiura_mind:_generate_unified_config - LLM response didn't contain valid JSON, using template
+2025-11-20 04:01:52 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] config_generated - 45% - 48.0s elapsed (~58.6s remaining)
+2025-11-20 04:01:52 | INFO     | backend.services.aiura_mind:generate_from_business_data - ✅ Unified config generated in 48.0s
+2025-11-20 04:01:52 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] generating_knowledge_base - 50% - 48.0s elapsed (~48.0s remaining)
+2025-11-20 04:01:52 | INFO     | backend.services.aiura_mind:generate_from_business_data - 🔄 Generating knowledge base for vendor mphenom_ltd (this may take 60-120 seconds)
+2025-11-20 04:01:52 | INFO     | backend.services.llm_service:switch_model - Switched to provider: ollama, model: Mistral:latest
+2025-11-20 04:01:52 | INFO     | backend.services.aiura_mind:_generate_knowledge_base - AiuraMind using model: ollama/Mistral:latest for KB generation
+2025-11-20 04:03:01 | INFO     | backend.services.llm_service:switch_model - Switched to provider: ollama, model: mistral
+2025-11-20 04:03:01 | WARNING  | backend.services.aiura_mind:_generate_knowledge_base - LLM response didn't contain valid JSON, using template
+2025-11-20 04:03:01 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] knowledge_base_generated - 90% - 117.5s elapsed (~13.1s remaining)
+2025-11-20 04:03:01 | INFO     | backend.services.aiura_mind:generate_from_business_data - ✅ Knowledge base generated in 69.6s with 4 chunks
+2025-11-20 04:03:01 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] generating_additional_files - 95% - 117.5s elapsed (~6.2s remaining)
+2025-11-20 04:03:01 | ERROR    | backend.services.aiura_mind:_generate_additional_config_files - Error generating additional config files: 'dict' object has no attribute 'vendor_name'
+2025-11-20 04:03:01 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] completed - 100% - 117.5s elapsed
+2025-11-20 04:03:01 | INFO     | backend.services.aiura_mind:generate_from_business_data - ✅ AiuraMind completed in 117.5s total
+INFO:     127.0.0.1:55771 - "POST /api/v1/vendor/mphenom_ltd/aiura-mind/generate HTTP/1.1" 200 OK
+2025-11-20 04:05:15 | ERROR    | backend.api.vendor:save_generated_config - Error saving generated config for mphenom_ltd: 'dict' object has no attribute 'vendor_name'
+INFO:     127.0.0.1:55844 - "POST /api/v1/vendor/mphenom_ltd/config/save-generated HTTP/1.1" 500 Internal Server Error
+2025-11-20 04:05:26 | ERROR    | backend.api.vendor:save_generated_config - Error saving generated config for mphenom_ltd: 'dict' object has no attribute 'vendor_name'
+INFO:     127.0.0.1:55847 - "POST /api/v1/vendor/mphenom_ltd/config/save-generated HTTP/1.1" 500 Internal Server Error
+2025-11-20 04:13:23 | ERROR    | backend.api.vendor:save_generated_knowledge_base - Error saving generated KB for mphenom_ltd: 'dict' object has no attribute 'vendor_name'
+INFO:     127.0.0.1:55946 - "POST /api/v1/vendor/mphenom_ltd/knowledge-base/save-generated HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:56332 - "GET /admin HTTP/1.1" 200 OK
+2025-11-20 04:43:52 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 04:43:52 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 04:43:52 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/default/unified_config.json
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 04:43:52 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor default
+2025-11-20 04:43:52 | WARNING  | backend.services.rag_service:load_knowledge_base - Knowledge base file not found: rag_knowledge_base/default/knowledge_base.json
+2025-11-20 04:43:52 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor default (collection: default_kb, chunks: 0)
+INFO:     127.0.0.1:56333 - "GET /api/v1/rag/stats HTTP/1.1" 200 OK
+2025-11-20 04:43:52 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 04:43:52 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 04:43:52 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     127.0.0.1:56338 - "GET /api/v1/models/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56339 - "GET /api/v1/vendor/list HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56341 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56332 - "GET /api/v1/models/available HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56337 - "GET /api/v1/database/stats HTTP/1.1" 200 OK
+2025-11-20 04:43:52 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 04:43:52 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 04:43:52 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/default/unified_config.json
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 04:43:52 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor default
+2025-11-20 04:43:52 | WARNING  | backend.services.rag_service:load_knowledge_base - Knowledge base file not found: rag_knowledge_base/default/knowledge_base.json
+2025-11-20 04:43:52 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor default (collection: default_kb, chunks: 0)
+INFO:     127.0.0.1:56332 - "GET /api/v1/rag/stats HTTP/1.1" 200 OK
+2025-11-20 04:43:52 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 04:43:52 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 04:43:52 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     127.0.0.1:56337 - "GET /api/v1/models/current HTTP/1.1" 200 OK
+2025-11-20 04:43:52 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 04:43:52 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 04:43:52 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     127.0.0.1:56337 - "GET /api/v1/models/current HTTP/1.1" 200 OK
+2025-11-20 04:43:54 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 04:43:54 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 04:43:54 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+INFO:     127.0.0.1:56337 - "GET /api/v1/models/available HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56372 - "GET /api/v1/vendor/list HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56373 - "GET /api/v1/vendor/mphenom_ltd/versions/config HTTP/1.1" 200 OK
+2025-11-20 04:45:53 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/mphenom_ltd/unified_config.json
+INFO:     127.0.0.1:56373 - "GET /api/v1/vendor/mphenom_ltd/config HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56372 - "GET /api/v1/vendor/mphenom_ltd/versions/knowledge-base HTTP/1.1" 200 OK
+2025-11-20 04:45:53 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 04:45:53 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 04:45:53 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/mphenom_ltd/unified_config.json
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 04:45:53 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor mphenom_ltd
+2025-11-20 04:45:53 | WARNING  | backend.services.rag_service:load_knowledge_base - No chunks found in knowledge base
+2025-11-20 04:45:53 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor mphenom_ltd (collection: mphenom_ltd_kb, chunks: 0)
+INFO:     127.0.0.1:56372 - "GET /api/v1/rag/stats?vendor_id=mphenom_ltd HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56372 - "GET /api/v1/vendor/mphenom_ltd/knowledge-base HTTP/1.1" 200 OK
+2025-11-20 04:45:53 | INFO     | backend.services.rag_service:_initialize - Loading embedding model: sentence-transformers/all-MiniLM-L6-v2
+2025-11-20 04:45:53 | INFO     | backend.services.offline_model_manager:load_embedding_model_offline - Loading embedding model from local cache: models/embeddings/embeddings/sentence-transformers_all-MiniLM-L6-v2
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 04:45:53 | INFO     | backend.utils.unified_config_manager:load_config - Loaded unified config from config/vendors/mphenom_ltd/unified_config.json
+Failed to send telemetry event ClientCreateCollectionEvent: capture() takes 1 positional argument but 3 were given
+2025-11-20 04:45:53 | INFO     | backend.services.rag_service:_initialize - Collection is empty, auto-loading knowledge base for vendor mphenom_ltd
+2025-11-20 04:45:53 | WARNING  | backend.services.rag_service:load_knowledge_base - No chunks found in knowledge base
+2025-11-20 04:45:53 | INFO     | backend.services.rag_service:_initialize - RAG service initialized successfully for vendor mphenom_ltd (collection: mphenom_ltd_kb, chunks: 0)
+INFO:     127.0.0.1:56372 - "GET /api/v1/rag/chromadb/info?vendor_id=mphenom_ltd HTTP/1.1" 200 OK
+2025-11-20 04:46:27 | INFO     | backend.services.llm_service:__init__ - Loaded active model from DB: mistral (ollama)
+2025-11-20 04:46:27 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-20 04:46:27 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-20 04:46:27 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] parsing_input_data - 5% - 0.0s elapsed
+2025-11-20 04:46:27 | INFO     | backend.services.aiura_mind:generate_from_business_data - ✅ Parsed input data for vendor mphenom_ltd
+2025-11-20 04:46:27 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] generating_config - 10% - 0.0s elapsed
+2025-11-20 04:46:27 | INFO     | backend.services.aiura_mind:generate_from_business_data - 🔄 Generating unified config for vendor mphenom_ltd (this may take 30-60 seconds)
+2025-11-20 04:47:53 | WARNING  | backend.services.aiura_mind:_generate_unified_config - LLM response didn't contain valid JSON, using template
+2025-11-20 04:47:53 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] config_generated - 45% - 86.3s elapsed (~105.4s remaining)
+2025-11-20 04:47:53 | INFO     | backend.services.aiura_mind:generate_from_business_data - ✅ Unified config generated in 86.3s
+2025-11-20 04:47:53 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] generating_knowledge_base - 50% - 86.3s elapsed (~86.2s remaining)
+2025-11-20 04:47:53 | INFO     | backend.services.aiura_mind:generate_from_business_data - 🔄 Generating knowledge base for vendor mphenom_ltd (this may take 60-120 seconds)
+2025-11-20 04:48:44 | WARNING  | backend.services.aiura_mind:_generate_knowledge_base - LLM response didn't contain valid JSON, using template
+2025-11-20 04:48:44 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] knowledge_base_generated - 90% - 136.7s elapsed (~15.2s remaining)
+2025-11-20 04:48:44 | INFO     | backend.services.aiura_mind:generate_from_business_data - ✅ Knowledge base generated in 50.5s with 4 chunks
+2025-11-20 04:48:44 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] generating_additional_files - 95% - 136.7s elapsed (~7.2s remaining)
+2025-11-20 04:48:44 | ERROR    | backend.services.aiura_mind:_generate_additional_config_files - Error generating additional config files: 'dict' object has no attribute 'vendor_name'
+2025-11-20 04:48:44 | INFO     | backend.services.aiura_mind:update_progress - [AiuraMind Progress] completed - 100% - 136.8s elapsed
+2025-11-20 04:48:44 | INFO     | backend.services.aiura_mind:generate_from_business_data - ✅ AiuraMind completed in 136.8s total
+INFO:     127.0.0.1:56407 - "POST /api/v1/vendor/mphenom_ltd/aiura-mind/generate HTTP/1.1" 200 OK

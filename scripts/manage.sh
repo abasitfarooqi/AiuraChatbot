@@ -303,6 +303,23 @@ case "${1:-}" in
     stop)
         print_header
         stop_server
+        
+        # Check if tunnel is running and prompt user
+        if check_tunnel_running; then
+            PID=$(cat "$TUNNEL_PID_FILE")
+            echo ""
+            echo -e "${YELLOW}⚠️  Tunnel is running (PID: $PID)${NC}"
+            echo -e "${YELLOW}Do you want to stop the tunnel as well? (y/n)${NC}"
+            read -r response
+            case "$response" in
+                [yY]|[yY][eE][sS])
+                    stop_tunnel
+                    ;;
+                *)
+                    echo -e "${BLUE}ℹ️  Tunnel left running${NC}"
+                    ;;
+            esac
+        fi
         ;;
     restart)
         print_header

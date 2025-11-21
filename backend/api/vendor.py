@@ -509,19 +509,44 @@ async def save_generated_config(
     vendor_id: str,
     config_data: Dict[str, Any]
 ):
-    """Save generated config directly to vendor folder."""
+    """Save generated config directly to vendor folder with timestamp."""
     try:
+        from datetime import datetime
+        import shutil
+        
         vendor_manager = get_vendor_manager()
         vendor = vendor_manager.get_vendor(vendor_id)
         if not vendor:
             raise HTTPException(status_code=404, detail=f"Vendor {vendor_id} not found")
         
-        # Save config
+        # Get vendor name and sanitize for filename (vendor is a dict)
+        import re
+        vendor_name = vendor.get("vendor_name", vendor_id) if isinstance(vendor, dict) else (vendor.vendor_name if hasattr(vendor, 'vendor_name') else vendor_id)
+        vendor_name_safe = re.sub(r'[^a-zA-Z0-9_]', '_', vendor_name).lower()
+        
+        # Create timestamped directory
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        vendor_dir = vendor_manager.vendors_dir / vendor_id
+        timestamped_dir = vendor_dir / "generated" / timestamp
+        timestamped_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Add metadata to config
+        if "metadata" not in config_data:
+            config_data["metadata"] = {}
+        config_data["metadata"]["generated_at"] = datetime.now().isoformat()
+        config_data["metadata"]["vendor_id"] = vendor_id
+        
+        # Save config to main location
         config_manager = vendor_manager.get_vendor_config_manager(vendor_id)
         success = config_manager.save_config(config_data)
         
         if not success:
             raise HTTPException(status_code=500, detail="Failed to save config")
+        
+        # Also save timestamped copy with vendor name in filename
+        timestamped_config_path = timestamped_dir / f"unified_config_{vendor_name_safe}_{timestamp}.json"
+        with open(timestamped_config_path, "w", encoding="utf-8") as f:
+            json.dump(config_data, f, indent=2, ensure_ascii=False)
         
         # Also generate additional config files
         from backend.services.aiura_mind import AiuraMindService
@@ -530,14 +555,16 @@ async def save_generated_config(
         db = SessionLocal()
         try:
             aiura_mind = AiuraMindService(db=db, vendor_id=vendor_id)
-            company_name = config_data.get("business", {}).get("company_name", vendor.company_name)
+            company_name = config_data.get("business", {}).get("company_name", vendor.get("company_name", "") if isinstance(vendor, dict) else "")
             aiura_mind._generate_additional_config_files(config_data, vendor_id, company_name)
         finally:
             db.close()
         
         return {
             "status": "success",
-            "message": f"Generated config saved to vendor {vendor_id} folder"
+            "message": f"Generated config saved to vendor {vendor_id} folder",
+            "timestamp": timestamp,
+            "timestamped_path": str(timestamped_dir)
         }
         
     except HTTPException:
@@ -552,23 +579,49 @@ async def save_generated_knowledge_base(
     vendor_id: str,
     kb_data: Dict[str, Any]
 ):
-    """Save generated knowledge base directly to vendor folder."""
+    """Save generated knowledge base directly to vendor folder with timestamp."""
     try:
+        from datetime import datetime
+        
         vendor_manager = get_vendor_manager()
         vendor = vendor_manager.get_vendor(vendor_id)
         if not vendor:
             raise HTTPException(status_code=404, detail=f"Vendor {vendor_id} not found")
         
-        # Save KB
+        # Get vendor name and sanitize for filename (vendor is a dict)
+        import re
+        vendor_name = vendor.get("vendor_name", vendor_id) if isinstance(vendor, dict) else (vendor.vendor_name if hasattr(vendor, 'vendor_name') else vendor_id)
+        vendor_name_safe = re.sub(r'[^a-zA-Z0-9_]', '_', vendor_name).lower()
+        
+        # Create timestamped directory
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        rag_dir = vendor_manager.rag_dir / vendor_id
+        timestamped_dir = rag_dir / "generated" / timestamp
+        timestamped_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Add metadata to KB
+        if "metadata" not in kb_data:
+            kb_data["metadata"] = {}
+        kb_data["metadata"]["generated_at"] = datetime.now().isoformat()
+        kb_data["metadata"]["vendor_id"] = vendor_id
+        
+        # Save KB to main location
         kb_path = vendor_manager.get_vendor_rag_path(vendor_id)
         kb_path.parent.mkdir(parents=True, exist_ok=True)
         
         with open(kb_path, "w", encoding="utf-8") as f:
             json.dump(kb_data, f, indent=2, ensure_ascii=False)
         
+        # Also save timestamped copy with vendor name in filename
+        timestamped_kb_path = timestamped_dir / f"knowledge_base_{vendor_name_safe}_{timestamp}.json"
+        with open(timestamped_kb_path, "w", encoding="utf-8") as f:
+            json.dump(kb_data, f, indent=2, ensure_ascii=False)
+        
         return {
             "status": "success",
-            "message": f"Generated knowledge base saved to vendor {vendor_id} folder"
+            "message": f"Generated knowledge base saved to vendor {vendor_id} folder",
+            "timestamp": timestamp,
+            "timestamped_path": str(timestamped_dir)
         }
         
     except HTTPException:

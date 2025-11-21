@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from backend.services.rag_service import RAGService
 from backend.services.llm_service import LLMService
 from backend.services.memory_service import MemoryService
+from backend.services.cache_service import CacheService
 from backend.models.database import User, Chat, Message, TokenUsage
 from backend.config import get_settings
 from loguru import logger
@@ -26,6 +27,7 @@ class ChatbotService:
         self.rag_service = RAGService(vendor_id=self.vendor_id)
         self.llm_service = LLMService(db=db)  # Pass db to load active model
         self.memory_service = MemoryService(db)
+        self.cache_service = CacheService(db=db, vendor_id=self.vendor_id)
         self.settings = settings
         self._load_chatbot_config()
     
@@ -91,6 +93,241 @@ RESPONSE FORMAT:
             
             # Save user message
             user_message = self._save_message(chat_id, "user", message)
+            
+            # Check cache first (if enabled)
+            # Reload config to get latest cache settings (in case they were changed via admin panel)
+            import time
+            start_time = time.time()
+            
+            # Load vendor-specific config for the effective vendor
+            try:
+                from backend.utils.vendor_manager import get_vendor_manager
+                vendor_manager = get_vendor_manager()
+                config_manager = vendor_manager.get_vendor_config_manager(effective_vendor_id)
+                unified_config = config_manager.load_config()
+                caching_config = unified_config.get("chatbot_service", {}).get("caching", {})
+            except Exception as e:
+                logger.error(f"[CACHE] Error loading vendor config for {effective_vendor_id}: {e}")
+                # Fallback to service's config
+                self.reload_chatbot_config()
+                caching_config = self.chatbot_config.get("caching", {})
+            
+            cache_enabled = caching_config.get("enabled", True)
+            use_cache_for_responses = caching_config.get("use_cache_for_responses", True)  # Default to True
+            fallback_to_llm_on_cache_miss = caching_config.get("fallback_to_llm_on_cache_miss", True)  # Default to True
+            disable_llm_completely = caching_config.get("disable_llm_completely", False)  # Default to False
+            
+            logger.info(f"[CACHE] Settings for vendor {effective_vendor_id} - enabled: {cache_enabled}, use_cache: {use_cache_for_responses}, fallback: {fallback_to_llm_on_cache_miss}, disable_llm: {disable_llm_completely}")
+            logger.info(f"[CACHE] Processing question: '{message[:100]}...' (chat_id: {chat_id}, vendor: {effective_vendor_id})")
+            
+            # CRITICAL: If LLM is completely disabled, ONLY use cache - NEVER call LLM
+            if disable_llm_completely:
+                logger.warning(f"[LLM] 🚫 LLM is COMPLETELY DISABLED for vendor {effective_vendor_id} - cache-only mode")
+                # Force cache to be enabled when LLM is disabled
+                cache_enabled = True
+                use_cache_for_responses = True
+                fallback_to_llm_on_cache_miss = False
+                logger.warning(f"[LLM] Forcing cache ON and fallback OFF for cache-only mode")
+            
+            cache_result = None
+            cache_check_time = 0
+            
+            # Check cache if enabled OR if LLM is disabled (cache-only mode)
+            if (cache_enabled and use_cache_for_responses) or disable_llm_completely:
+                cache_check_start = time.time()
+                logger.info(f"[CACHE] Checking cache for question...")
+                cache_result = self.cache_service.check_cache(
+                    question=message,
+                    chat_id=chat_id,
+                    vendor_id=effective_vendor_id
+                )
+                cache_check_time = time.time() - cache_check_start
+                
+                if cache_result:
+                    # Found in cache - return cached answer
+                    total_time = time.time() - start_time
+                    logger.info(f"[CACHE] ✅ CACHE HIT! Question: '{message[:50]}...'")
+                    logger.info(f"[CACHE]   - Similarity: {cache_result.get('similarity', 0):.3f}")
+                    logger.info(f"[CACHE]   - Cache Type: {cache_result.get('cache_type', 'unknown')}")
+                    logger.info(f"[CACHE]   - Cache ID: {cache_result.get('cache_id', 'unknown')}")
+                    logger.info(f"[CACHE]   - Check Time: {cache_check_time:.3f}s, Total Time: {total_time:.3f}s")
+                    logger.info(f"[CACHE]   - ⚡ Using cached answer (NO LLM call)")
+                    
+                    cached_answer = cache_result["answer"]
+                    cache_type = cache_result["cache_type"]
+                    cache_id = cache_result["cache_id"]
+                    
+                    # Estimate tokens saved (approximate)
+                    estimated_tokens = len(cached_answer.split()) * 1.3  # Rough estimate
+                    tokens_saved = int(estimated_tokens)
+                    
+                    # Save assistant message
+                    assistant_message = self._save_message(
+                        chat_id,
+                        "assistant",
+                        cached_answer,
+                        tokens_used=0,  # No tokens used from cache
+                        message_metadata={
+                            "from_cache": True,
+                            "cache_type": cache_type,
+                            "cache_id": cache_id,
+                            "similarity": cache_result.get("similarity", 0),
+                            "tokens_saved": tokens_saved
+                        }
+                    )
+                    
+                    # Update cache stats
+                    self.cache_service.update_cache_stats(
+                        cache_id=cache_id,
+                        cache_type=cache_type,
+                        tokens_saved=tokens_saved
+                    )
+                    
+                    # Update memory (lightweight - just track that we answered)
+                    entities = self.memory_service.extract_entities(message, [])
+                    self.memory_service.update_memory(
+                        chat_id=chat_id,
+                        entities=entities,
+                        intent="cached_query"
+                    )
+                    
+                    return {
+                        "response": cached_answer,
+                        "chat_id": chat_id,
+                        "message_id": assistant_message.message_id,
+                        "tokens_used": 0,
+                        "credits_used": 0,
+                        "model_used": "cache",
+                        "retrieved_chunks": 0,
+                        "is_domain_relevant": True,
+                        "from_cache": True,
+                        "cache_type": cache_type,
+                        "cache_similarity": cache_result.get("similarity", 0),
+                        "suggestions": []
+                    }
+                else:
+                    # Cache miss
+                    total_time = time.time() - start_time
+                    logger.warning(f"[CACHE] ❌ CACHE MISS! Question: '{message[:50]}...'")
+                    logger.warning(f"[CACHE]   - Check Time: {cache_check_time:.3f}s, Total Time: {total_time:.3f}s")
+                    
+                    if not fallback_to_llm_on_cache_miss:
+                        # Cache miss and fallback disabled - return "not in cache" message
+                        logger.warning(f"[CACHE]   - Fallback to LLM is DISABLED - returning cache miss message")
+                        logger.warning(f"[CACHE]   - ⚠️ NO LLM call (fallback disabled)")
+                    
+                    # Get cache miss message from config
+                    cache_miss_message = caching_config.get("cache_miss_message", 
+                        "I don't have that information in my cache. Please try rephrasing your question or contact us for assistance.")
+                    
+                    assistant_message = self._save_message(
+                        chat_id,
+                        "assistant",
+                        cache_miss_message,
+                        tokens_used=0,
+                        message_metadata={
+                            "from_cache": False,
+                            "cache_miss": True,
+                            "fallback_disabled": True
+                        }
+                    )
+                    
+                    return {
+                        "response": cache_miss_message,
+                        "chat_id": chat_id,
+                        "message_id": assistant_message.message_id,
+                        "tokens_used": 0,
+                        "credits_used": 0,
+                        "model_used": "cache_miss",
+                        "retrieved_chunks": 0,
+                        "is_domain_relevant": True,
+                        "from_cache": False,
+                        "cache_miss": True,
+                        "suggestions": []
+                    }
+            
+            # CRITICAL: If LLM is completely disabled, NEVER proceed to LLM processing
+            # This check MUST happen before ANY LLM-related code (RAG, domain check, etc.)
+            if disable_llm_completely:
+                # LLM is disabled - only cache is allowed
+                if not cache_result:
+                    # Cache miss and LLM disabled - return message and STOP HERE - NO LLM CALLS
+                    logger.error(f"[LLM] 🚫 LLM DISABLED - Cache miss! Cannot generate response. Returning cache miss message.")
+                    logger.error(f"[LLM] 🚫 BLOCKING all LLM processing - cache-only mode enforced")
+                    cache_miss_message = caching_config.get("cache_miss_message", 
+                        "I don't have that information in my cache. LLM is currently disabled. Please try rephrasing your question or contact us for assistance.")
+                    
+                    assistant_message = self._save_message(
+                        chat_id,
+                        "assistant",
+                        cache_miss_message,
+                        tokens_used=0,
+                        message_metadata={
+                            "from_cache": False,
+                            "cache_miss": True,
+                            "llm_disabled": True
+                        }
+                    )
+                    
+                    return {
+                        "response": cache_miss_message,
+                        "chat_id": chat_id,
+                        "message_id": assistant_message.message_id,
+                        "tokens_used": 0,
+                        "credits_used": 0,
+                        "model_used": "llm_disabled",
+                        "retrieved_chunks": 0,
+                        "is_domain_relevant": True,
+                        "from_cache": False,
+                        "cache_miss": True,
+                        "llm_disabled": True,
+                        "suggestions": []
+                    }
+                # If cache_result exists, it was already returned above, so we shouldn't reach here
+                # This is a safety check - should never happen
+                logger.error(f"[LLM] 🚫 LLM DISABLED but reached unexpected code path! This should not happen.")
+                if cache_result:
+                    return {
+                        "response": cache_result["answer"],
+                        "chat_id": chat_id,
+                        "message_id": "",
+                        "tokens_used": 0,
+                        "credits_used": 0,
+                        "model_used": "cache",
+                        "retrieved_chunks": 0,
+                        "is_domain_relevant": True,
+                        "from_cache": True,
+                        "suggestions": []
+                    }
+                # Should never reach here, but just in case
+                logger.error(f"[LLM] 🚫 LLM DISABLED - No cache result and no fallback possible!")
+                return {
+                    "response": "I don't have that information in my cache. LLM is currently disabled.",
+                    "chat_id": chat_id,
+                    "message_id": "",
+                    "tokens_used": 0,
+                    "credits_used": 0,
+                    "model_used": "llm_disabled",
+                    "retrieved_chunks": 0,
+                    "is_domain_relevant": True,
+                    "from_cache": False,
+                    "cache_miss": True,
+                    "llm_disabled": True,
+                    "suggestions": []
+                }
+            
+            # If we got here, LLM is NOT disabled, so we can proceed to LLM if needed
+            # (either cache disabled, cache miss with fallback, or cache not checked)
+            if not (cache_enabled and use_cache_for_responses and cache_result):
+                if not cache_enabled:
+                    logger.info(f"[LLM] Cache is DISABLED - proceeding to LLM")
+                elif not use_cache_for_responses:
+                    logger.info(f"[LLM] Use cache for responses is OFF - proceeding to LLM")
+                elif cache_result is None and fallback_to_llm_on_cache_miss:
+                    logger.info(f"[LLM] Cache miss with fallback ENABLED - proceeding to LLM")
+            
+            llm_start_time = time.time()
+            logger.info(f"[LLM] 🚀 Starting LLM processing...")
             
             # Check domain relevance
             if not self.rag_service.is_domain_relevant(message):
@@ -336,14 +573,61 @@ ANSWER (based ONLY on the information above):"""
                 "content": user_message_content
             })
             
+            # Check if we should use lightweight model for cache generation
+            use_cache_model = False
+            original_provider = None
+            original_model = None
+            cache_model_provider = None
+            cache_model_name = None
+            
+            # Reload caching config to get latest settings
+            try:
+                from backend.utils.vendor_manager import get_vendor_manager
+                vendor_manager = get_vendor_manager()
+                config_manager = vendor_manager.get_vendor_config_manager(effective_vendor_id)
+                unified_config = config_manager.load_config()
+                caching_config = unified_config.get("chatbot_service", {}).get("caching", {})
+                use_cache_model = caching_config.get("use_lightweight_model_for_cache", False)
+                cache_model_provider = caching_config.get("cache_model_provider")
+                cache_model_name = caching_config.get("cache_model_name")
+            except Exception as e:
+                logger.warning(f"[LLM] Error loading cache model config: {e}, using default model")
+            
+            # Switch to cache model if enabled and configured
+            if use_cache_model and cache_model_provider and cache_model_name:
+                # Save original model
+                original_provider = self.llm_service.current_provider
+                original_model = self.llm_service.current_model
+                
+                # Switch to cache model
+                logger.info(f"[LLM] 🔄 Switching to lightweight cache model: {cache_model_name} ({cache_model_provider})")
+                self.llm_service.switch_model(cache_model_provider, cache_model_name)
+            
             # Generate response
+            logger.info(f"[LLM] Calling LLM service with {len(messages)} message(s)...")
+            if use_cache_model and cache_model_provider and cache_model_name:
+                logger.info(f"[LLM] Using lightweight cache model: {cache_model_name} ({cache_model_provider})")
+            llm_call_start = time.time()
+            
             llm_response = await self.llm_service.generate(
                 messages=messages,
                 system_prompt=self.get_system_prompt()
             )
             
+            llm_call_time = time.time() - llm_call_start
             response_content = llm_response.get("content", "")
             tokens_used = llm_response.get("tokens_used", 0)
+            
+            # Switch back to original model if we switched
+            if use_cache_model and original_provider and original_model:
+                logger.info(f"[LLM] 🔄 Switching back to original model: {original_model} ({original_provider})")
+                self.llm_service.switch_model(original_provider, original_model)
+            
+            logger.info(f"[LLM] ✅ LLM response received")
+            logger.info(f"[LLM]   - Tokens used: {tokens_used}")
+            logger.info(f"[LLM]   - Model used: {llm_response.get('model_used', 'unknown')}")
+            logger.info(f"[LLM]   - LLM call time: {llm_call_time:.3f}s")
+            logger.info(f"[LLM]   - Total processing time: {time.time() - llm_start_time:.3f}s")
             
             # Validate response is based on RAG chunks (prevent hallucinations)
             # Skip validation for simple greetings as they don't need RAG chunks
@@ -396,6 +680,62 @@ ANSWER (based ONLY on the information above):"""
                 user.credits -= credits_used
                 self.db.commit()
             
+            # Save to cache (if enabled and not a simple greeting)
+            if cache_enabled and not is_simple_greeting and response_content:
+                caching_config = self.chatbot_config.get("caching", {})
+                save_to_temp = caching_config.get("save_to_temporary_cache", True)
+                save_to_main = caching_config.get("save_to_main_cache", True)
+                
+                logger.info(f"[CACHE] Saving LLM response to cache - temp: {save_to_temp}, main: {save_to_main}")
+                
+                # Extract metadata for cache
+                cache_metadata = {
+                    "topics": list(current_topics) if current_topics else [],
+                    "retrieved_chunks": len(retrieved_chunks),
+                    "model_used": llm_response.get("model_used"),
+                    "is_complete_question": is_complete_question
+                }
+                
+                # Save to temporary cache (always for active chats)
+                if save_to_temp:
+                    save_start = time.time()
+                    cache_id = self.cache_service.save_to_temporary_cache(
+                        chat_id=chat_id,
+                        question=message,
+                        answer=response_content,
+                        vendor_id=effective_vendor_id,
+                        tokens_used=tokens_used,
+                        metadata=cache_metadata
+                    )
+                    save_time = time.time() - save_start
+                    if cache_id:
+                        logger.info(f"[CACHE] ✅ Saved to temporary cache: {cache_id} (time: {save_time:.3f}s)")
+                    else:
+                        logger.warning(f"[CACHE] ⚠️ Failed to save to temporary cache (time: {save_time:.3f}s)")
+                
+                # Save to main cache (if enabled and question is complete)
+                if save_to_main and is_complete_question:
+                    # Only save if question is substantial enough
+                    min_question_length = caching_config.get("min_question_length_for_main_cache", 10)
+                    if len(message.split()) >= min_question_length:
+                        save_start = time.time()
+                        cache_id = self.cache_service.save_to_main_cache(
+                            question=message,
+                            answer=response_content,
+                            vendor_id=effective_vendor_id,
+                            tokens_used=tokens_used,
+                            metadata=cache_metadata
+                        )
+                        save_time = time.time() - save_start
+                        if cache_id:
+                            logger.info(f"[CACHE] ✅ Saved to main cache: {cache_id} (time: {save_time:.3f}s)")
+                        else:
+                            logger.warning(f"[CACHE] ⚠️ Failed to save to main cache (time: {save_time:.3f}s)")
+                    else:
+                        logger.debug(f"[CACHE] Question too short ({len(message.split())} words < {min_question_length}) - skipping main cache")
+                elif save_to_main:
+                    logger.debug(f"[CACHE] Question not complete - skipping main cache save")
+            
             # Generate helpful suggestions based on conversation history and current topic
             # For initial chat or greetings, show general suggestions
             # For ongoing chat, only show suggestions if question was incomplete/ambiguous
@@ -411,6 +751,9 @@ ANSWER (based ONLY on the information above):"""
             elif not (is_complete_question and topic_changed):
                 # Ongoing chat - only show suggestions if question was incomplete/ambiguous
                 suggestions = self._generate_suggestions(chat_id, message, retrieved_chunks, current_topics=current_topics)
+            
+            total_processing_time = time.time() - start_time
+            logger.info(f"[SUMMARY] ✅ Response generated - Total time: {total_processing_time:.3f}s, Tokens: {tokens_used}, Model: {llm_response.get('model_used', 'unknown')}")
             
             return {
                 "response": response_content,
@@ -1019,8 +1362,33 @@ ANSWER (based ONLY on the information above):"""
         if not response or not isinstance(response, str):
             return response or ""
         
+        # First, fix common line break issues in addresses, postcodes, and times
+        # Fix UK postcodes that have been split (e.g., "SE6 4\nNU" -> "SE6 4NU")
+        # Pattern: UK postcode format (1-2 letters, 1-2 digits, space, digit, newline, 2-3 letters)
+        response = re.sub(r'(\b[A-Z]{1,2}\d{1,2}[A-Z]?\s+\d)\s*\n\s*([A-Z]{2,3}\b)', r'\1\2', response)
+        
+        # Fix time formats that have been split (e.g., "9:\n00 AM" -> "9:00 AM")
+        response = re.sub(r'(\d{1,2}):\s*\n\s*(\d{2}\s*(?:AM|PM|am|pm))', r'\1:\2', response)
+        
+        # Fix addresses that have been split mid-word (e.g., "SE6 4\nNU" -> "SE6 4NU")
+        # This handles cases where postcodes are split (alternative pattern)
+        response = re.sub(r'(\b\d{1,2}[A-Z]?\d{1,2}[A-Z]?\s+)\s*\n\s*([A-Z]{2,3}\b)', r'\1\2', response)
+        
+        # Fix postcodes at end of lines (e.g., "SE6 4\nNU" when on separate lines)
+        response = re.sub(r'(\b[A-Z]{1,2}\d{1,2}[A-Z]?\s+\d)\s*\n\s*([A-Z]{2,3})\b', r'\1\2', response)
+        
+        # Fix phone numbers that might have been split
+        response = re.sub(r'(\d{4})\s*\n\s*(\d{4})', r'\1 \2', response)
+        
+        # Fix common address patterns (e.g., "Unit 1179" split)
+        response = re.sub(r'(\bUnit\s+\d+)\s*\n\s*', r'\1 ', response)
+        response = re.sub(r'(\b\d+[A-Z]?)\s*\n\s*([A-Z][a-z]+)', r'\1 \2', response)
+        
         # Remove excessive blank lines (more than 2 consecutive)
         response = re.sub(r'\n{3,}', '\n\n', response)
+        
+        # Fix numbered lists that have been split (e.g., "1.\nCATFORD" -> "1. CATFORD")
+        response = re.sub(r'(\d+\.)\s*\n\s*([A-Z])', r'\1 \2', response)
         
         # Ensure proper spacing around bullet points
         response = re.sub(r'(\S)(•)', r'\1 \2', response)  # Add space before bullet if missing
@@ -1030,35 +1398,55 @@ ANSWER (based ONLY on the information above):"""
         response = re.sub(r'£(\d+)', r'£\1', response)  # Ensure no space after £
         response = re.sub(r'(\d+)(/[a-z]+)', r'\1\2', response)  # Ensure no space before /week, /month, etc.
         
-        # Ensure line breaks after section headers (if they end with :)
-        response = re.sub(r'([A-Z][^:]*:)([^\n])', r'\1\n\2', response)
+        # Fix section headers - ensure proper spacing
+        # Don't add line breaks if it's already properly formatted
+        response = re.sub(r'([A-Z][A-Z\s]{2,}BRANCH)\s*\n\s*', r'\1\n\n', response)
         
-        # Fix line breaking issues - ensure proper line breaks
-        # Add line breaks after periods that are followed by capital letters (new sentences)
-        # But avoid breaking on abbreviations like "U.K." or "A.M."
-        response = re.sub(r'\.([A-Z][a-z])', r'.\n\1', response)
+        # Ensure line breaks after section headers (if they end with :)
+        response = re.sub(r'([A-Z][^:\n]*:)([^\n\s])', r'\1 \2', response)
+        
+        # Fix line breaking issues - but be more careful
+        # Only add line breaks after periods that are clearly new sentences
+        # Avoid breaking on abbreviations, postcodes, times, etc.
+        response = re.sub(r'\.([A-Z][a-z]{2,})', r'. \1', response)
         
         # Ensure line breaks after list items (bullet points)
         # Each bullet point should be on its own line
         response = re.sub(r'(•)\s*([^\n])', r'\1 \2', response)
         
         # Ensure line breaks before section headers (lines starting with capital letters followed by colon)
-        # But only if not already on a new line
-        response = re.sub(r'([^\n])([A-Z][A-Za-z\s]{3,}:)', r'\1\n\n\2', response)
+        # But only if not already on a new line and it's a proper header
+        response = re.sub(r'([^\n])(\n?[A-Z][A-Za-z\s]{3,}:)', r'\1\n\2', response)
         
         # Ensure each bullet point item is on a separate line
         response = re.sub(r'(•[^\n•]+)(•)', r'\1\n\2', response)
         
+        # Fix branch information formatting
+        # Ensure branch names are on their own line
+        response = re.sub(r'(\d+\.)\s*([A-Z][A-Z\s]+BRANCH)', r'\1\n\n\2', response)
+        
         # Normalize whitespace (but preserve intentional line breaks)
         lines = response.split('\n')
         formatted_lines = []
-        for line in lines:
+        for i, line in enumerate(lines):
             # Strip trailing whitespace but preserve leading (for indentation)
             line = line.rstrip()
-            if line:  # Only add non-empty lines
-                formatted_lines.append(line)
-            elif formatted_lines and formatted_lines[-1]:  # Add blank line only if previous line wasn't blank
-                formatted_lines.append('')
+            
+            # Skip empty lines that are duplicates
+            if not line:
+                if formatted_lines and formatted_lines[-1]:  # Add blank line only if previous line wasn't blank
+                    formatted_lines.append('')
+                continue
+            
+            # Fix lines that start with lowercase after a number (likely continuation)
+            if i > 0 and formatted_lines:
+                prev_line = formatted_lines[-1]
+                # If previous line ends with a number and this line starts lowercase, merge
+                if re.match(r'^\d+\.?\s*$', prev_line.strip()) and line and line[0].islower():
+                    formatted_lines[-1] = prev_line + ' ' + line
+                    continue
+            
+            formatted_lines.append(line)
         
         if not formatted_lines:
             return response.strip()
@@ -1067,6 +1455,9 @@ ANSWER (based ONLY on the information above):"""
         
         # Fix any double line breaks that might have been created
         response = re.sub(r'\n{3,}', '\n\n', response)
+        
+        # Clean up spacing around colons in addresses and times
+        response = re.sub(r':\s*\n\s*', ': ', response)  # Fix "Address:\n" -> "Address: "
         
         # Ensure response ends with proper punctuation if it's a sentence
         if response and len(response) > 0:

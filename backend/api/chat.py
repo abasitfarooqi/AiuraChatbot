@@ -242,9 +242,10 @@ async def delete_chat(
     chat_id: str,
     db: Session = Depends(get_db)
 ):
-    """Delete a chat completely (messages, memory, token usage, and chat record)."""
+    """Delete a chat completely (messages, memory, token usage, temporary cache, and chat record)."""
     try:
         from backend.models.database import Message, ConversationMemory, Chat, TokenUsage
+        from backend.services.cache_service import CacheService
         
         # Delete all messages
         messages_deleted = db.query(Message).filter(
@@ -261,6 +262,10 @@ async def delete_chat(
             TokenUsage.chat_id == chat_id
         ).delete()
         
+        # Delete temporary cache entries
+        cache_service = CacheService(db=db)
+        temp_cache_deleted = cache_service.delete_temporary_cache_for_chat(chat_id)
+        
         # Delete the chat record itself
         chat_deleted = db.query(Chat).filter(Chat.chat_id == chat_id).delete()
         
@@ -273,6 +278,7 @@ async def delete_chat(
                 "messages": messages_deleted,
                 "memory": memory_deleted,
                 "token_usage": token_usage_deleted,
+                "temporary_cache": temp_cache_deleted,
                 "chat": chat_deleted > 0
             }
         }

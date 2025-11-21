@@ -1,0 +1,31 @@
+{
+  "application": {
+    "api_port": 8000
+  },
+  "database": {},
+  "vector_database": {},
+  "embedding": {},
+  "llm": {},
+  "openai": {},
+  "rag": {},
+  "memory": {},
+  "domain_restriction": {},
+  "credits": {},
+  "multi_vendor": {},
+  "logging": {},
+  "cors": {},
+  "security": {},
+  "frontend": {},
+  "contact": {
+    "primary_phone": "",
+    "primary_email": "",
+    "contact_format": "Contact: {phone} or {email}"
+  },
+  "company": {
+    "name": "mPhenom Ltd",
+    "company_number": "",
+    "registered_address": "",
+    "trading_names": []
+  },
+  "branches": []
+}
