@@ -147,16 +147,25 @@
 </head>
 <body>
     <div class="container">
-        <h1>Chatbot Super Admin Panel</h1>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h1>Chatbot Admin Panel</h1>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="text-align: right;">
+                    <div id="adminNameDisplay" style="font-weight: 600; color: #2c3e50;">Loading...</div>
+                    <div id="adminTypeDisplay" style="font-size: 0.85rem; color: #7f8c8d;">Loading...</div>
+                </div>
+                <button onclick="logout()" style="padding: 0.5rem 1rem; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">Logout</button>
+            </div>
+        </div>
         
         <!-- Vendor Selector (Always Visible) -->
-        <div style="background: #ecf0f1; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px; display: flex; align-items: center; gap: 1rem;">
+        <div id="vendorSelectorContainer" style="background: #ecf0f1; padding: 1rem; margin-bottom: 1.5rem; border-radius: 4px; display: flex; align-items: center; gap: 1rem;">
             <label style="font-weight: 600; color: #2c3e50;">Active Vendor:</label>
             <select id="vendorSelector" onchange="switchActiveVendor()" style="flex: 1; max-width: 300px; padding: 0.5rem; font-size: 1rem;">
                 <option value="">Loading vendors...</option>
             </select>
-            <button onclick="loadVendors()" style="background: #27ae60; padding: 0.5rem 1rem;">Refresh</button>
-            <button onclick="showCreateVendorForm()" style="background: #3498db; padding: 0.5rem 1rem;">+ New Vendor</button>
+            <button id="refreshVendorBtn" onclick="loadVendors()" style="background: #27ae60; padding: 0.5rem 1rem;">Refresh</button>
+            <button id="createVendorBtn" onclick="showCreateVendorForm()" style="background: #3498db; padding: 0.5rem 1rem;">+ New Vendor</button>
             <div id="vendorInfo" style="margin-left: auto; padding: 0.5rem 1rem; background: white; border-radius: 4px; font-size: 0.9rem;">
                 <strong id="currentVendorDisplay">No vendor selected</strong>
             </div>
@@ -164,7 +173,7 @@
         
         <div class="tabs">
             <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
-            <button class="tab" onclick="switchTab('vendors')">Vendors</button>
+            <button id="vendorsTab" class="tab" onclick="switchTab('vendors')">Vendors</button>
             <button class="tab" onclick="switchTab('models')">Models</button>
             <button class="tab" onclick="switchTab('rag')">RAG</button>
             <button class="tab" onclick="switchTab('memory')">Memory</button>
@@ -187,7 +196,7 @@
                 
                 <div style="display: flex; gap: 1rem; margin-bottom: 2rem; align-items: center;">
                     <button onclick="loadVendors()" style="background: #27ae60;">Refresh Vendors</button>
-                    <button onclick="showCreateVendorForm()" style="background: #3498db;">Create New Vendor</button>
+                    <button id="createVendorInTabBtn" onclick="showCreateVendorForm()" style="background: #3498db;">Create New Vendor</button>
                     <div id="currentVendor" style="margin-left: auto; padding: 0.5rem 1rem; background: #ecf0f1; border-radius: 4px;">
                         <strong>Current Vendor:</strong> <span id="currentVendorName">Loading...</span>
                     </div>
@@ -426,6 +435,13 @@
         <div id="config" class="tab-content">
             <div class="section">
                 <h2>LLM Configuration</h2>
+                
+                <div class="form-group" style="padding: 1rem; background: #f8f9fa; border: 1px solid #ddd; margin-bottom: 1.5rem;">
+                    <label style="font-weight: bold; margin-bottom: 0.5rem;">Active Model</label>
+                    <div id="activeModelDisplay" style="color: #27ae60; font-weight: 600;">Loading...</div>
+                    <small style="display: block; margin-top: 0.25rem; color: #666;">Configuration is connected to the active model for this vendor</small>
+                </div>
+                
                 <div class="form-group">
                     <label>Max Tokens (Response Length)</label>
                     <input type="number" id="maxTokens" min="100" max="4000" step="100" value="2000">
@@ -450,8 +466,39 @@
                     <small style="display: block; margin-top: 0.25rem; color: #666;">Top K sampling (1-100)</small>
                 </div>
                 
-                <button onclick="updateLLMConfig()">Update Configuration</button>
-                <button onclick="loadLLMConfig()" style="margin-left: 1rem; background: #27ae60;">Load Current</button>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+                    <button onclick="updateLLMConfig()">Update Configuration</button>
+                    <button onclick="loadLLMConfig()" style="background: #27ae60;">Load Current</button>
+                    <button onclick="saveAsPreset()" style="background: #9b59b6; color: white;">Save as Preset</button>
+                </div>
+                
+                <div class="form-group" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #ddd;">
+                    <h3>Presets</h3>
+                    <div style="display: grid; grid-template-columns: 1fr auto; gap: 1rem; margin-bottom: 1rem;">
+                        <select id="presetSelect" style="padding: 0.5rem;">
+                            <option value="">-- Select Preset --</option>
+                        </select>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button onclick="applyPreset()" style="background: #3498db; color: white;">Apply Preset</button>
+                            <button onclick="deletePreset()" style="background: #e74c3c; color: white;">Delete</button>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 1rem; background: #f8f9fa; border: 1px solid #ddd; margin-top: 1rem;">
+                        <h4 style="margin-top: 0;">Create New Preset</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <label style="display: block; margin-bottom: 0.25rem;">Preset Name:</label>
+                                <input type="text" id="presetName" placeholder="e.g., Creative Mode" style="width: 100%; padding: 0.5rem;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 0.25rem;">Description (optional):</label>
+                                <input type="text" id="presetDescription" placeholder="e.g., High creativity for creative tasks" style="width: 100%; padding: 0.5rem;">
+                            </div>
+                        </div>
+                        <button onclick="createPreset()" style="background: #27ae60; color: white;">Create Preset</button>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -721,12 +768,20 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                         <label>Select Table</label>
                         <select id="tableSelect" onchange="loadTableData()" style="width: 300px; padding: 0.75rem;">
                             <option value="">-- Select a table --</option>
+                            <option value="vendors">Vendors</option>
                             <option value="users">Users</option>
-                            <option value="chats">Chats</option>
-                            <option value="messages">Messages</option>
-                            <option value="conversation_memory">Conversation Memory</option>
-                            <option value="token_usage">Token Usage</option>
-                            <option value="model_configs">Model Configs</option>
+                            <option value="chat_sessions">Chat Sessions</option>
+                            <option value="chat_messages">Chat Messages</option>
+                            <option value="knowledge_bases">Knowledge Bases</option>
+                            <option value="kb_documents">KB Documents</option>
+                            <option value="usage_records">Usage Records</option>
+                            <option value="models">Models</option>
+                            <option value="quota_allocations">Quota Allocations</option>
+                            <option value="billing_plans">Billing Plans</option>
+                            <option value="invoices">Invoices</option>
+                            <option value="payments">Payments</option>
+                            <option value="api_keys">API Keys</option>
+                            <option value="audit_logs">Audit Logs</option>
                         </select>
                     </div>
                     
@@ -951,6 +1006,108 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
         // Use relative URL since frontend is served from same server
         const API_BASE = '/api/v1';
         
+        // Super Admin - Vendor Management (declared early to avoid initialization errors)
+        let currentVendorId = null;
+        let allVendors = [];
+        
+        // Authentication
+        let adminToken = localStorage.getItem('admin_token');
+        let adminType = localStorage.getItem('admin_type');
+        let adminName = localStorage.getItem('admin_name');
+        let vendorId = localStorage.getItem('vendor_id');
+        let vendorSlug = localStorage.getItem('vendor_slug');
+        
+        // Check authentication on page load
+        if (!adminToken) {
+            window.location.href = '/login.html';
+        }
+        
+        // Verify token (use appropriate endpoint based on admin type)
+        const verifyEndpoint = adminType === 'vendor_admin' 
+            ? `${API_BASE}/auth/vendor-admin/verify`
+            : `${API_BASE}/auth/verify`;
+        
+        // Add timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
+        fetch(verifyEndpoint, {
+            headers: {
+                'Authorization': `Bearer ${adminToken}`
+            },
+            signal: controller.signal
+        }).then(response => {
+            clearTimeout(timeoutId);
+            return response.json().then(data => {
+                if (data.valid) {
+                    // Token valid, update admin info
+                    if (data.type === 'vendor_admin' && adminType !== 'vendor_admin') {
+                        localStorage.setItem('admin_type', 'vendor_admin');
+                        if (data.vendor_id) {
+                            localStorage.setItem('vendor_id', data.vendor_id);
+                        }
+                        if (data.vendor_slug) {
+                            localStorage.setItem('vendor_slug', data.vendor_slug);
+                        }
+                    }
+                } else {
+                    // Token invalid, redirect to login
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_type');
+                    localStorage.removeItem('admin_id');
+                    localStorage.removeItem('vendor_id');
+                    localStorage.removeItem('vendor_slug');
+                    localStorage.removeItem('admin_name');
+                    window.location.href = '/login.html';
+                }
+            });
+        }).catch((error) => {
+            clearTimeout(timeoutId);
+            console.error('Token verification error:', error);
+            // On error or timeout, redirect to login
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_type');
+            localStorage.removeItem('admin_id');
+            localStorage.removeItem('vendor_id');
+            localStorage.removeItem('vendor_slug');
+            localStorage.removeItem('admin_name');
+            window.location.href = '/login.html';
+        });
+        
+        // Helper function to add auth header to fetch requests
+        function getAuthHeaders() {
+            return {
+                'Authorization': `Bearer ${adminToken}`,
+                'Content-Type': 'application/json'
+            };
+        }
+        
+        // Override fetch to add auth header automatically
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options = {}) {
+            // Only add auth for API calls
+            if (typeof url === 'string' && url.startsWith('/api/')) {
+                options.headers = {
+                    ...options.headers,
+                    ...getAuthHeaders()
+                };
+            }
+            return originalFetch(url, options);
+        };
+        
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('admin_token');
+                localStorage.removeItem('admin_type');
+                localStorage.removeItem('admin_id');
+                localStorage.removeItem('admin_name');
+                localStorage.removeItem('vendor_id');
+                localStorage.removeItem('vendor_slug');
+                window.location.href = '/login.html';
+            }
+        }
+        
         function switchTab(tabName) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1030,25 +1187,89 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
         
         async function loadModels() {
             try {
-                const response = await fetch(`${API_BASE}/models/available`);
-                const data = await response.json();
+                // Update vendor display
+                const vendorDisplay = document.getElementById('modelVendorDisplay');
+                if (vendorDisplay) {
+                    if (currentVendorId) {
+                        const vendor = allVendors?.find(v => v.vendor_id === currentVendorId);
+                        vendorDisplay.textContent = vendor ? `${vendor.vendor_name} (${currentVendorId})` : currentVendorId;
+                    } else {
+                        vendorDisplay.textContent = 'No vendor selected (Global)';
+                    }
+                }
+                
+                // Load models from DATABASE (not Ollama directly)
+                // First get all models from database
+                const dbModelsResponse = await fetch(`${API_BASE}/database/table/models?page=1&page_size=100`);
+                const dbModelsData = await dbModelsResponse.json();
                 
                 const select = document.getElementById('modelSelect');
-                select.innerHTML = '';
+                select.innerHTML = '<option value="">-- Select Model --</option>';
                 
-                data.models.forEach(model => {
-                    const option = document.createElement('option');
-                    option.value = model.name;
-                    option.textContent = `${model.name} (${model.provider})`;
-                    select.appendChild(option);
-                });
+                // Populate from database models
+                if (dbModelsData.data && Array.isArray(dbModelsData.data)) {
+                    dbModelsData.data.forEach(model => {
+                        if (model.is_active && model.provider === 'ollama') {
+                            const option = document.createElement('option');
+                            option.value = model.code || model.display_name;
+                            option.textContent = `${model.display_name || model.code} (${model.provider})`;
+                            select.appendChild(option);
+                        }
+                    });
+                }
                 
-                const currentResponse = await fetch(`${API_BASE}/models/current`);
+                // Also try to get available models from Ollama API (for discovery)
+                try {
+                    const ollamaResponse = await fetch(`${API_BASE}/models/available?provider=ollama`);
+                    const ollamaData = await ollamaResponse.json();
+                    if (ollamaData.models && ollamaData.models.length > 0) {
+                        // Add any missing models from Ollama
+                        ollamaData.models.forEach(model => {
+                            const exists = Array.from(select.options).some(opt => opt.value === model.name);
+                            if (!exists) {
+                                const option = document.createElement('option');
+                                option.value = model.name;
+                                option.textContent = `${model.name} (ollama) - Not in DB`;
+                                option.style.color = '#999';
+                                select.appendChild(option);
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.warn('Could not fetch Ollama models:', e);
+                }
+                
+                // Load current model - vendor-aware (from DATABASE)
+                let currentUrl = `${API_BASE}/models/current`;
+                if (currentVendorId) {
+                    currentUrl += `?vendor_id=${currentVendorId}`;
+                }
+                const currentResponse = await fetch(currentUrl);
                 const current = await currentResponse.json();
-                document.getElementById('currentModel').textContent = 
-                    `${current.model} (${current.provider})`;
+                
+                const vendorInfo = currentVendorId ? ` (Vendor: ${currentVendorId})` : ' (Global)';
+                const currentModelEl = document.getElementById('currentModel');
+                if (currentModelEl) {
+                    currentModelEl.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="color: #27ae60;">✓</span>
+                            <span><strong>${current.model}</strong> (${current.provider})${vendorInfo}</span>
+                            <span style="color: #666; font-size: 0.9em;">[DATABASE]</span>
+                        </div>
+                    `;
+                }
+                
+                // Set the current model as selected in dropdown
+                if (current.model) {
+                    select.value = current.model;
+                }
             } catch (error) {
                 console.error('Error loading models:', error);
+                const currentModelEl = document.getElementById('currentModel');
+                if (currentModelEl) {
+                    currentModelEl.textContent = 'Error loading model: ' + error.message;
+                    currentModelEl.style.color = '#e74c3c';
+                }
             }
         }
         
@@ -1056,19 +1277,37 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
             const provider = document.getElementById('providerSelect').value;
             const model = document.getElementById('modelSelect').value;
             
+            if (!provider || !model) {
+                alert('Please select both provider and model');
+                return;
+            }
+            
             try {
+                // Include vendor_id if available
+                const requestBody = {provider, model};
+                if (currentVendorId) {
+                    requestBody.vendor_id = currentVendorId;
+                }
+                
                 const response = await fetch(`${API_BASE}/models/switch`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({provider, model})
+                    body: JSON.stringify(requestBody)
                 });
                 
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ detail: response.statusText }));
+                    throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
-                alert(`Model switched to ${data.model} (${data.provider})`);
-                loadModels();
+                const vendorMsg = currentVendorId ? ` for vendor ${currentVendorId}` : '';
+                alert(`✅ Model switched successfully!\n\nModel: ${data.model}\nProvider: ${data.provider}${vendorMsg}\n\nNew model will be used for all future chat requests.`);
+                // Reload models to show updated current model
+                await loadModels();
             } catch (error) {
                 console.error('Error switching model:', error);
-                alert('Error switching model');
+                alert('Error switching model: ' + error.message);
             }
         }
         
@@ -1098,8 +1337,18 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
         
         async function loadDashboardStats() {
             try {
+                // Build URL with vendor filter if vendor is selected
+                let statsUrl = `${API_BASE}/database/stats`;
+                if (currentVendorId) {
+                    // Get vendor ID from database
+                    const vendor = allVendors?.find(v => v.vendor_id === currentVendorId);
+                    if (vendor && vendor.id) {
+                        statsUrl += `?vendor_id=${vendor.id}`;
+                    }
+                }
+                
                 // Load database stats
-                const dbResponse = await fetch(`${API_BASE}/database/stats`);
+                const dbResponse = await fetch(statsUrl);
                 if (!dbResponse.ok) {
                     throw new Error(`HTTP ${dbResponse.status}: ${dbResponse.statusText}`);
                 }
@@ -1126,27 +1375,70 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                 document.getElementById('chats7d').textContent = dbStats.chats_7d || 0;
                 
                 // Update additional metrics
-                document.getElementById('memoryRecords').textContent = dbStats.conversation_memory || 0;
+                document.getElementById('memoryRecords').textContent = dbStats.kb_documents || 0; // Using KB documents as memory indicator
                 document.getElementById('tokenUsageRecords').textContent = dbStats.token_usage || 0;
-                document.getElementById('modelConfigs').textContent = dbStats.model_configs || 0;
+                document.getElementById('modelConfigs').textContent = dbStats.models || 0;
                 
-                // Update database info
+                // Update database info with vendor context
+                const vendorContext = currentVendorId ? ` (Vendor: ${currentVendorId})` : ' (All Vendors)';
                 document.getElementById('databaseInfo').innerHTML = 
-                    `<strong>Users:</strong> ${dbStats.users || 0}<br>
+                    `<strong>Vendors:</strong> ${dbStats.vendors || 0}<br>
+                     <strong>Users:</strong> ${dbStats.users || 0}${vendorContext}<br>
                      <strong>Chats:</strong> ${dbStats.chats || 0}<br>
                      <strong>Messages:</strong> ${dbStats.messages || 0}<br>
+                     <strong>Knowledge Bases:</strong> ${dbStats.knowledge_bases || 0}<br>
                      ${dbStats.latest_message_time ? `<strong>Latest:</strong> ${new Date(dbStats.latest_message_time).toLocaleString()}` : ''}`;
                 
                 // Load RAG stats
                 await getRAGStats();
                 
-                // Load current model
+                // Load current model - vendor-aware
                 try {
-                    const modelResponse = await fetch(`${API_BASE}/models/current`);
-                    const modelData = await modelResponse.json();
-                    document.getElementById('currentModelInfo').innerHTML = 
-                        `<strong>Provider:</strong> ${modelData.provider || 'N/A'}<br>
-                         <strong>Model:</strong> ${modelData.model || 'N/A'}`;
+                    // Get vendor's default model if vendor is selected
+                    if (currentVendorId) {
+                        const vendor = allVendors?.find(v => v.vendor_id === currentVendorId);
+                        if (vendor && vendor.default_model_id) {
+                            // Fetch model details from admin API
+                            try {
+                                const modelResponse = await fetch(`${API_BASE}/admin/models/${vendor.default_model_id}`);
+                                if (modelResponse.ok) {
+                                    const modelData = await modelResponse.json();
+                                    document.getElementById('currentModelInfo').innerHTML = 
+                                        `<strong>Provider:</strong> ${modelData.provider || 'N/A'}<br>
+                                         <strong>Model:</strong> ${modelData.name || 'N/A'}<br>
+                                         <strong>Vendor:</strong> ${currentVendorId}`;
+                                } else {
+                                    // Fallback to general model endpoint
+                                    const modelResponse = await fetch(`${API_BASE}/models/current`);
+                                    const modelData = await modelResponse.json();
+                                    document.getElementById('currentModelInfo').innerHTML = 
+                                        `<strong>Provider:</strong> ${modelData.provider || 'N/A'}<br>
+                                         <strong>Model:</strong> ${modelData.model || 'N/A'}`;
+                                }
+                            } catch (e) {
+                                // Fallback
+                                const modelResponse = await fetch(`${API_BASE}/models/current`);
+                                const modelData = await modelResponse.json();
+                                document.getElementById('currentModelInfo').innerHTML = 
+                                    `<strong>Provider:</strong> ${modelData.provider || 'N/A'}<br>
+                                     <strong>Model:</strong> ${modelData.model || 'N/A'}`;
+                            }
+                        } else {
+                            // No default model, use general
+                            const modelResponse = await fetch(`${API_BASE}/models/current`);
+                            const modelData = await modelResponse.json();
+                            document.getElementById('currentModelInfo').innerHTML = 
+                                `<strong>Provider:</strong> ${modelData.provider || 'N/A'}<br>
+                                 <strong>Model:</strong> ${modelData.model || 'N/A'}`;
+                        }
+                    } else {
+                        // No vendor selected, use general model
+                        const modelResponse = await fetch(`${API_BASE}/models/current`);
+                        const modelData = await modelResponse.json();
+                        document.getElementById('currentModelInfo').innerHTML = 
+                            `<strong>Provider:</strong> ${modelData.provider || 'N/A'}<br>
+                             <strong>Model:</strong> ${modelData.model || 'N/A'}`;
+                    }
                 } catch (error) {
                     document.getElementById('currentModelInfo').innerHTML = 'Error loading model info';
                 }
@@ -1243,15 +1535,37 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
         
         async function loadLLMConfig() {
             try {
-                const response = await fetch(`${API_BASE}/models/config`);
+                // Load current model info
+                let currentUrl = `${API_BASE}/models/current`;
+                if (currentVendorId) {
+                    currentUrl += `?vendor_id=${currentVendorId}`;
+                }
+                const currentResponse = await fetch(currentUrl);
+                const current = await currentResponse.json();
+                
+                const activeModelDisplay = document.getElementById('activeModelDisplay');
+                if (activeModelDisplay) {
+                    activeModelDisplay.textContent = `${current.model || 'N/A'} (${current.provider || 'N/A'})`;
+                }
+                
+                // Load config (vendor-aware)
+                let configUrl = `${API_BASE}/models/config`;
+                if (currentVendorId) {
+                    configUrl += `?vendor_id=${currentVendorId}`;
+                }
+                const response = await fetch(configUrl);
                 const data = await response.json();
                 
                 document.getElementById('maxTokens').value = data.max_tokens || 2000;
                 document.getElementById('temperature').value = data.temperature || 0.7;
                 document.getElementById('topP').value = data.top_p || 0.9;
                 document.getElementById('topK').value = data.top_k || 40;
+                
+                // Load presets
+                await loadPresets();
             } catch (error) {
                 console.error('Error loading LLM config:', error);
+                alert('Error loading configuration: ' + error.message);
             }
         }
         
@@ -1261,28 +1575,202 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
             const topP = parseFloat(document.getElementById('topP').value);
             const topK = parseInt(document.getElementById('topK').value);
             
+            // Validate ranges
+            if (maxTokens < 100 || maxTokens > 4000) {
+                alert('Max Tokens must be between 100 and 4000');
+                return;
+            }
+            if (temperature < 0 || temperature > 2) {
+                alert('Temperature must be between 0.0 and 2.0');
+                return;
+            }
+            if (topP < 0 || topP > 1) {
+                alert('Top P must be between 0.0 and 1.0');
+                return;
+            }
+            if (topK < 1 || topK > 100) {
+                alert('Top K must be between 1 and 100');
+                return;
+            }
+            
             try {
+                const requestBody = {
+                    max_tokens: maxTokens,
+                    temperature: temperature,
+                    top_p: topP,
+                    top_k: topK
+                };
+                
+                if (currentVendorId) {
+                    requestBody.vendor_id = currentVendorId;
+                }
+                
                 const response = await fetch(`${API_BASE}/models/config`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        max_tokens: maxTokens,
-                        temperature: temperature,
-                        top_p: topP,
-                        top_k: topK
-                    })
+                    body: JSON.stringify(requestBody)
                 });
                 
                 const data = await response.json();
                 if (data.status === 'success') {
-                    alert('Configuration updated successfully');
+                    alert('✅ Configuration updated successfully!\n\nModel: ' + (data.config.model_id || 'N/A') + '\nMax Tokens: ' + data.config.max_tokens + '\nTemperature: ' + data.config.temperature);
                 } else {
-                    alert('Error updating configuration');
+                    alert('Error updating configuration: ' + (data.detail || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Error updating LLM config:', error);
-                alert('Error updating configuration');
+                alert('Error updating configuration: ' + error.message);
             }
+        }
+        
+        async function loadPresets() {
+            try {
+                let url = `${API_BASE}/models/presets`;
+                if (currentVendorId) {
+                    url += `?vendor_id=${currentVendorId}`;
+                }
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                const select = document.getElementById('presetSelect');
+                select.innerHTML = '<option value="">-- Select Preset --</option>';
+                
+                if (data.presets && data.presets.length > 0) {
+                    data.presets.forEach(preset => {
+                        const option = document.createElement('option');
+                        option.value = preset.id;
+                        option.textContent = `${preset.name}${preset.description ? ' - ' + preset.description : ''}`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading presets:', error);
+            }
+        }
+        
+        async function createPreset() {
+            const name = document.getElementById('presetName').value.trim();
+            const description = document.getElementById('presetDescription').value.trim();
+            
+            if (!name) {
+                alert('Please enter a preset name');
+                return;
+            }
+            
+            const maxTokens = parseInt(document.getElementById('maxTokens').value);
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const topP = parseFloat(document.getElementById('topP').value);
+            const topK = parseInt(document.getElementById('topK').value);
+            
+            try {
+                const requestBody = {
+                    name: name,
+                    description: description || null,
+                    max_tokens: maxTokens,
+                    temperature: temperature,
+                    top_p: topP,
+                    top_k: topK
+                };
+                
+                if (currentVendorId) {
+                    requestBody.vendor_id = currentVendorId;
+                }
+                
+                const response = await fetch(`${API_BASE}/models/presets`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert('✅ Preset "' + name + '" created successfully!');
+                    document.getElementById('presetName').value = '';
+                    document.getElementById('presetDescription').value = '';
+                    await loadPresets();
+                } else {
+                    alert('Error creating preset: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error creating preset:', error);
+                alert('Error creating preset: ' + error.message);
+            }
+        }
+        
+        async function applyPreset() {
+            const presetId = document.getElementById('presetSelect').value;
+            if (!presetId) {
+                alert('Please select a preset');
+                return;
+            }
+            
+            try {
+                let url = `${API_BASE}/models/presets/${presetId}/apply`;
+                if (currentVendorId) {
+                    url += `?vendor_id=${currentVendorId}`;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert('✅ Preset "' + data.preset_name + '" applied successfully!');
+                    // Reload config to show updated values
+                    await loadLLMConfig();
+                } else {
+                    alert('Error applying preset: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error applying preset:', error);
+                alert('Error applying preset: ' + error.message);
+            }
+        }
+        
+        async function deletePreset() {
+            const presetId = document.getElementById('presetSelect').value;
+            if (!presetId) {
+                alert('Please select a preset to delete');
+                return;
+            }
+            
+            const presetName = document.getElementById('presetSelect').options[document.getElementById('presetSelect').selectedIndex].text;
+            if (!confirm(`Are you sure you want to delete preset "${presetName}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/models/presets/${presetId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert('✅ Preset deleted successfully!');
+                    await loadPresets();
+                } else {
+                    alert('Error deleting preset: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error deleting preset:', error);
+                alert('Error deleting preset: ' + error.message);
+            }
+        }
+        
+        async function saveAsPreset() {
+            const name = prompt('Enter a name for this preset:');
+            if (!name) {
+                return;
+            }
+            
+            document.getElementById('presetName').value = name;
+            document.getElementById('presetDescription').value = '';
+            document.getElementById('presetDescription').focus();
+            
+            // Scroll to preset section
+            document.querySelector('#config .form-group:last-child').scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         
         // App Config Functions
@@ -1969,18 +2457,30 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
         
         async function loadDatabaseStats() {
             try {
-                const response = await fetch(`${API_BASE}/database/stats`);
+                // Build URL with vendor filter if vendor is selected
+                let statsUrl = `${API_BASE}/database/stats`;
+                if (currentVendorId) {
+                    const vendor = allVendors?.find(v => v.vendor_id === currentVendorId);
+                    if (vendor && vendor.id) {
+                        statsUrl += `?vendor_id=${vendor.id}`;
+                    }
+                }
+                
+                const response = await fetch(statsUrl);
                 const stats = await response.json();
                 
+                const vendorContext = currentVendorId ? ` (Vendor: ${currentVendorId})` : ' (All Vendors)';
                 let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">';
-                html += `<div><strong>Users:</strong> ${stats.users}</div>`;
-                html += `<div><strong>Chats:</strong> ${stats.chats}</div>`;
-                html += `<div><strong>Messages:</strong> ${stats.messages}</div>`;
-                html += `<div><strong>Memory Records:</strong> ${stats.conversation_memory}</div>`;
-                html += `<div><strong>Token Usage:</strong> ${stats.token_usage}</div>`;
-                html += `<div><strong>Model Configs:</strong> ${stats.model_configs}</div>`;
-                html += `<div><strong>Total Tokens:</strong> ${stats.total_tokens.toLocaleString()}</div>`;
-                html += `<div><strong>Total Credits:</strong> ${stats.total_credits.toLocaleString()}</div>`;
+                html += `<div><strong>Vendors:</strong> ${stats.vendors || 0}</div>`;
+                html += `<div><strong>Users:</strong> ${stats.users || 0}${vendorContext}</div>`;
+                html += `<div><strong>Chats:</strong> ${stats.chats || 0}</div>`;
+                html += `<div><strong>Messages:</strong> ${stats.messages || 0}</div>`;
+                html += `<div><strong>Knowledge Bases:</strong> ${stats.knowledge_bases || 0}</div>`;
+                html += `<div><strong>KB Documents:</strong> ${stats.kb_documents || 0}</div>`;
+                html += `<div><strong>Usage Records:</strong> ${stats.token_usage || 0}</div>`;
+                html += `<div><strong>Models:</strong> ${stats.models || 0}</div>`;
+                html += `<div><strong>Total Tokens:</strong> ${(stats.total_tokens || 0).toLocaleString()}</div>`;
+                html += `<div><strong>Total Credits:</strong> £${(stats.total_credits || 0).toFixed(2)}</div>`;
                 html += '</div>';
                 
                 document.getElementById('dbStats').innerHTML = html;
@@ -2090,12 +2590,18 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
         async function viewUserFull() {
             const userId = document.getElementById('viewUserId').value.trim();
             if (!userId) {
-                alert('Please enter a User ID');
+                alert('Please enter a User ID (numeric ID from database)');
                 return;
             }
             
             try {
-                const response = await fetch(`${API_BASE}/database/user/${userId}/full`);
+                // User ID should be numeric in SaaS models
+                const userIdNum = parseInt(userId);
+                if (isNaN(userIdNum)) {
+                    throw new Error('User ID must be a number');
+                }
+                
+                const response = await fetch(`${API_BASE}/database/user/${userIdNum}/full`);
                 const data = await response.json();
                 
                 let html = '<h4>User Details</h4>';
@@ -2112,15 +2618,20 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
         async function viewChatFull() {
             const chatId = document.getElementById('viewChatId').value.trim();
             if (!chatId) {
-                alert('Please enter a Chat ID');
+                alert('Please enter a Chat Session UUID');
                 return;
             }
             
             try {
+                // Try session_uuid first (new format), fallback to old chat_id if needed
                 const response = await fetch(`${API_BASE}/database/chat/${chatId}/full`);
+                if (!response.ok) {
+                    // Try alternative endpoint or format
+                    throw new Error(`Chat not found: ${chatId}`);
+                }
                 const data = await response.json();
                 
-                let html = '<h4>Chat Details</h4>';
+                let html = '<h4>Chat Session Details</h4>';
                 html += `<pre style="background: white; padding: 1rem; overflow-x: auto; border: 1px solid #ddd;">${JSON.stringify(data, null, 2)}</pre>`;
                 
                 document.getElementById('fullRecordView').innerHTML = html;
@@ -2163,14 +2674,37 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
         }
         
         // Super Admin - Vendor Management
-        let currentVendorId = null;
-        let allVendors = [];
+        // Note: currentVendorId and allVendors are declared at the top of the script
         
         async function loadVendors() {
             try {
-                const response = await fetch(`${API_BASE}/vendor/list`);
-                const data = await response.json();
-                allVendors = data.vendors || [];
+                // Try admin API first (for super admin), fallback to vendor API
+                let response;
+                try {
+                    response = await fetch(`${API_BASE}/admin/vendors`);
+                    if (response.ok) {
+                        const adminData = await response.json();
+                        // Transform admin API response to match expected format
+                        allVendors = (adminData.vendors || []).map(v => ({
+                            vendor_id: v.slug,
+                            vendor_name: v.name,
+                            company_name: v.company_name,
+                            business_type: v.business_type || 'general',
+                            is_active: v.status === 'active',
+                            id: v.id,
+                            plan_code: v.plan_code,
+                            credit_balance: v.credit_balance,
+                            status: v.status
+                        }));
+                    } else {
+                        throw new Error('Admin API not available');
+                    }
+                } catch (e) {
+                    // Fallback to vendor API
+                    response = await fetch(`${API_BASE}/vendor/list`);
+                    const data = await response.json();
+                    allVendors = data.vendors || [];
+                }
                 
                 // Update vendor selector dropdown
                 const selector = document.getElementById('vendorSelector');
@@ -2180,7 +2714,7 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                     const option = document.createElement('option');
                     option.value = vendor.vendor_id;
                     option.textContent = `${vendor.vendor_name} (${vendor.vendor_id})`;
-                    if (vendor.is_active) {
+                    if (vendor.is_active || vendor.status === 'active') {
                         option.textContent += ' ✓';
                     }
                     selector.appendChild(option);
@@ -2188,7 +2722,7 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                 
                 // Set default vendor if none selected
                 if (!currentVendorId && allVendors.length > 0) {
-                    const activeVendor = allVendors.find(v => v.is_active) || allVendors[0];
+                    const activeVendor = allVendors.find(v => v.is_active || v.status === 'active') || allVendors[0];
                     currentVendorId = activeVendor.vendor_id;
                     selector.value = currentVendorId;
                     updateVendorDisplay(activeVendor);
@@ -2198,19 +2732,23 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                     if (vendor) updateVendorDisplay(vendor);
                 }
                 
-                // Update vendors list in Vendors tab
+                // Update vendors list in Vendors tab with database info
                 if (allVendors.length > 0) {
-                    let html = '<table><thead><tr><th>Vendor ID</th><th>Vendor Name</th><th>Company</th><th>Business Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+                    let html = '<table><thead><tr><th>Vendor ID</th><th>Vendor Name</th><th>Company</th><th>Business Type</th><th>Plan</th><th>Status</th><th>Credits</th><th>Actions</th></tr></thead><tbody>';
                     
                     allVendors.forEach(vendor => {
-                        const status = vendor.is_active ? '<span style="color: #27ae60;">Active</span>' : '<span style="color: #e74c3c;">Inactive</span>';
+                        const status = (vendor.is_active || vendor.status === 'active') ? '<span style="color: #27ae60;">Active</span>' : '<span style="color: #e74c3c;">Inactive</span>';
                         const isCurrent = vendor.vendor_id === currentVendorId ? ' style="background: #e8f5e9;"' : '';
+                        const credits = vendor.credit_balance ? `£${parseFloat(vendor.credit_balance).toFixed(2)}` : 'N/A';
+                        const plan = vendor.plan_code || 'N/A';
                         html += `<tr${isCurrent}>
                             <td><strong>${vendor.vendor_id}</strong></td>
                             <td>${vendor.vendor_name}</td>
                             <td>${vendor.company_name || 'N/A'}</td>
                             <td>${vendor.business_type || 'N/A'}</td>
+                            <td>${plan}</td>
                             <td>${status}</td>
+                            <td>${credits}</td>
                             <td>
                                 <button onclick="switchActiveVendorById('${vendor.vendor_id}')" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: #3498db; margin-right: 0.5rem;">Switch</button>
                                 <button onclick="editVendorConfig('${vendor.vendor_id}')" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: #f39c12; margin-right: 0.5rem;">Config</button>
@@ -3442,6 +3980,22 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
             }
         });
         
+        // Update admin info display
+        function updateAdminDisplay() {
+            const nameEl = document.getElementById('adminNameDisplay');
+            const typeEl = document.getElementById('adminTypeDisplay');
+            if (nameEl && typeEl) {
+                nameEl.textContent = adminName || 'Admin';
+                if (adminType === 'super_admin') {
+                    typeEl.textContent = 'Super Admin';
+                } else if (adminType === 'vendor_admin') {
+                    typeEl.textContent = `Vendor Admin (${vendorSlug || 'N/A'})`;
+                } else {
+                    typeEl.textContent = 'Admin';
+                }
+            }
+        }
+        
         // Load vendors on page load and set default vendor
         loadVendors().then(() => {
             // Auto-select first vendor if available
@@ -3452,6 +4006,49 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                 }
             }
         });
+        
+        // Update admin display on load
+        updateAdminDisplay();
+        
+        // Apply vendor admin restrictions
+        if (adminType === 'vendor_admin') {
+            // Hide vendor management features
+            const vendorsTab = document.getElementById('vendorsTab');
+            if (vendorsTab) vendorsTab.style.display = 'none';
+            
+            const createVendorBtn = document.getElementById('createVendorBtn');
+            if (createVendorBtn) createVendorBtn.style.display = 'none';
+            
+            const createVendorInTabBtn = document.getElementById('createVendorInTabBtn');
+            if (createVendorInTabBtn) createVendorInTabBtn.style.display = 'none';
+            
+            const vendorSelector = document.getElementById('vendorSelector');
+            if (vendorSelector) {
+                vendorSelector.disabled = true;
+                vendorSelector.style.background = '#f5f5f5';
+            }
+            
+            const refreshVendorBtn = document.getElementById('refreshVendorBtn');
+            if (refreshVendorBtn) refreshVendorBtn.style.display = 'none';
+            
+            // Set current vendor to vendor admin's vendor
+            if (vendorSlug) {
+                currentVendorId = vendorSlug;
+                // Load vendors and auto-select their vendor
+                loadVendors().then(() => {
+                    if (currentVendorId) {
+                        const selector = document.getElementById('vendorSelector');
+                        if (selector) {
+                            selector.value = currentVendorId;
+                            const vendor = allVendors.find(v => v.vendor_id === currentVendorId);
+                            if (vendor) {
+                                updateVendorDisplay(vendor);
+                            }
+                        }
+                    }
+                });
+            }
+        }
     </script>
 </body>
 </html>

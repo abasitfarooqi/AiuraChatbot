@@ -286,7 +286,12 @@ class CacheService:
             return None
             
         except Exception as e:
-            logger.error(f"Error checking temporary cache: {e}")
+            # If table doesn't exist, silently return None (cache not available)
+            error_str = str(e).lower()
+            if "doesn't exist" in error_str or "no such table" in error_str:
+                logger.debug(f"Cache table not available (temporary_cache), skipping cache check")
+            else:
+                logger.error(f"Error checking temporary cache: {e}")
             return None
     
     def _check_main_cache(
@@ -370,7 +375,12 @@ class CacheService:
             return None
             
         except Exception as e:
-            logger.error(f"Error checking main cache: {e}")
+            # If table doesn't exist, silently return None (cache not available)
+            error_str = str(e).lower()
+            if "doesn't exist" in error_str or "no such table" in error_str:
+                logger.debug(f"Cache table not available (main_cache), skipping cache check")
+            else:
+                logger.error(f"Error checking main cache: {e}")
             return None
     
     def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:

@@ -7,6 +7,8 @@ pydantic-settings==2.1.0
 # Database
 sqlalchemy==2.0.25
 alembic==1.13.1
+pymysql==1.1.0
+cryptography==42.0.5
 # sqlite3 is built into Python, no need to install
 
 # Vector Database & Embeddings
@@ -29,7 +31,8 @@ requests==2.31.0
 # CORS & Security
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
-python-multipart==0.0.6
+PyJWT==2.8.0
+email-validator==2.3.0
 
 # Logging & Monitoring
 loguru==0.7.2
@@ -43,4 +46,3 @@ orjson==3.9.10
 # Testing (optional)
 pytest==7.4.4
 pytest-asyncio==0.23.3
-

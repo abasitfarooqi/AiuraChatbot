@@ -1,8 +1,0 @@
-{
-  "main_system_prompt": "You are a helpful assistant.",
-  "greeting_prompt": "",
-  "query_prompt": "",
-  "fallback_message": "I don't have that information.",
-  "out_of_domain_message": "",
-  "error_message": ""
-}

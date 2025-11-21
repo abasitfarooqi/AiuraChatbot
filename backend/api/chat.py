@@ -5,21 +5,22 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from backend.models.database import get_session_local
-SessionLocal = get_session_local()
+from backend.config.database import get_db_session
+from backend.models.saas_models import ChatSession, ChatMessage, User, MessageSender
 from backend.services.chatbot_service import ChatbotService
 from loguru import logger
+import uuid
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 def get_db():
     """Dependency for database session."""
-    db = SessionLocal()
+    db = next(get_db_session())
     try:
         yield db
     finally:
-        db.close()
+        pass
 
 
 class ChatMessageRequest(BaseModel):
@@ -50,28 +51,126 @@ async def send_message(
 ):
     """Send a message to the chatbot."""
     try:
-        import time
         from backend.config import get_settings
+        from backend.models.saas_models import Vendor
         settings = get_settings()
         
         # Use provided vendor_id or default
         effective_vendor_id = request.vendor_id or settings.default_vendor_id
-        chatbot_service = ChatbotService(db, vendor_id=effective_vendor_id)
         
-        # Generate chat_id if not provided
-        chat_id = request.chat_id or f"chat_{request.user_id}_{int(time.time())}"
+        # Get vendor by slug
+        vendor = None
+        if effective_vendor_id:
+            vendor = db.query(Vendor).filter(
+                Vendor.slug == effective_vendor_id,
+                Vendor.deleted_at.is_(None)
+            ).first()
+            if not vendor:
+                raise HTTPException(status_code=404, detail=f"Vendor {effective_vendor_id} not found")
         
+        # Get or create user (for anonymous chatbot users, we don't require password)
+        # Use a dummy password hash for anonymous chatbot users
+        from backend.utils.auth import hash_password
+        user_obj = db.query(User).filter(User.email == request.user_id).first()
+        if not user_obj and vendor:
+            # Create anonymous user with dummy password (for chatbot usage)
+            # Use a random password hash that will never be used for login
+            dummy_password_hash = hash_password("chatbot_anonymous_user_" + str(uuid.uuid4()))
+            user_obj = User(
+                vendor_id=vendor.id,
+                email=request.user_id,
+                name=request.user_id,
+                password_hash=dummy_password_hash,
+                is_active=True
+            )
+            db.add(user_obj)
+            db.commit()
+            db.refresh(user_obj)
+        
+        # Get or create chat session
+        chat_session = None
+        if request.chat_id:
+            chat_session = db.query(ChatSession).filter(
+                ChatSession.session_uuid == request.chat_id
+            ).first()
+        
+        if not chat_session:
+            chat_session = ChatSession(
+                vendor_id=vendor.id if vendor else None,
+                user_id=user_obj.id if user_obj else None,
+                session_uuid=str(uuid.uuid4()),
+                status="open"
+            )
+            db.add(chat_session)
+            db.commit()
+            db.refresh(chat_session)
+        
+        # Save user message
+        user_message = ChatMessage(
+            session_id=chat_session.id,
+            vendor_id=vendor.id if vendor else None,
+            sender=MessageSender.USER,
+            role="user",
+            content=request.message
+        )
+        db.add(user_message)
+        db.commit()
+        
+        # Call chatbot service (db is optional now since API handles persistence)
+        chatbot_service = ChatbotService(db=db, vendor_id=effective_vendor_id)
         result = await chatbot_service.process_message(
-            user_id=request.user_id,
-            chat_id=chat_id,
+            user_id=str(user_obj.id) if user_obj else request.user_id,
+            chat_id=chat_session.session_uuid,
             message=request.message,
             vendor_id=effective_vendor_id
         )
         
+        # Save bot response
+        bot_message = ChatMessage(
+            session_id=chat_session.id,
+            vendor_id=vendor.id if vendor else None,
+            sender=MessageSender.BOT,
+            role="assistant",
+            content=result.get("response", "")
+        )
+        db.add(bot_message)
+        
+        # Create usage record for tokens used
+        if vendor and result.get("tokens_used", 0) > 0:
+            from backend.models.saas_models import UsageRecord, ResourceType, UsageSource
+            from backend.models.saas_models import Model
+            from datetime import datetime
+            
+            # Get model ID if model name is provided
+            model_id = None
+            if result.get("model_used"):
+                # Model table uses 'code' field for model identifier
+                model = db.query(Model).filter(
+                    (Model.code == result.get("model_used")) | 
+                    (Model.display_name == result.get("model_used"))
+                ).first()
+                if model:
+                    model_id = model.id
+            
+            usage_record = UsageRecord(
+                vendor_id=vendor.id,
+                user_id=user_obj.id if user_obj else None,
+                model_id=model_id,
+                session_id=chat_session.id,
+                resource_type=ResourceType.TOKENS,
+                amount=float(result.get("tokens_used", 0)),
+                source=UsageSource.API,
+                cost=float(result.get("credits_used", 0)),
+                timestamp=datetime.utcnow()
+            )
+            db.add(usage_record)
+        
+        db.commit()
+        
         return ChatMessageResponse(
-            response=result["response"],
-            chat_id=result["chat_id"],
-            message_id=result.get("message_id", ""),
+            response=result.get("response", ""),
+            chat_id=chat_session.session_uuid,
+            message_id=str(bot_message.id),
             tokens_used=result.get("tokens_used", 0),
             credits_used=result.get("credits_used", 0),
             model_used=result.get("model_used", ""),
@@ -80,6 +179,8 @@ async def send_message(
             suggestions=result.get("suggestions", [])
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in send_message: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -93,12 +194,17 @@ async def get_chat_history(
 ):
     """Get chat history."""
     try:
-        from backend.models.database import Message
+        chat_session = db.query(ChatSession).filter(
+            ChatSession.session_uuid == chat_id
+        ).first()
         
-        messages = db.query(Message).filter(
-            Message.chat_id == chat_id
+        if not chat_session:
+            raise HTTPException(status_code=404, detail="Chat session not found")
+        
+        messages = db.query(ChatMessage).filter(
+            ChatMessage.session_id == chat_session.id
         ).order_by(
-            Message.created_at.asc()
+            ChatMessage.created_at.asc()
         ).limit(limit).all()
         
         return {
@@ -107,13 +213,14 @@ async def get_chat_history(
                 {
                     "role": msg.role,
                     "content": msg.content,
-                    "created_at": msg.created_at.isoformat(),
-                    "tokens_used": msg.tokens_used
+                    "created_at": msg.created_at.isoformat()
                 }
                 for msg in messages
             ]
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error getting chat history: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -127,29 +234,35 @@ async def get_user_chats(
 ):
     """Get all chats for a user (vendor-aware)."""
     try:
-        from backend.models.database import Chat
-        from backend.config import get_settings
-        settings = get_settings()
+        from backend.models.saas_models import Vendor
         
-        # Use provided vendor_id or default
-        effective_vendor_id = vendor_id or settings.default_vendor_id
+        # Get user by email
+        user_obj = db.query(User).filter(User.email == user_id).first()
+        if not user_obj:
+            return {
+                "user_id": user_id,
+                "vendor_id": vendor_id,
+                "chats": []
+            }
         
-        # Filter by user_id and vendor_id
-        query = db.query(Chat).filter(Chat.user_id == user_id)
-        if effective_vendor_id:
-            query = query.filter(Chat.vendor_id == effective_vendor_id)
+        # Filter by user and vendor
+        query = db.query(ChatSession).filter(ChatSession.user_id == user_obj.id)
+        if vendor_id:
+            vendor = db.query(Vendor).filter(Vendor.slug == vendor_id).first()
+            if vendor:
+                query = query.filter(ChatSession.vendor_id == vendor.id)
         
-        chats = query.order_by(Chat.updated_at.desc()).all()
+        chats = query.order_by(ChatSession.created_at.desc()).all()
         
         return {
             "user_id": user_id,
-            "vendor_id": effective_vendor_id,
+            "vendor_id": vendor_id,
             "chats": [
                 {
-                    "chat_id": chat.chat_id,
-                    "title": chat.title,
+                    "chat_id": chat.session_uuid,
+                    "title": chat.title or f"Chat {chat.id}",
                     "created_at": chat.created_at.isoformat(),
-                    "updated_at": chat.updated_at.isoformat()
+                    "updated_at": chat.updated_at.isoformat() if chat.updated_at else chat.created_at.isoformat()
                 }
                 for chat in chats
             ]
@@ -199,25 +312,25 @@ async def clear_chat_all(
 ):
     """Clear ALL data for a chat (messages, memory, everything)."""
     try:
-        from backend.models.database import Message, ConversationMemory, Chat, TokenUsage
+        from backend.models.saas_models import UsageRecord
+        
+        # Get chat session
+        chat_session = db.query(ChatSession).filter(
+            ChatSession.session_uuid == chat_id
+        ).first()
+        
+        if not chat_session:
+            raise HTTPException(status_code=404, detail="Chat session not found")
         
         # Delete all messages
-        messages_deleted = db.query(Message).filter(
-            Message.chat_id == chat_id
-        ).delete()
-        
-        # Delete conversation memory
-        memory_deleted = db.query(ConversationMemory).filter(
-            ConversationMemory.chat_id == chat_id
+        messages_deleted = db.query(ChatMessage).filter(
+            ChatMessage.session_id == chat_session.id
         ).delete()
         
         # Delete token usage records
-        token_usage_deleted = db.query(TokenUsage).filter(
-            TokenUsage.chat_id == chat_id
+        token_usage_deleted = db.query(UsageRecord).filter(
+            UsageRecord.chat_session_id == chat_session.id
         ).delete()
-        
-        # Optionally delete the chat record itself (uncomment if you want to delete chat too)
-        # chat_deleted = db.query(Chat).filter(Chat.chat_id == chat_id).delete()
         
         db.commit()
         
@@ -226,11 +339,12 @@ async def clear_chat_all(
             "message": f"All data cleared for chat {chat_id}",
             "deleted": {
                 "messages": messages_deleted,
-                "memory": memory_deleted,
                 "token_usage": token_usage_deleted
             }
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error clearing chat: {e}")
         db.rollback()
@@ -242,32 +356,37 @@ async def delete_chat(
     chat_id: str,
     db: Session = Depends(get_db)
 ):
-    """Delete a chat completely (messages, memory, token usage, temporary cache, and chat record)."""
+    """Delete a chat completely (messages, token usage, temporary cache, and chat record)."""
     try:
-        from backend.models.database import Message, ConversationMemory, Chat, TokenUsage
+        from backend.models.saas_models import UsageRecord
         from backend.services.cache_service import CacheService
         
-        # Delete all messages
-        messages_deleted = db.query(Message).filter(
-            Message.chat_id == chat_id
-        ).delete()
+        # Get chat session
+        chat_session = db.query(ChatSession).filter(
+            ChatSession.session_uuid == chat_id
+        ).first()
         
-        # Delete conversation memory
-        memory_deleted = db.query(ConversationMemory).filter(
-            ConversationMemory.chat_id == chat_id
+        if not chat_session:
+            raise HTTPException(status_code=404, detail="Chat session not found")
+        
+        # Delete all messages
+        messages_deleted = db.query(ChatMessage).filter(
+            ChatMessage.session_id == chat_session.id
         ).delete()
         
         # Delete token usage records
-        token_usage_deleted = db.query(TokenUsage).filter(
-            TokenUsage.chat_id == chat_id
+        token_usage_deleted = db.query(UsageRecord).filter(
+            UsageRecord.chat_session_id == chat_session.id
         ).delete()
         
         # Delete temporary cache entries
         cache_service = CacheService(db=db)
         temp_cache_deleted = cache_service.delete_temporary_cache_for_chat(chat_id)
         
-        # Delete the chat record itself
-        chat_deleted = db.query(Chat).filter(Chat.chat_id == chat_id).delete()
+        # Delete the chat session itself
+        chat_deleted = db.query(ChatSession).filter(
+            ChatSession.id == chat_session.id
+        ).delete()
         
         db.commit()
         
@@ -276,12 +395,13 @@ async def delete_chat(
             "message": f"Chat {chat_id} deleted successfully",
             "deleted": {
                 "messages": messages_deleted,
-                "memory": memory_deleted,
                 "token_usage": token_usage_deleted,
                 "temporary_cache": temp_cache_deleted,
                 "chat": chat_deleted > 0
             }
         }
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error deleting chat: {e}")
         db.rollback()

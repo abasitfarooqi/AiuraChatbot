@@ -116,10 +116,12 @@ class ModelManager:
             self.db.rollback()
             return False
     
-    def get_active_model(self) -> Optional[ModelConfig]:
-        """Get the currently active model."""
-        return self.db.query(ModelConfig).filter(
-            ModelConfig.is_active == True
+    def get_active_model(self):
+        """Get the currently active model from SaaS Model table."""
+        from backend.models.saas_models import Model
+        # Get first active model from SaaS models table
+        return self.db.query(Model).filter(
+            Model.is_active == True
         ).first()
     
     def list_all_models(self) -> List[Dict[str, Any]]:

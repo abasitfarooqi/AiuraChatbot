@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - AiuraChatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+        
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-header h1 {
+            color: #2c3e50;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-header p {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .login-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 0.75rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #7f8c8d;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+        
+        .tab-button:hover {
+            color: #667eea;
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ecf0f1;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group input.error {
+            border-color: #e74c3c;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .login-button {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 0.5rem;
+        }
+        
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .login-button:active {
+            transform: translateY(0);
+        }
+        
+        .login-button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .vendor-slug-group {
+            display: none;
+        }
+        
+        .vendor-slug-group.show {
+            display: block;
+        }
+        
+        .info-text {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        
+        .info-text a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .info-text a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>AiuraChatbot</h1>
+            <p>Admin Portal</p>
+        </div>
+        
+        <div class="login-tabs">
+            <button class="tab-button active" onclick="switchTab('super-admin')">Super Admin</button>
+            <button class="tab-button" onclick="switchTab('vendor-admin')">Vendor Admin</button>
+        </div>
+        
+        <div id="successMessage" class="success-message"></div>
+        
+        <!-- Super Admin Login Form -->
+        <form id="superAdminForm" onsubmit="handleSuperAdminLogin(event)">
+            <div class="form-group">
+                <label for="superAdminEmail">Email</label>
+                <input 
+                    type="email" 
+                    id="superAdminEmail" 
+                    required 
+                    placeholder="admin@aiurachatbot.com"
+                    autocomplete="email"
+                >
+                <div class="error-message" id="superAdminEmailError"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="superAdminPassword">Password</label>
+                <input 
+                    type="password" 
+                    id="superAdminPassword" 
+                    required 
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                >
+                <div class="error-message" id="superAdminPasswordError"></div>
+            </div>
+            
+            <button type="submit" class="login-button" id="superAdminButton">
+                Login as Super Admin
+            </button>
+        </form>
+        
+        <!-- Vendor Admin Login Form -->
+        <form id="vendorAdminForm" onsubmit="handleVendorAdminLogin(event)" style="display: none;">
+            <div class="form-group">
+                <label for="vendorAdminEmail">Email</label>
+                <input 
+                    type="email" 
+                    id="vendorAdminEmail" 
+                    required 
+                    placeholder="admin@vendor.com"
+                    autocomplete="email"
+                >
+                <div class="error-message" id="vendorAdminEmailError"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="vendorAdminPassword">Password</label>
+                <input 
+                    type="password" 
+                    id="vendorAdminPassword" 
+                    required 
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                >
+                <div class="error-message" id="vendorAdminPasswordError"></div>
+            </div>
+            
+            <div class="form-group vendor-slug-group" id="vendorSlugGroup">
+                <label for="vendorSlug">Vendor Slug (Optional)</label>
+                <input 
+                    type="text" 
+                    id="vendorSlug" 
+                    placeholder="neguinho_motors"
+                    autocomplete="off"
+                >
+                <div class="error-message" id="vendorSlugError"></div>
+                <small style="color: #7f8c8d; font-size: 0.8rem; margin-top: 0.25rem; display: block;">
+                    Leave empty to use your default vendor
+                </small>
+            </div>
+            
+            <button type="submit" class="login-button" id="vendorAdminButton">
+                Login as Vendor Admin
+            </button>
+        </form>
+        
+        <div class="info-text">
+            <p>Default credentials: admin@aiurachatbot.com / admin123</p>
+            <p style="margin-top: 0.5rem;">
+                <a href="/admin.html">Go to Admin Panel</a> | 
+                <a href="/index.html">Go to Chatbot</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = '/api/v1';
+        let currentTab = 'super-admin';
+        
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide forms
+            if (tab === 'super-admin') {
+                document.getElementById('superAdminForm').style.display = 'block';
+                document.getElementById('vendorAdminForm').style.display = 'none';
+            } else {
+                document.getElementById('superAdminForm').style.display = 'none';
+                document.getElementById('vendorAdminForm').style.display = 'block';
+            }
+            
+            // Clear errors
+            clearErrors();
+        }
+        
+        function clearErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.classList.remove('show');
+                el.textContent = '';
+            });
+            document.querySelectorAll('input').forEach(el => {
+                el.classList.remove('error');
+            });
+        }
+        
+        function showError(fieldId, message) {
+            const errorEl = document.getElementById(fieldId + 'Error');
+            const inputEl = document.getElementById(fieldId);
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.classList.add('show');
+            }
+            if (inputEl) {
+                inputEl.classList.add('error');
+            }
+        }
+        
+        function showSuccess(message) {
+            const successEl = document.getElementById('successMessage');
+            successEl.textContent = message;
+            successEl.classList.add('show');
+            setTimeout(() => {
+                successEl.classList.remove('show');
+            }, 3000);
+        }
+        
+        async function handleSuperAdminLogin(event) {
+            event.preventDefault();
+            clearErrors();
+            
+            const email = document.getElementById('superAdminEmail').value;
+            const password = document.getElementById('superAdminPassword').value;
+            const button = document.getElementById('superAdminButton');
+            
+            button.disabled = true;
+            button.innerHTML = '<div class="loading"></div>Logging in...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/admin/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store token
+                    localStorage.setItem('admin_token', data.access_token);
+                    localStorage.setItem('admin_type', 'super_admin');
+                    localStorage.setItem('admin_id', data.admin_id);
+                    localStorage.setItem('admin_name', data.name || email);
+                    
+                    showSuccess('Login successful! Redirecting...');
+                    
+                    // Redirect to admin panel
+                    setTimeout(() => {
+                        window.location.href = '/admin.html';
+                    }, 1000);
+                } else {
+                    showError('superAdminEmail', data.detail || 'Invalid email or password');
+                    showError('superAdminPassword', '');
+                }
+            } catch (error) {
+                showError('superAdminEmail', 'Connection error. Please try again.');
+                console.error('Login error:', error);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Login as Super Admin';
+            }
+        }
+        
+        async function handleVendorAdminLogin(event) {
+            event.preventDefault();
+            clearErrors();
+            
+            const email = document.getElementById('vendorAdminEmail').value;
+            const password = document.getElementById('vendorAdminPassword').value;
+            const vendorSlug = document.getElementById('vendorSlug').value.trim();
+            const button = document.getElementById('vendorAdminButton');
+            
+            button.disabled = true;
+            button.innerHTML = '<div class="loading"></div>Logging in...';
+            
+            try {
+                const requestBody = { email, password };
+                if (vendorSlug) {
+                    requestBody.vendor_slug = vendorSlug;
+                }
+                
+                const response = await fetch(`${API_BASE}/auth/vendor-admin/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store token
+                    localStorage.setItem('admin_token', data.access_token);
+                    localStorage.setItem('admin_type', 'vendor_admin');
+                    localStorage.setItem('admin_id', data.user_id);
+                    localStorage.setItem('vendor_id', data.vendor_id);
+                    localStorage.setItem('vendor_slug', data.vendor_slug);
+                    localStorage.setItem('admin_name', data.name || email);
+                    
+                    showSuccess('Login successful! Redirecting...');
+                    
+                    // Redirect to admin panel
+                    setTimeout(() => {
+                        window.location.href = '/admin.html';
+                    }, 1000);
+                } else {
+                    showError('vendorAdminEmail', data.detail || 'Invalid email or password');
+                    showError('vendorAdminPassword', '');
+                }
+            } catch (error) {
+                showError('vendorAdminEmail', 'Connection error. Please try again.');
+                console.error('Login error:', error);
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Login as Vendor Admin';
+            }
+        }
+        
+        // Check if already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('admin_token');
+            const adminType = localStorage.getItem('admin_type');
+            if (token) {
+                // Verify token (use appropriate endpoint based on admin type)
+                const verifyEndpoint = adminType === 'vendor_admin' 
+                    ? `${API_BASE}/auth/vendor-admin/verify`
+                    : `${API_BASE}/auth/verify`;
+                
+                // Add timeout to prevent hanging
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+                
+                fetch(verifyEndpoint, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    signal: controller.signal
+                }).then(response => {
+                    clearTimeout(timeoutId);
+                    return response.json().then(data => {
+                        if (data.valid) {
+                            // Already logged in, redirect
+                            window.location.href = '/admin.html';
+                        } else {
+                            // Token invalid, clear and show login
+                            localStorage.removeItem('admin_token');
+                            localStorage.removeItem('admin_type');
+                            localStorage.removeItem('admin_id');
+                            localStorage.removeItem('vendor_id');
+                            localStorage.removeItem('vendor_slug');
+                            localStorage.removeItem('admin_name');
+                        }
+                    });
+                }).catch((error) => {
+                    clearTimeout(timeoutId);
+                    console.error('Token verification error:', error);
+                    // Token invalid, clear and show login
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_type');
+                    localStorage.removeItem('admin_id');
+                    localStorage.removeItem('vendor_id');
+                    localStorage.removeItem('vendor_slug');
+                    localStorage.removeItem('admin_name');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+

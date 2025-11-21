@@ -8,7 +8,8 @@ from backend.services.rag_service import RAGService
 from backend.services.llm_service import LLMService
 from backend.services.memory_service import MemoryService
 from backend.services.cache_service import CacheService
-from backend.models.database import User, Chat, Message, TokenUsage
+# Database models are now handled in API layer, not here
+# from backend.models.database import User, Chat, Message, TokenUsage
 from backend.config import get_settings
 from loguru import logger
 import uuid
@@ -20,14 +21,14 @@ settings = get_settings()
 class ChatbotService:
     """Main chatbot service orchestrating all components."""
     
-    def __init__(self, db: Session, vendor_id: Optional[str] = None):
+    def __init__(self, db: Optional[Session] = None, vendor_id: Optional[str] = None):
         """Initialize chatbot service."""
         self.db = db
         self.vendor_id = vendor_id or settings.default_vendor_id
         self.rag_service = RAGService(vendor_id=self.vendor_id)
-        self.llm_service = LLMService(db=db)  # Pass db to load active model
-        self.memory_service = MemoryService(db)
-        self.cache_service = CacheService(db=db, vendor_id=self.vendor_id)
+        self.llm_service = LLMService(db=db, vendor_id=self.vendor_id) if db else LLMService(vendor_id=self.vendor_id)  # Pass db and vendor_id to load vendor's model
+        self.memory_service = MemoryService(db) if db else None
+        self.cache_service = CacheService(db=db, vendor_id=self.vendor_id) if db else CacheService(vendor_id=self.vendor_id)
         self.settings = settings
         self._load_chatbot_config()
     
@@ -87,12 +88,8 @@ RESPONSE FORMAT:
             # Use provided vendor_id or service's default
             effective_vendor_id = vendor_id or self.vendor_id
             
-            # Get or create user and chat first (needed for response)
-            user = self._get_or_create_user(user_id, effective_vendor_id)
-            chat = self._get_or_create_chat(chat_id, user_id, effective_vendor_id)
-            
-            # Save user message
-            user_message = self._save_message(chat_id, "user", message)
+            # Note: User and chat creation is now handled in the API layer (chat.py)
+            # We don't need to create them here anymore, just process the message
             
             # Check cache first (if enabled)
             # Reload config to get latest cache settings (in case they were changed via admin panel)
@@ -184,8 +181,10 @@ RESPONSE FORMAT:
                     )
                     
                     # Update memory (lightweight - just track that we answered)
-                    entities = self.memory_service.extract_entities(message, [])
-                    self.memory_service.update_memory(
+                    # Memory service is optional (may not have db)
+                    if self.memory_service:
+                        entities = self.memory_service.extract_entities(message, [])
+                        self.memory_service.update_memory(
                         chat_id=chat_id,
                         entities=entities,
                         intent="cached_query"
@@ -194,7 +193,7 @@ RESPONSE FORMAT:
                     return {
                         "response": cached_answer,
                         "chat_id": chat_id,
-                        "message_id": assistant_message.message_id,
+                        "message_id": assistant_message.get("message_id", "") if isinstance(assistant_message, dict) else (assistant_message.message_id if hasattr(assistant_message, "message_id") else ""),
                         "tokens_used": 0,
                         "credits_used": 0,
                         "model_used": "cache",
@@ -215,36 +214,39 @@ RESPONSE FORMAT:
                         # Cache miss and fallback disabled - return "not in cache" message
                         logger.warning(f"[CACHE]   - Fallback to LLM is DISABLED - returning cache miss message")
                         logger.warning(f"[CACHE]   - ⚠️ NO LLM call (fallback disabled)")
-                    
-                    # Get cache miss message from config
-                    cache_miss_message = caching_config.get("cache_miss_message", 
-                        "I don't have that information in my cache. Please try rephrasing your question or contact us for assistance.")
-                    
-                    assistant_message = self._save_message(
-                        chat_id,
-                        "assistant",
-                        cache_miss_message,
-                        tokens_used=0,
-                        message_metadata={
+                        
+                        # Get cache miss message from config
+                        cache_miss_message = caching_config.get("cache_miss_message", 
+                            "I don't have that information in my cache. Please try rephrasing your question or contact us for assistance.")
+                        
+                        assistant_message = self._save_message(
+                            chat_id,
+                            "assistant",
+                            cache_miss_message,
+                            tokens_used=0,
+                            message_metadata={
+                                "from_cache": False,
+                                "cache_miss": True,
+                                "fallback_disabled": True
+                            }
+                        )
+                        
+                        return {
+                            "response": cache_miss_message,
+                            "chat_id": chat_id,
+                            "message_id": assistant_message.get("message_id", "") if isinstance(assistant_message, dict) else (assistant_message.message_id if hasattr(assistant_message, "message_id") else ""),
+                            "tokens_used": 0,
+                            "credits_used": 0,
+                            "model_used": "cache_miss",
+                            "retrieved_chunks": 0,
+                            "is_domain_relevant": True,
                             "from_cache": False,
                             "cache_miss": True,
-                            "fallback_disabled": True
+                            "suggestions": []
                         }
-                    )
-                    
-                    return {
-                        "response": cache_miss_message,
-                        "chat_id": chat_id,
-                        "message_id": assistant_message.message_id,
-                        "tokens_used": 0,
-                        "credits_used": 0,
-                        "model_used": "cache_miss",
-                        "retrieved_chunks": 0,
-                        "is_domain_relevant": True,
-                        "from_cache": False,
-                        "cache_miss": True,
-                        "suggestions": []
-                    }
+                    else:
+                        # Fallback is enabled - continue to LLM processing
+                        logger.info(f"[CACHE]   - Fallback to LLM is ENABLED - will proceed to LLM")
             
             # CRITICAL: If LLM is completely disabled, NEVER proceed to LLM processing
             # This check MUST happen before ANY LLM-related code (RAG, domain check, etc.)
@@ -272,7 +274,7 @@ RESPONSE FORMAT:
                     return {
                         "response": cache_miss_message,
                         "chat_id": chat_id,
-                        "message_id": assistant_message.message_id,
+                        "message_id": assistant_message.get("message_id", "") if isinstance(assistant_message, dict) else (assistant_message.message_id if hasattr(assistant_message, "message_id") else ""),
                         "tokens_used": 0,
                         "credits_used": 0,
                         "model_used": "llm_disabled",
@@ -354,7 +356,7 @@ RESPONSE FORMAT:
                 return {
                     "response": out_of_domain_msg,
                     "chat_id": chat_id,
-                    "message_id": assistant_message.message_id,
+                    "message_id": assistant_message.get("message_id", "") if isinstance(assistant_message, dict) else (assistant_message.message_id if hasattr(assistant_message, "message_id") else ""),
                     "is_domain_relevant": False,
                     "tokens_used": 0,
                     "credits_used": 0,
@@ -448,7 +450,7 @@ RESPONSE FORMAT:
                         return {
                             "response": fallback_msg,
                             "chat_id": chat_id,
-                            "message_id": assistant_message.message_id,
+                            "message_id": assistant_message.get("message_id", "") if isinstance(assistant_message, dict) else (assistant_message.message_id if hasattr(assistant_message, "message_id") else ""),
                             "is_domain_relevant": True,
                             "tokens_used": 0,
                             "credits_used": 0,
@@ -560,7 +562,7 @@ ANSWER (based ONLY on the information above):"""
                 return {
                     "response": fallback_msg,
                     "chat_id": chat_id,
-                    "message_id": assistant_message.message_id,
+                    "message_id": assistant_message.get("message_id", "") if isinstance(assistant_message, dict) else (assistant_message.message_id if hasattr(assistant_message, "message_id") else ""),
                     "is_domain_relevant": True,
                     "tokens_used": 0,
                     "credits_used": 0,
@@ -599,9 +601,9 @@ ANSWER (based ONLY on the information above):"""
                 original_provider = self.llm_service.current_provider
                 original_model = self.llm_service.current_model
                 
-                # Switch to cache model
+                # Switch to cache model (allow vendor switch for cache models)
                 logger.info(f"[LLM] 🔄 Switching to lightweight cache model: {cache_model_name} ({cache_model_provider})")
-                self.llm_service.switch_model(cache_model_provider, cache_model_name)
+                self.llm_service.switch_model(cache_model_provider, cache_model_name, _allow_vendor_switch=True)
             
             # Generate response
             logger.info(f"[LLM] Calling LLM service with {len(messages)} message(s)...")
@@ -621,7 +623,13 @@ ANSWER (based ONLY on the information above):"""
             # Switch back to original model if we switched
             if use_cache_model and original_provider and original_model:
                 logger.info(f"[LLM] 🔄 Switching back to original model: {original_model} ({original_provider})")
-                self.llm_service.switch_model(original_provider, original_model)
+                # For vendor instances, restore the vendor model
+                if hasattr(self.llm_service, '_vendor_model') and self.llm_service._vendor_model:
+                    self.llm_service.current_model = self.llm_service._vendor_model
+                    self.llm_service.current_provider = self.llm_service._vendor_provider
+                    logger.info(f"[LLM] ✅ Restored vendor model: {self.llm_service.current_model}")
+                else:
+                    self.llm_service.switch_model(original_provider, original_model, _allow_vendor_switch=True)
             
             logger.info(f"[LLM] ✅ LLM response received")
             logger.info(f"[LLM]   - Tokens used: {tokens_used}")
@@ -657,8 +665,10 @@ ANSWER (based ONLY on the information above):"""
             )
             
             # Update memory
-            entities = self.memory_service.extract_entities(message, retrieved_chunks)
-            self.memory_service.update_memory(
+            # Memory service is optional (may not have db)
+            if self.memory_service:
+                entities = self.memory_service.extract_entities(message, retrieved_chunks)
+                self.memory_service.update_memory(
                 chat_id=chat_id,
                 entities=entities,
                 intent="query"
@@ -674,11 +684,12 @@ ANSWER (based ONLY on the information above):"""
                     credits_used=self._calculate_credits(tokens_used)
                 )
             
-            # Update user credits
+            # Update user credits (now handled in API layer)
+            # Credits are tracked via UsageRecord in the SaaS database
             if self.settings.credit_system_enabled:
                 credits_used = self._calculate_credits(tokens_used)
-                user.credits -= credits_used
-                self.db.commit()
+                # Credit tracking is now handled in the API layer
+                pass
             
             # Save to cache (if enabled and not a simple greeting)
             if cache_enabled and not is_simple_greeting and response_content:
@@ -758,7 +769,7 @@ ANSWER (based ONLY on the information above):"""
             return {
                 "response": response_content,
                 "chat_id": chat_id,
-                "message_id": assistant_message.message_id,
+                "message_id": assistant_message.get("message_id", "") if isinstance(assistant_message, dict) else (assistant_message.message_id if hasattr(assistant_message, "message_id") else ""),
                 "tokens_used": tokens_used,
                 "credits_used": self._calculate_credits(tokens_used),
                 "model_used": llm_response.get("model_used"),
@@ -792,10 +803,12 @@ ANSWER (based ONLY on the information above):"""
                     error_msg,
                     tokens_used=0
                 )
+                # error_message is now a dict, not an object
+                message_id = error_message.get("message_id", "") if isinstance(error_message, dict) else (error_message.message_id if hasattr(error_message, "message_id") else "")
                 return {
                     "response": error_msg,
                     "chat_id": chat_id,
-                    "message_id": error_message.message_id,
+                    "message_id": message_id,
                     "error": str(e),
                     "tokens_used": 0,
                     "credits_used": 0,
@@ -828,33 +841,17 @@ ANSWER (based ONLY on the information above):"""
                     "is_domain_relevant": True
                 }
     
-    def _get_or_create_user(self, user_id: str, vendor_id: str) -> User:
-        """Get or create user."""
-        user = self.db.query(User).filter(User.user_id == user_id).first()
-        if not user:
-            user = User(
-                user_id=user_id,
-                vendor_id=vendor_id,
-                credits=self.settings.default_user_credits
-            )
-            self.db.add(user)
-            self.db.commit()
-            self.db.refresh(user)
-        return user
+    def _get_or_create_user(self, user_id: str, vendor_id: str) -> Optional[Dict]:
+        """Get or create user (now handled by API layer, this is a no-op for compatibility)."""
+        # User creation is now handled in the API layer (chat.py)
+        # Return a dict for compatibility
+        return {"user_id": user_id, "vendor_id": vendor_id}
     
-    def _get_or_create_chat(self, chat_id: str, user_id: str, vendor_id: str) -> Chat:
-        """Get or create chat session."""
-        chat = self.db.query(Chat).filter(Chat.chat_id == chat_id).first()
-        if not chat:
-            chat = Chat(
-                chat_id=chat_id,
-                user_id=user_id,
-                vendor_id=vendor_id
-            )
-            self.db.add(chat)
-            self.db.commit()
-            self.db.refresh(chat)
-        return chat
+    def _get_or_create_chat(self, chat_id: str, user_id: str, vendor_id: str) -> Optional[Dict]:
+        """Get or create chat session (now handled by API layer, this is a no-op for compatibility)."""
+        # Chat creation is now handled in the API layer (chat.py)
+        # Return a dict for compatibility
+        return {"chat_id": chat_id, "user_id": user_id, "vendor_id": vendor_id}
     
     def _save_message(
         self,
@@ -864,22 +861,29 @@ ANSWER (based ONLY on the information above):"""
         tokens_used: int = 0,
         model_used: Optional[str] = None,
         message_metadata: Optional[Dict] = None
-    ) -> Message:
-        """Save message to database."""
-        message = Message(
-            message_id=str(uuid.uuid4()),
-            chat_id=chat_id,
-            role=role,
-            content=content,
-            tokens_used=tokens_used,
-            credits_used=self._calculate_credits(tokens_used),
-            model_used=model_used,
-            message_metadata=message_metadata or {}
-        )
-        self.db.add(message)
-        self.db.commit()
-        self.db.refresh(message)
-        return message
+    ) -> Optional[Dict]:
+        """Save message to database (now handled by API layer, this is a no-op for compatibility)."""
+        # Messages are now saved in the API layer (chat.py), so this is just for compatibility
+        # Return a dict with message info instead of a Message object
+        if not self.db:
+            # If no db session, just return dict (messages saved in API layer)
+            return {
+                "message_id": str(uuid.uuid4()),
+                "chat_id": chat_id,
+                "role": role,
+                "content": content,
+                "tokens_used": tokens_used,
+                "model_used": model_used
+            }
+        # Even with db, don't save - API layer handles it
+        return {
+            "message_id": str(uuid.uuid4()),
+            "chat_id": chat_id,
+            "role": role,
+            "content": content,
+            "tokens_used": tokens_used,
+            "model_used": model_used
+        }
     
     def _track_token_usage(
         self,
@@ -889,16 +893,10 @@ ANSWER (based ONLY on the information above):"""
         model: str,
         credits_used: int
     ):
-        """Track token usage."""
-        usage = TokenUsage(
-            user_id=user_id,
-            chat_id=chat_id,
-            model=model,
-            tokens_total=tokens_used,
-            credits_used=credits_used
-        )
-        self.db.add(usage)
-        self.db.commit()
+        """Track token usage (now handled by API layer, this is a no-op for compatibility)."""
+        # Token usage tracking is now handled in the API layer
+        # This is kept for compatibility but doesn't do anything
+        pass
     
     def _calculate_credits(self, tokens: int) -> int:
         """Calculate credits used based on tokens."""

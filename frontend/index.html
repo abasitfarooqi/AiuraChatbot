@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Neguinho Motors Chatbot</title>
+    <title>Chatbot</title>
     <style>
         * {
             margin: 0;
@@ -117,11 +117,52 @@
         }
         
         .chat-list {
-            width: 250px;
+            width: 280px;
             background: #34495e;
             color: white;
             padding: 1rem;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .model-log-entry {
+            background: #2c3e50;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid #3498db;
+            font-size: 0.7rem;
+            line-height: 1.4;
+        }
+        
+        .model-log-entry.model-switch {
+            border-left-color: #e74c3c;
+        }
+        
+        .model-log-entry .log-time {
+            color: #95a5a6;
+            font-size: 0.65rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .model-log-entry .log-model {
+            color: #95e1d3;
+            font-weight: 600;
+            margin: 0.25rem 0;
+        }
+        
+        .model-log-entry .log-tokens {
+            color: #f39c12;
+            margin: 0.25rem 0;
+        }
+        
+        .model-log-entry .log-message {
+            color: #ecf0f1;
+            margin-top: 0.25rem;
+            opacity: 0.8;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         .chat-item {
@@ -206,6 +247,15 @@
             <button id="newChatBtn" style="width: 100%; padding: 0.75rem; margin-bottom: 0.5rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">New Chat</button>
             <button onclick="clearAllData()" style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear All Data</button>
             <div id="chatsContainer"></div>
+            
+            <!-- Model Usage Log -->
+            <div style="margin-top: 2rem; border-top: 2px solid #2c3e50; padding-top: 1rem;">
+                <h3 style="margin-bottom: 0.75rem; font-size: 0.9rem; color: #95e1d3;">Model Usage Log</h3>
+                <button onclick="clearModelLog()" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; background: #555; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.75rem;">Clear Log</button>
+                <div id="modelLogContainer" style="max-height: 400px; overflow-y: auto; font-size: 0.7rem;">
+                    <!-- Model usage entries will be added here -->
+                </div>
+            </div>
         </div>
         
         <div class="chat-container">
@@ -224,6 +274,9 @@
                 <h2 id="chatbotTitle">Chatbot</h2>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem;">
                     <div id="userInfo">User: <span id="userId">user_001</span></div>
+                    <div id="modelInfo" style="font-size: 0.75rem; opacity: 0.85; color: #ecf0f1;">
+                        Model: <span id="currentModelName" style="color: #95e1d3; font-weight: 500;">Loading...</span>
+                    </div>
                     <div id="chatInfo" style="font-size: 0.85rem; opacity: 0.9;">
                         Chat ID: <span id="chatIdDisplay">-</span>
                         <button onclick="copyChatId()" style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; cursor: pointer; border-radius: 3px;">Copy</button>
@@ -283,12 +336,36 @@
             });
         });
         
-        // Vendor functions
+        // Vendor functions - load from database
         async function loadVendors() {
             try {
-                const response = await fetch(`${API_BASE}/vendor/list`);
-                const data = await response.json();
-                allVendors = data.vendors || [];
+                // Try admin API first (for super admin), fallback to vendor API
+                let response;
+                try {
+                    response = await fetch(`${API_BASE}/admin/vendors`);
+                    if (response.ok) {
+                        const adminData = await response.json();
+                        // Transform admin API response to match expected format
+                        allVendors = (adminData.vendors || []).map(v => ({
+                            vendor_id: v.slug,
+                            vendor_name: v.name,
+                            company_name: v.company_name,
+                            business_type: v.business_type || 'general',
+                            is_active: v.status === 'active',
+                            id: v.id,
+                            plan_code: v.plan_code,
+                            credit_balance: v.credit_balance,
+                            status: v.status
+                        }));
+                    } else {
+                        throw new Error('Admin API not available');
+                    }
+                } catch (e) {
+                    // Fallback to vendor API
+                    response = await fetch(`${API_BASE}/vendor/list`);
+                    const data = await response.json();
+                    allVendors = data.vendors || [];
+                }
                 
                 const selector = document.getElementById('vendorSelector');
                 selector.innerHTML = '<option value="">Select vendor...</option>';
@@ -297,15 +374,15 @@
                     const option = document.createElement('option');
                     option.value = vendor.vendor_id;
                     option.textContent = `${vendor.vendor_name} (${vendor.vendor_id})`;
-                    if (vendor.is_active) {
+                    if (vendor.is_active || vendor.status === 'active') {
                         option.textContent += ' ✓';
                     }
                     selector.appendChild(option);
                 });
                 
-                // Set default vendor if none selected
+                // Set default vendor if none selected - prefer active vendor
                 if (!currentVendorId && allVendors.length > 0) {
-                    const activeVendor = allVendors.find(v => v.is_active) || allVendors[0];
+                    const activeVendor = allVendors.find(v => v.is_active || v.status === 'active') || allVendors[0];
                     currentVendorId = activeVendor.vendor_id;
                     selector.value = currentVendorId;
                     updateVendorDisplay(activeVendor);
@@ -332,7 +409,7 @@
                 const vendor = allVendors.find(v => v.vendor_id === vendorId);
                 if (vendor) {
                     updateVendorDisplay(vendor);
-                    // Reload business info for the new vendor
+                    // Reload business info for the new vendor (includes model info)
                     loadBusinessInfo();
                     // Clear current chat to start fresh with new vendor
                     currentChatId = null;
@@ -356,6 +433,16 @@
         function updateVendorDisplay(vendor) {
             document.getElementById('currentVendorDisplay').textContent = 
                 `Active: ${vendor.vendor_name}`;
+        }
+        
+        function getGreetingMessage() {
+            if (currentVendorId) {
+                const vendor = allVendors?.find(v => v.vendor_id === currentVendorId);
+                if (vendor) {
+                    return `Hello! I'm the ${vendor.vendor_name || vendor.company_name || 'chatbot'}. How can I help you today?`;
+                }
+            }
+            return 'Hello! How can I help you today?';
         }
         
         function generateChatId() {
@@ -419,6 +506,17 @@
                     localStorage.setItem('chatbot_currentChatId', currentChatId);
                     updateChatIdDisplay();
                 }
+                
+                // Log model usage
+                addModelLogEntry({
+                    type: 'message',
+                    model: data.model_used || 'unknown',
+                    tokens: data.tokens_used || 0,
+                    credits: data.credits_used || 0,
+                    message: message.substring(0, 50),
+                    response: data.response ? data.response.substring(0, 50) : '',
+                    retrieved_chunks: data.retrieved_chunks || 0
+                });
                 
                 // Add assistant response
                 addMessage('assistant', data.response);
@@ -619,8 +717,11 @@
                     currentChatId = null;
                     localStorage.removeItem('chatbot_currentChatId');
                     updateChatIdDisplay();
+                    const greeting = currentVendorId 
+                        ? `Hello! I'm the ${allVendors?.find(v => v.vendor_id === currentVendorId)?.vendor_name || 'chatbot'}. How can I help you today?`
+                        : 'Hello! How can I help you today?';
                     document.getElementById('messagesContainer').innerHTML = 
-                        '<div class="message assistant">Hello! I\'m the Neguinho Motors chatbot. How can I help you today?</div>';
+                        `<div class="message assistant">${greeting}</div>`;
                     loadUserChats();
                 } else {
                     alert('Error clearing chat');
@@ -689,7 +790,7 @@
                         localStorage.removeItem('chatbot_currentChatId');
                         updateChatIdDisplay();
                         document.getElementById('messagesContainer').innerHTML = 
-                            '<div class="message assistant">Hello! I\'m the Neguinho Motors chatbot. How can I help you today?</div>';
+                            `<div class="message assistant">${getGreetingMessage()}</div>`;
                     }
                     
                     // Reload chat list
@@ -709,7 +810,7 @@
             localStorage.removeItem('chatbot_currentChatId');
             updateChatIdDisplay();
             document.getElementById('messagesContainer').innerHTML = 
-                '<div class="message assistant">Hello! I\'m the Neguinho Motors chatbot. How can I help you today?</div>';
+                `<div class="message assistant">${getGreetingMessage()}</div>`;
         };
         
         async function clearAllData() {
@@ -745,7 +846,7 @@
                 updateChatIdDisplay();
                 document.getElementById('userId').textContent = userId;
                 document.getElementById('messagesContainer').innerHTML = 
-                    '<div class="message assistant">Hello! I\'m the Neguinho Motors chatbot. How can I help you today?</div>';
+                    `<div class="message assistant">${getGreetingMessage()}</div>`;
                 
                 // Reload chats
                 await loadUserChats();
@@ -757,9 +858,73 @@
             }
         }
         
-        // Load business info for dynamic content (vendor-aware)
+        // Track model switches when model info is loaded
+        let previousModelName = null;
+        
+        // Load current model info for display
+        async function loadCurrentModelInfo() {
+            try {
+                let modelUrl = `${API_BASE}/models/current`;
+                if (currentVendorId) {
+                    modelUrl += `?vendor_id=${currentVendorId}`;
+                }
+                
+                const response = await fetch(modelUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const modelData = await response.json();
+                
+                const modelInfoEl = document.getElementById('currentModelName');
+                if (modelInfoEl) {
+                    const modelName = modelData.model || 'Unknown';
+                    const provider = modelData.provider || 'Unknown';
+                    const fullModelName = `${modelName} (${provider})`;
+                    modelInfoEl.textContent = fullModelName;
+                    modelInfoEl.style.color = '#95e1d3';
+                    
+                    // Check if model switched
+                    if (previousModelName && previousModelName !== fullModelName) {
+                        addModelLogEntry({
+                            type: 'switch',
+                            model: modelName,
+                            from: previousModelName,
+                            to: fullModelName
+                        });
+                    }
+                    previousModelName = fullModelName;
+                }
+            } catch (error) {
+                console.error('Error loading model info:', error);
+                const modelInfoEl = document.getElementById('currentModelName');
+                if (modelInfoEl) {
+                    modelInfoEl.textContent = 'Error loading model';
+                    modelInfoEl.style.color = '#e74c3c';
+                }
+            }
+        }
+        
+        // Load business info for dynamic content (vendor-aware, from database)
         async function loadBusinessInfo() {
             try {
+                if (!currentVendorId) {
+                    // No vendor selected - use default
+                    document.getElementById('chatbotTitle').textContent = 'Chatbot';
+                    await loadCurrentModelInfo(); // Still load model info
+                    return;
+                }
+                
+                // First, get vendor info from database
+                let vendorInfo = null;
+                try {
+                    const vendorResponse = await fetch(`${API_BASE}/vendor/${currentVendorId}`);
+                    if (vendorResponse.ok) {
+                        vendorInfo = await vendorResponse.json();
+                    }
+                } catch (e) {
+                    console.warn('Could not fetch vendor info from API:', e);
+                }
+                
                 // Use vendor-specific config if vendor is selected
                 let url = `${API_BASE}/config/unified`;
                 if (currentVendorId) {
@@ -771,18 +936,18 @@
                 const business = config.business || {};
                 const contact = config.contact || {};
 
-                // Update title
+                // Update title - prefer vendor name from database, then config
                 const title = document.getElementById('chatbotTitle');
-                if (business.company_name) {
-                    title.textContent = business.company_name + ' Chatbot';
-                } else {
-                    title.textContent = 'Chatbot';
-                }
+                const companyName = vendorInfo?.company_name || business.company_name || vendorInfo?.vendor_name || 'Chatbot';
+                title.textContent = companyName + ' Chatbot';
 
-                // Update disclaimer
+                // Load current model info
+                await loadCurrentModelInfo();
+
+                // Update disclaimer with contact info from database or config
                 const disclaimer = document.getElementById('disclaimer');
-                const phone = contact.primary_phone || '';
-                const email = contact.primary_email || '';
+                const phone = contact.primary_phone || vendorInfo?.primary_phone || '';
+                const email = contact.primary_email || vendorInfo?.primary_email || '';
                 if (phone || email) {
                     disclaimer.innerHTML = `<strong>⚠️ Disclaimer:</strong> I'm a chatbot and may make mistakes. Information provided might be incorrect. Please always verify important details by contacting us${phone ? ` at <strong>${phone}</strong>` : ''}${email ? (phone ? ' or ' : ' at ') + `<strong>${email}</strong>` : ''}.`;
                 } else {
@@ -790,12 +955,102 @@
                 }
             } catch (error) {
                 console.error('Error loading business info:', error);
+                // Fallback to vendor name if available
+                if (currentVendorId) {
+                    const vendor = allVendors?.find(v => v.vendor_id === currentVendorId);
+                    if (vendor) {
+                        document.getElementById('chatbotTitle').textContent = (vendor.vendor_name || vendor.company_name || 'Chatbot') + ' Chatbot';
+                    }
+                }
             }
         }
+        
+        // Model Usage Log Functions
+        let modelLogEntries = [];
+        let lastModel = null;
+        
+        function addModelLogEntry(entry) {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            // Check if model switched
+            if (lastModel && lastModel !== entry.model) {
+                addModelLogEntry({
+                    type: 'switch',
+                    model: entry.model,
+                    from: lastModel,
+                    to: entry.model
+                });
+            }
+            
+            const logEntry = {
+                ...entry,
+                timestamp: timeStr,
+                datetime: now
+            };
+            
+            modelLogEntries.unshift(logEntry); // Add to beginning
+            if (modelLogEntries.length > 50) {
+                modelLogEntries = modelLogEntries.slice(0, 50); // Keep last 50 entries
+            }
+            
+            lastModel = entry.model;
+            renderModelLog();
+        }
+        
+        function renderModelLog() {
+            const container = document.getElementById('modelLogContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (modelLogEntries.length === 0) {
+                container.innerHTML = '<div style="color: #7f8c8d; font-style: italic; text-align: center; padding: 1rem;">No model usage logged yet</div>';
+                return;
+            }
+            
+            modelLogEntries.forEach(entry => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = `model-log-entry ${entry.type === 'switch' ? 'model-switch' : ''}`;
+                
+                if (entry.type === 'switch') {
+                    entryDiv.innerHTML = `
+                        <div class="log-time">${entry.timestamp}</div>
+                        <div style="color: #e74c3c; font-weight: 600;">🔄 Model Switched</div>
+                        <div style="color: #95a5a6; margin-top: 0.25rem;">From: <span style="color: #e74c3c;">${entry.from}</span> → To: <span style="color: #95e1d3;">${entry.to}</span></div>
+                    `;
+                } else {
+                    entryDiv.innerHTML = `
+                        <div class="log-time">${entry.timestamp}</div>
+                        <div class="log-model">🤖 Model: ${entry.model}</div>
+                        <div class="log-tokens">📊 Tokens: ${entry.tokens.toLocaleString()} | Credits: ${entry.credits || 0}</div>
+                        ${entry.retrieved_chunks > 0 ? `<div style="color: #3498db; margin-top: 0.25rem;">📚 RAG Chunks: ${entry.retrieved_chunks}</div>` : ''}
+                        <div class="log-message" title="${entry.message}">💬 Q: ${entry.message}${entry.message.length >= 50 ? '...' : ''}</div>
+                        ${entry.response ? `<div class="log-message" title="${entry.response}" style="color: #95e1d3;">💭 A: ${entry.response}${entry.response.length >= 50 ? '...' : ''}</div>` : ''}
+                    `;
+                }
+                
+                container.appendChild(entryDiv);
+            });
+        }
+        
+        function clearModelLog() {
+            if (confirm('Clear model usage log?')) {
+                modelLogEntries = [];
+                lastModel = null;
+                renderModelLog();
+            }
+        }
+        
         
         // Initialize chat ID display
         updateChatIdDisplay();
         // loadBusinessInfo will be called after vendor is loaded
+        // Initialize model log
+        renderModelLog();
+        
+        // Refresh model info periodically to catch switches from admin panel
+        setInterval(loadCurrentModelInfo, 5000); // Every 5 seconds
     </script>
 </body>
 </html>

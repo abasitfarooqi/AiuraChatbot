@@ -108,6 +108,16 @@ if frontend_path.exists():
         """Serve admin.html directly."""
         return FileResponse(str(frontend_path / "admin.html"))
     
+    @app.get("/login")
+    async def login_redirect():
+        """Redirect /login to login.html."""
+        return FileResponse(str(frontend_path / "login.html"))
+    
+    @app.get("/login.html")
+    async def login_html():
+        """Serve login.html directly."""
+        return FileResponse(str(frontend_path / "login.html"))
+    
     @app.get("/")
     async def root_redirect():
         """Redirect root to frontend."""
@@ -117,23 +127,37 @@ if frontend_path.exists():
 @app.on_event("startup")
 async def startup_event():
     """Initialize on startup."""
+    import asyncio
     logger.info("Starting up application...")
     
-    # Initialize database
+    # Initialize database (non-blocking)
     try:
         init_database()
-        logger.info("Database initialized")
+        logger.info("✅ Database initialized")
     except Exception as e:
-        logger.error(f"Error initializing database: {e}")
+        logger.error(f"❌ Error initializing database: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
     
-    # Load knowledge base into RAG
-    try:
-        from backend.services.rag_service import RAGService
-        rag_service = RAGService()
-        rag_service.load_knowledge_base()
-        logger.info("Knowledge base loaded")
-    except Exception as e:
-        logger.warning(f"Error loading knowledge base: {e}")
+    # Load knowledge base into RAG in background (non-blocking)
+    async def load_kb_background():
+        try:
+            from backend.services.rag_service import RAGService
+            # Load default vendor's KB
+            rag_service = RAGService(vendor_id=settings.default_vendor_id)
+            result = rag_service.load_knowledge_base()
+            if result:
+                logger.info(f"✅ Knowledge base loaded for vendor {settings.default_vendor_id}")
+            else:
+                logger.warning(f"⚠️ Knowledge base load returned False for vendor {settings.default_vendor_id}")
+        except Exception as e:
+            logger.warning(f"⚠️ Error loading knowledge base: {e}")
+            import traceback
+            logger.warning(traceback.format_exc())
+    
+    # Run KB loading in background task (non-blocking)
+    asyncio.create_task(load_kb_background())
+    logger.info("🚀 Server ready (KB loading in background)")
 
 
 @app.on_event("shutdown")
@@ -142,13 +166,14 @@ async def shutdown_event():
     logger.info("Shutting down application...")
 
 
-@app.get("/")
-async def root():
-    """Root endpoint."""
+@app.get("/api")
+async def api_root():
+    """API root endpoint."""
     return {
         "name": settings.app_name,
         "version": settings.app_version,
-        "status": "running"
+        "status": "running",
+        "api_prefix": settings.api_prefix
     }
 
 

@@ -8,7 +8,9 @@ from pathlib import Path
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 from loguru import logger
-from backend.models.database import Vendor, get_session_local
+from backend.config.database import get_db_session
+from backend.models.saas_models import Vendor as SaaSVendor
+from sqlalchemy.orm import Session
 from backend.utils.unified_config_manager import UnifiedConfigManager
 
 
@@ -197,42 +199,19 @@ RESPONSE FORMAT:
             # Generate ChromaDB collection name
             chroma_collection = f"{vendor_id}_kb"
             
-            # Create vendor record in database
-            SessionLocal = get_session_local()
-            db = SessionLocal()
-            try:
-                vendor = Vendor(
-                    vendor_id=vendor_id,
-                    vendor_name=vendor_name,
-                    company_name=company_name,
-                    business_type=business_type,
-                    config_path=str(config_path),
-                    rag_path=str(rag_path),
-                    chroma_collection=chroma_collection,
-                    is_active=True,
-                    vendor_metadata={
-                        "created_by": "system",
-                        "config_dir": str(vendor_config_dir),
-                        "rag_dir": str(vendor_rag_dir)
-                    }
-                )
-                db.add(vendor)
-                db.commit()
-                db.refresh(vendor)
-                
-                logger.info(f"Created vendor: {vendor_id} ({vendor_name})")
-                
-                return {
-                    "vendor_id": vendor_id,
-                    "vendor_name": vendor_name,
-                    "company_name": company_name,
-                    "config_path": str(config_path),
-                    "rag_path": str(rag_path),
-                    "chroma_collection": chroma_collection,
-                    "status": "success"
-                }
-            finally:
-                db.close()
+            # Note: Vendor record should be created via SaaS admin API, not here
+            # This function only creates file structure
+            logger.info(f"Created vendor file structure: {vendor_id} ({vendor_name})")
+            
+            return {
+                "vendor_id": vendor_id,
+                "vendor_name": vendor_name,
+                "company_name": company_name,
+                "config_path": str(config_path),
+                "rag_path": str(rag_path),
+                "chroma_collection": chroma_collection,
+                "status": "success"
+            }
                 
         except Exception as e:
             logger.error(f"Error creating vendor {vendor_id}: {e}")
@@ -462,15 +441,14 @@ RESPONSE FORMAT:
     
     def get_vendor_chroma_collection(self, vendor_id: str) -> str:
         """Get ChromaDB collection name for a vendor."""
-        SessionLocal = get_session_local()
-        db = SessionLocal()
+        db = next(get_db_session())
         try:
-            vendor = db.query(Vendor).filter(Vendor.vendor_id == vendor_id).first()
+            vendor = db.query(SaaSVendor).filter(SaaSVendor.slug == vendor_id, SaaSVendor.deleted_at.is_(None)).first()
             if vendor:
                 return vendor.chroma_collection or f"{vendor_id}_kb"
             return f"{vendor_id}_kb"
         finally:
-            db.close()
+            pass
     
     def get_vendor_system_prompts_path(self, vendor_id: str) -> Path:
         """Get system prompts file path for a vendor."""
@@ -546,60 +524,69 @@ RESPONSE FORMAT:
     
     def list_vendors(self) -> list:
         """List all vendors."""
-        SessionLocal = get_session_local()
-        db = SessionLocal()
+        db = next(get_db_session())
         try:
-            vendors = db.query(Vendor).all()
+            vendors = db.query(SaaSVendor).filter(SaaSVendor.deleted_at.is_(None)).all()
             return [
                 {
-                    "vendor_id": v.vendor_id,
-                    "vendor_name": v.vendor_name,
+                    "vendor_id": v.slug,
+                    "vendor_name": v.name,
                     "company_name": v.company_name,
                     "business_type": v.business_type,
-                    "is_active": v.is_active,
+                    "is_active": v.status.value == "active",
                     "created_at": v.created_at.isoformat() if v.created_at else None
                 }
                 for v in vendors
             ]
         finally:
-            db.close()
+            pass
     
     def get_vendor(self, vendor_id: str) -> Optional[Dict[str, Any]]:
         """Get vendor information."""
-        SessionLocal = get_session_local()
-        db = SessionLocal()
+        db = next(get_db_session())
         try:
-            vendor = db.query(Vendor).filter(Vendor.vendor_id == vendor_id).first()
+            vendor = db.query(SaaSVendor).filter(SaaSVendor.slug == vendor_id, SaaSVendor.deleted_at.is_(None)).first()
             if vendor:
                 return {
-                    "vendor_id": vendor.vendor_id,
-                    "vendor_name": vendor.vendor_name,
+                    "vendor_id": vendor.slug,
+                    "vendor_name": vendor.name,
                     "company_name": vendor.company_name,
                     "business_type": vendor.business_type,
-                    "is_active": vendor.is_active,
+                    "is_active": vendor.status.value == "active",
                     "config_path": vendor.config_path,
                     "rag_path": vendor.rag_path,
                     "chroma_collection": vendor.chroma_collection,
-                    "metadata": vendor.vendor_metadata,
+                    "metadata": vendor.meta if vendor.meta else {},
                     "created_at": vendor.created_at.isoformat() if vendor.created_at else None,
                     "updated_at": vendor.updated_at.isoformat() if vendor.updated_at else None
                 }
             return None
         finally:
-            db.close()
+            pass
     
     def update_vendor(self, vendor_id: str, **kwargs) -> bool:
         """Update vendor information."""
-        SessionLocal = get_session_local()
-        db = SessionLocal()
+        db = next(get_db_session())
         try:
-            vendor = db.query(Vendor).filter(Vendor.vendor_id == vendor_id).first()
+            vendor = db.query(SaaSVendor).filter(SaaSVendor.slug == vendor_id, SaaSVendor.deleted_at.is_(None)).first()
             if not vendor:
                 return False
             
+            # Map old field names to new SaaS field names
+            field_mapping = {
+                "vendor_name": "name",
+                "vendor_metadata": "meta",
+                "is_active": "status"
+            }
+            
             for key, value in kwargs.items():
-                if hasattr(vendor, key):
-                    setattr(vendor, key, value)
+                mapped_key = field_mapping.get(key, key)
+                if hasattr(vendor, mapped_key):
+                    if mapped_key == "status" and isinstance(value, bool):
+                        from backend.models.saas_models import VendorStatus
+                        setattr(vendor, mapped_key, VendorStatus.ACTIVE if value else VendorStatus.SUSPENDED)
+                    else:
+                        setattr(vendor, mapped_key, value)
             
             db.commit()
             logger.info(f"Updated vendor: {vendor_id}")
@@ -609,7 +596,7 @@ RESPONSE FORMAT:
             db.rollback()
             return False
         finally:
-            db.close()
+            pass
     
     def delete_vendor(self, vendor_id: str) -> bool:
         """Delete a vendor (soft delete by setting is_active=False)."""

@@ -621,8 +621,8 @@
     },
     "caching": {
       "enabled": true,
-      "use_cache_for_responses": false,
-      "fallback_to_llm_on_cache_miss": false,
+      "use_cache_for_responses": true,
+      "fallback_to_llm_on_cache_miss": true,
       "similarity_threshold": 0.85,
       "save_to_temporary_cache": true,
       "save_to_main_cache": true,

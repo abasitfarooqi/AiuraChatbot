@@ -33,10 +33,29 @@ class VendorUpdateRequest(BaseModel):
 
 @router.get("/list")
 async def list_vendors():
-    """List all vendors."""
+    """List all vendors from SaaS database."""
     try:
-        vendor_manager = get_vendor_manager()
-        vendors = vendor_manager.list_vendors()
+        from backend.config.database import get_db_session
+        from backend.models.saas_models import Vendor
+        from sqlalchemy.orm import Session
+        
+        db = next(get_db_session())
+        vendors_list = db.query(Vendor).filter(Vendor.deleted_at.is_(None)).all()
+        
+        vendors = []
+        for vendor in vendors_list:
+            vendors.append({
+                "vendor_id": vendor.slug,
+                "vendor_name": vendor.name,
+                "company_name": vendor.company_name,
+                "business_type": vendor.business_type,
+                "is_active": vendor.status.value == "active",
+                "id": vendor.id,
+                "plan_code": vendor.plan_code,
+                "credit_balance": float(vendor.credit_balance) if vendor.credit_balance else 0.0,
+                "status": vendor.status.value
+            })
+        
         return {"vendors": vendors, "count": len(vendors)}
     except Exception as e:
         logger.error(f"Error listing vendors: {e}")
@@ -672,8 +691,73 @@ async def upload_kb_file(
         # Reload into RAG service
         try:
             from backend.services.rag_service import RAGService
+            from backend.config.database import get_db_session
+            from backend.models.saas_models import KnowledgeBase, KBDocument, Vendor as SaaSVendor
+            import hashlib
+            
             rag_service = RAGService(vendor_id=vendor_id)
             rag_service.load_knowledge_base(str(rag_path))
+            
+            # Sync KB chunks to kb_documents table
+            db = next(get_db_session())
+            try:
+                # Get vendor
+                vendor_db = db.query(SaaSVendor).filter(SaaSVendor.slug == vendor_id).first()
+                if vendor_db:
+                    # Get or create knowledge base
+                    kb = db.query(KnowledgeBase).filter(
+                        KnowledgeBase.vendor_id == vendor_db.id,
+                        KnowledgeBase.name == "default"
+                    ).first()
+                    
+                    if not kb:
+                        kb = KnowledgeBase(
+                            vendor_id=vendor_db.id,
+                            name="default",
+                            description=f"Default knowledge base for {vendor_id}",
+                            vector_db_collection=rag_service.collection.name if rag_service.collection else None
+                        )
+                        db.add(kb)
+                        db.commit()
+                        db.refresh(kb)
+                    
+                    # Delete existing documents for this KB
+                    db.query(KBDocument).filter(KBDocument.knowledge_base_id == kb.id).delete()
+                    
+                    # Create documents from chunks
+                    chunks = kb_data.get("chunks", [])
+                    for chunk in chunks:
+                        content = chunk.get("content", "")
+                        if not content:
+                            continue
+                        
+                        # Create checksum for deduplication
+                        checksum = hashlib.sha256(content.encode('utf-8')).hexdigest()
+                        
+                        doc = KBDocument(
+                            knowledge_base_id=kb.id,
+                            vendor_id=vendor_db.id,
+                            title=chunk.get("keyword", chunk.get("symbol", "Untitled")),
+                            content=content,
+                            checksum=checksum,
+                            meta={
+                                "symbol": chunk.get("symbol", ""),
+                                "keyword": chunk.get("keyword", ""),
+                                "tags": chunk.get("tags", []),
+                                "mapping": chunk.get("mapping", {}),
+                                "metadata": chunk.get("metadata", {})
+                            }
+                        )
+                        db.add(doc)
+                    
+                    db.commit()
+                    logger.info(f"Synced {len(chunks)} chunks to kb_documents for vendor {vendor_id}")
+            
+            except Exception as e:
+                logger.warning(f"Error syncing KB to database: {e}")
+            finally:
+                pass
+            
             reload_status = "success"
             reload_message = "Knowledge base uploaded and reloaded into ChromaDB"
         except Exception as e:
