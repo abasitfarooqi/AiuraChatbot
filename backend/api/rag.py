@@ -88,7 +88,7 @@ async def load_knowledge_base(vendor_id: Optional[str] = None, kb_path: Optional
 
 @router.get("/stats")
 async def get_rag_stats(vendor_id: Optional[str] = None):
-    """Get RAG statistics (vendor-aware)."""
+    """Get RAG statistics including MVS status (vendor-aware)."""
     try:
         from backend.config import get_settings
         settings = get_settings()
@@ -100,6 +100,47 @@ async def get_rag_stats(vendor_id: Optional[str] = None):
         
         # Add vendor info to stats
         stats["vendor_id"] = effective_vendor_id
+        
+        # Add MVS status and configuration
+        try:
+            from backend.utils.vendor_manager import get_vendor_manager
+            vendor_manager = get_vendor_manager()
+            config_manager = vendor_manager.get_vendor_config_manager(effective_vendor_id)
+            unified_config = config_manager.load_config()
+            mvs_config = unified_config.get("rag", {}).get("mvs", {})
+            
+            stats["mvs"] = {
+                "enabled": mvs_config.get("enabled", False),
+                "dense_weight": mvs_config.get("dense_weight", 0.6),
+                "sparse_weight": mvs_config.get("sparse_weight", 0.4),
+                "sparse_model": mvs_config.get("sparse_model", "bm25"),
+                "fusion_method": mvs_config.get("fusion_method", "rrf"),
+                "rrf_k": mvs_config.get("rrf_k", 60)
+            }
+            
+            # Count chunks with sparse embeddings
+            if rag_service.collection:
+                try:
+                    all_chunks = rag_service.collection.get()
+                    chunks_with_sparse = sum(
+                        1 for meta in (all_chunks.get("metadatas") or [])
+                        if meta and meta.get("sparse_embedding")
+                    )
+                    stats["mvs"]["chunks_with_sparse"] = chunks_with_sparse
+                    stats["mvs"]["total_chunks"] = len(all_chunks.get("ids", []))
+                    stats["mvs"]["sparse_coverage"] = (chunks_with_sparse / len(all_chunks.get("ids", [])) * 100) if all_chunks.get("ids") else 0
+                except Exception as e:
+                    logger.debug(f"Error counting sparse embeddings: {e}")
+                    stats["mvs"]["chunks_with_sparse"] = 0
+                    stats["mvs"]["total_chunks"] = stats.get("total_chunks", 0)
+                    stats["mvs"]["sparse_coverage"] = 0
+        except Exception as e:
+            logger.warning(f"Error loading MVS config: {e}")
+            stats["mvs"] = {
+                "enabled": False,
+                "error": str(e)
+            }
+        
         return stats
         
     except Exception as e:

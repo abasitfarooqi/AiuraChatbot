@@ -3,7 +3,80 @@
     "version": "2.0.0",
     "vendor_id": "mphenom_ltd",
     "description": "Knowledge base for mPhenom Ltd",
-    "chunking_strategy": "semantic_chunks_with_metadata"
+    "chunking_strategy": "semantic_chunks_with_metadata",
+    "last_updated": "2025-11-25"
   },
-  "chunks": []
+  "chunks": [
+    {
+      "symbol": "COMPANY_001",
+      "keyword": "company_info",
+      "tags": [
+        "company",
+        "business",
+        "about",
+        "information"
+      ],
+      "mapping": {
+        "category": "company",
+        "subcategory": "general",
+        "priority": "high",
+        "domain": "mphenom_ltd"
+      },
+      "metadata": {
+        "source": "company",
+        "last_verified": "2025-11-25",
+        "confidence": "high",
+        "requires_update": false,
+        "vendor_id": "mphenom_ltd"
+      },
+      "content": "mPhenom Ltd is a other. We provide quality services to our customers. Contact us for more information."
+    },
+    {
+      "symbol": "SERVICE_001",
+      "keyword": "services",
+      "tags": [
+        "services",
+        "what we do",
+        "offerings"
+      ],
+      "mapping": {
+        "category": "services",
+        "subcategory": "general",
+        "priority": "high",
+        "domain": "mphenom_ltd"
+      },
+      "metadata": {
+        "source": "company",
+        "last_verified": "2025-11-25",
+        "confidence": "high",
+        "requires_update": false,
+        "vendor_id": "mphenom_ltd"
+      },
+      "content": "mPhenom Ltd offers various services. Please contact us to learn more about our service offerings and how we can help you."
+    },
+    {
+      "symbol": "CONTACT_001",
+      "keyword": "contact",
+      "tags": [
+        "contact",
+        "phone",
+        "email",
+        "reach us"
+      ],
+      "mapping": {
+        "category": "contact",
+        "subcategory": "general",
+        "priority": "high",
+        "domain": "mphenom_ltd"
+      },
+      "metadata": {
+        "source": "company",
+        "last_verified": "2025-11-25",
+        "confidence": "high",
+        "requires_update": false,
+        "vendor_id": "mphenom_ltd"
+      },
+      "content": "Contact mPhenom Ltd: Phone: 0000 000 0000, Email: info@mphenomltd.com. We're here to help!"
+    }
+  ]
 }

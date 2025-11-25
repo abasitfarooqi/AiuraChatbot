@@ -245,7 +245,23 @@
         <div class="chat-list" id="chatList">
             <h3 style="margin-bottom: 1rem;">Chats</h3>
             <button id="newChatBtn" style="width: 100%; padding: 0.75rem; margin-bottom: 0.5rem; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">New Chat</button>
-            <button onclick="clearAllData()" style="width: 100%; padding: 0.75rem; margin-bottom: 1rem; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear All Data</button>
+            <button onclick="clearAllData()" style="width: 100%; padding: 0.75rem; margin-bottom: 0.5rem; background: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">Clear All Data</button>
+            
+            <!-- Cache Clearing Section -->
+            <div style="margin-top: 1rem; margin-bottom: 1rem; padding-top: 1rem; border-top: 1px solid #2c3e50;">
+                <h4 style="font-size: 0.85rem; color: #95e1d3; margin-bottom: 0.5rem;">Clear Caches</h4>
+                <button onclick="clearAllCaches()" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; background: #e67e22; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.75rem;">Clear All Caches</button>
+                <button onclick="clearMainCache()" style="width: 100%; padding: 0.4rem; margin-bottom: 0.3rem; background: #c0392b; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">Clear Main Cache</button>
+                <button onclick="clearTempCache()" style="width: 100%; padding: 0.4rem; margin-bottom: 0.3rem; background: #c0392b; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">Clear Temp Cache</button>
+                <button onclick="clearChromaDB()" style="width: 100%; padding: 0.4rem; margin-bottom: 0.3rem; background: #c0392b; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">Clear ChromaDB</button>
+            </div>
+            
+            <!-- Memory Management Section -->
+            <div style="margin-top: 1rem; margin-bottom: 1rem; padding-top: 1rem; border-top: 1px solid #2c3e50;">
+                <h4 style="font-size: 0.85rem; color: #95e1d3; margin-bottom: 0.5rem;">Memory Management</h4>
+                <button onclick="clearCurrentChatMemory()" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; background: #9b59b6; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.75rem;">Clear Current Chat Memory</button>
+                <button onclick="viewCurrentChatMemory()" style="width: 100%; padding: 0.4rem; margin-bottom: 0.3rem; background: #3498db; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.7rem;">View Memory</button>
+            </div>
             <div id="chatsContainer"></div>
             
             <!-- Model Usage Log -->
@@ -263,12 +279,12 @@
                 <strong>⚠️ Disclaimer:</strong> I'm a chatbot and may make mistakes. Information provided might be incorrect. Please always verify important details by contacting us.
             </div>
             <!-- Vendor Selector -->
-            <div style="background: #34495e; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid #2c3e50;">
-                <label style="color: white; font-size: 0.9rem; font-weight: 500;">Vendor:</label>
-                <select id="vendorSelector" onchange="switchVendor()" style="flex: 1; max-width: 250px; padding: 0.4rem; font-size: 0.9rem; border: 1px solid #2c3e50; background: white;">
+            <div style="display:none;background: #34495e; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid #2c3e50;">
+                <label style="color: white; font-size: 0.9rem; font-weight: 500;display:none;">Vendor:</label>
+                <select id="vendorSelector" onchange="switchVendor()" style="display:none;flex: 1; max-width: 250px; padding: 0.4rem; font-size: 0.9rem; border: 1px solid #2c3e50; background: white;">
                     <option value="">Loading vendors...</option>
                 </select>
-                <span id="currentVendorDisplay" style="color: #ecf0f1; font-size: 0.85rem; margin-left: auto;"></span>
+                <span id="currentVendorDisplay" style="display:none;color: #ecf0f1; font-size: 0.85rem; margin-left: auto;"></span>
             </div>
             <div class="chat-header">
                 <h2 id="chatbotTitle">Chatbot</h2>
@@ -286,9 +302,7 @@
             </div>
             
             <div class="chat-messages" id="messagesContainer">
-                <div class="message assistant">
-                    Hello! How can I help you today?
-                </div>
+                <!-- Messages will be loaded here -->
             </div>
             
             <div class="chat-input-container">
@@ -297,7 +311,7 @@
                     class="chat-input" 
                     id="messageInput" 
                     placeholder="Type your message..."
-                    onkeypress="if(event.key === 'Enter') sendMessage()"
+                    onkeypress="if(event.key === 'Enter' && !window.isSendingMessage) { event.preventDefault(); sendMessage(); }"
                 >
                 <button class="send-button" id="sendButton" onclick="sendMessage()">Send</button>
             </div>
@@ -312,6 +326,13 @@
         let currentVendorId = localStorage.getItem('chatbot_vendorId') || null;
         let allVendors = [];
         
+        // Message sending state - prevent concurrent sends
+        let isSendingMessage = false;
+        window.isSendingMessage = false; // Make it accessible from inline handlers
+        
+        // Chat loading state - prevent concurrent loads
+        let isLoadingChat = false;
+        
         // Load userId from localStorage or create new one
         let userId = localStorage.getItem('chatbot_userId');
         if (!userId) {
@@ -322,6 +343,7 @@
         
         // Load currentChatId from localStorage
         let currentChatId = localStorage.getItem('chatbot_currentChatId');
+        console.log('Initial currentChatId from localStorage:', currentChatId);
         
         // Load vendors and set default
         loadVendors().then(() => {
@@ -331,10 +353,82 @@
             loadUserChats().then(() => {
                 // If we have a saved chatId, load it
                 if (currentChatId) {
-                    loadChat(currentChatId);
+                    console.log('Loading saved chat on page load:', currentChatId);
+                    // Delay to ensure DOM is ready and chat list is rendered
+                    setTimeout(() => {
+                        // Double-check chatId is still valid
+                        const savedChatId = localStorage.getItem('chatbot_currentChatId');
+                        if (savedChatId && savedChatId === currentChatId) {
+                            console.log(`🔄 Attempting to load saved chat: ${currentChatId}`);
+                            // Ensure loading flag is reset
+                            isLoadingChat = false;
+                            loadChat(currentChatId).then(() => {
+                                console.log('✅ Successfully loaded saved chat on refresh');
+                            }).catch(err => {
+                                console.error('❌ Error loading saved chat:', err);
+                                // If chat fails to load, clear it and show greeting
+                                localStorage.removeItem('chatbot_currentChatId');
+                                currentChatId = null;
+                                updateChatIdDisplay();
+                                showGreeting();
+                            });
+                        } else {
+                            console.log('⚠️ Chat ID changed or invalid, showing greeting');
+                            currentChatId = null;
+                            updateChatIdDisplay();
+                            showGreeting();
+                        }
+                    }, 600); // Increased delay to ensure everything is ready
+                } else {
+                    console.log('No saved chat ID, showing greeting');
+                    // No saved chat - show greeting
+                    showGreeting();
+                }
+            }).catch(err => {
+                console.error('Error loading user chats:', err);
+                // Even if chat list fails, try to load saved chat or show greeting
+                if (currentChatId) {
+                    setTimeout(() => {
+                        loadChat(currentChatId).then(() => {
+                            console.log('Successfully loaded saved chat after chat list error');
+                        }).catch(loadErr => {
+                            console.error('Error loading saved chat after chat list error:', loadErr);
+                            showGreeting();
+                        });
+                    }, 300);
+                } else {
+                    showGreeting();
                 }
             });
+        }).catch(err => {
+            console.error('Error loading vendors:', err);
+            // Even if vendors fail, try to load saved chat or show greeting
+            if (currentChatId) {
+                setTimeout(() => {
+                    loadChat(currentChatId).catch(loadErr => {
+                        console.error('Error loading saved chat after vendor error:', loadErr);
+                        showGreeting();
+                    });
+                }, 300);
+            } else {
+                showGreeting();
+            }
         });
+        
+        // Function to show greeting message
+        function showGreeting() {
+            const container = document.getElementById('messagesContainer');
+            if (container && container.innerHTML.trim() === '') {
+                const greeting = getGreetingMessage();
+                container.innerHTML = `<div class="message assistant">${greeting}</div>`;
+                // Scroll to bottom after greeting is shown
+                setTimeout(() => {
+                    if (container) {
+                        container.scrollTop = container.scrollHeight;
+                    }
+                }, 50);
+            }
+        }
         
         // Vendor functions - load from database
         async function loadVendors() {
@@ -450,10 +544,23 @@
         }
         
         async function sendMessage() {
+            // Prevent concurrent message sending
+            if (isSendingMessage) {
+                console.warn('Message already being sent, ignoring duplicate request');
+                return;
+            }
+            
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
             
             if (!message) return;
+            
+            // Set sending flag immediately
+            isSendingMessage = true;
+            window.isSendingMessage = true; // Update global flag for inline handlers
+            
+            // Disable input immediately to prevent double-sending
+            const sendButton = document.getElementById('sendButton');
             
             // Create chat ID if not exists
             if (!currentChatId) {
@@ -465,26 +572,26 @@
             input.value = '';
             
             // Disable input
-            const sendButton = document.getElementById('sendButton');
             sendButton.disabled = true;
             sendButton.innerHTML = '<div class="loading"></div>';
             
+            // Build request body outside try block so it's available in catch
+            const requestBody = {
+                user_id: userId,
+                message: message
+            };
+            
+            // Only add chat_id if it exists
+            if (currentChatId) {
+                requestBody.chat_id = currentChatId;
+            }
+            
+            // Add vendor_id if selected
+            if (currentVendorId) {
+                requestBody.vendor_id = currentVendorId;
+            }
+            
             try {
-                const requestBody = {
-                    user_id: userId,
-                    message: message
-                };
-                
-                // Only add chat_id if it exists
-                if (currentChatId) {
-                    requestBody.chat_id = currentChatId;
-                }
-                
-                // Add vendor_id if selected
-                if (currentVendorId) {
-                    requestBody.vendor_id = currentVendorId;
-                }
-                
                 const response = await fetch(`${API_BASE}/chat/message`, {
                     method: 'POST',
                     headers: {
@@ -494,66 +601,178 @@
                 });
                 
                 if (!response.ok) {
-                    const errorData = await response.json();
+                    const errorData = await response.json().catch(() => ({ detail: `HTTP error! status: ${response.status}` }));
                     throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
                 }
                 
                 const data = await response.json();
                 
-                // Update currentChatId from response and save to localStorage
-                if (data.chat_id) {
-                    currentChatId = data.chat_id;
-                    localStorage.setItem('chatbot_currentChatId', currentChatId);
-                    updateChatIdDisplay();
-                }
-                
-                // Log model usage
-                addModelLogEntry({
-                    type: 'message',
-                    model: data.model_used || 'unknown',
-                    tokens: data.tokens_used || 0,
-                    credits: data.credits_used || 0,
-                    message: message.substring(0, 50),
-                    response: data.response ? data.response.substring(0, 50) : '',
-                    retrieved_chunks: data.retrieved_chunks || 0
-                });
-                
-                // Add assistant response
-                addMessage('assistant', data.response);
-                
-                // Add suggestions if available
-                if (data.suggestions && data.suggestions.length > 0) {
-                    addSuggestions(data.suggestions);
-                }
-                
-                // Reload chats
-                loadUserChats();
+                // Process response asynchronously to prevent recursion
+                // Use setTimeout to break the call stack and prevent recursion
+                setTimeout(() => {
+                    try {
+                        // Update currentChatId from response and save to localStorage
+                        if (data.chat_id) {
+                            const newChatId = data.chat_id;
+                            if (currentChatId !== newChatId) {
+                                console.log(`Chat ID updated: ${currentChatId} -> ${newChatId}`);
+                                currentChatId = newChatId;
+                                localStorage.setItem('chatbot_currentChatId', currentChatId);
+                                updateChatIdDisplay();
+                                // Update active state in chat list
+                                setTimeout(() => {
+                                    document.querySelectorAll('.chat-item').forEach(item => {
+                                        item.classList.remove('active');
+                                        const dataChatId = item.getAttribute('data-chat-id');
+                                        if (dataChatId === currentChatId) {
+                                            item.classList.add('active');
+                                        }
+                                    });
+                                }, 100);
+                            }
+                        }
+                        
+                        // Log model usage (delay to prevent recursion)
+                        setTimeout(() => {
+                            try {
+                                addModelLogEntry({
+                                    type: 'message',
+                                    model: data.model_used || 'unknown',
+                                    tokens: data.tokens_used || 0,
+                                    credits: data.credits_used || 0,
+                                    message: message.substring(0, 50),
+                                    response: data.response ? data.response.substring(0, 50) : '',
+                                    retrieved_chunks: data.retrieved_chunks || 0
+                                });
+                            } catch (logError) {
+                                console.error('Error adding model log entry:', logError);
+                            }
+                        }, 10);
+                        
+                        // Add assistant response
+                        if (data.response) {
+                            addMessage('assistant', data.response);
+                        } else {
+                            console.warn('No response in data:', data);
+                            addMessage('assistant', 'Sorry, I received an empty response. Please try again.');
+                        }
+                        
+                        // Add suggestions if available (delay to prevent recursion)
+                        if (data.suggestions && data.suggestions.length > 0) {
+                            setTimeout(() => {
+                                try {
+                                    addSuggestions(data.suggestions);
+                                } catch (suggestError) {
+                                    console.error('Error adding suggestions:', suggestError);
+                                }
+                            }, 100);
+                        }
+                        
+                        // Reload chats (async, don't wait) - delay to prevent recursion
+                        // Wait longer to ensure isSendingMessage flag is reset first
+                        setTimeout(() => {
+                            if (!isSendingMessage && !isLoadingChats) {
+                                loadUserChats().catch(err => {
+                                    console.error('Error reloading chats:', err);
+                                });
+                            }
+                        }, 300);
+                        
+                        // Reset flag AFTER all response processing is scheduled
+                        // This ensures flag stays true during response processing to prevent recursion
+                        setTimeout(() => {
+                            isSendingMessage = false;
+                            window.isSendingMessage = false;
+                        }, 250);
+                    } catch (processError) {
+                        console.error('Error processing response:', processError);
+                        addMessage('assistant', 'Sorry, I encountered an error processing the response. Please try again.');
+                        // Reset flag on error too
+                        isSendingMessage = false;
+                        window.isSendingMessage = false;
+                    }
+                }, 10);
                 
             } catch (error) {
                 console.error('Error sending message:', error);
                 console.error('Request body was:', JSON.stringify(requestBody, null, 2));
-                addMessage('assistant', `Sorry, I encountered an error: ${error.message}. Please check if the server is running at http://localhost:8000`);
+                const errorMsg = error.message || 'Unknown error occurred';
+                addMessage('assistant', `Sorry, I encountered an error: ${errorMsg}. Please try again or check if the server is running.`);
             } finally {
-                sendButton.disabled = false;
-                sendButton.textContent = 'Send';
+                // Don't reset flag here - it's reset in the response processing setTimeout (line 587)
+                // This ensures the flag stays true during response processing to prevent recursion
+                // Only update UI here
+                setTimeout(() => {
+                    sendButton.disabled = false;
+                    sendButton.textContent = 'Send';
+                    // Re-focus input for next message (use requestAnimationFrame to avoid triggering events)
+                    requestAnimationFrame(() => {
+                        if (input && document.activeElement !== input) {
+                            input.focus();
+                        }
+                    });
+                }, 100);
             }
         }
         
         function addMessage(role, content) {
+            if (!content || typeof content !== 'string') {
+                return;
+            }
+            
             const container = document.getElementById('messagesContainer');
+            if (!container) {
+                return;
+            }
+            
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${role}`;
             
-            // Preserve line breaks in response
-            const formattedContent = content.replace(/\n/g, '<br>');
+            // Beautify response formatting with proper line breaks and list styling
+            let formattedContent = content
+                // Convert double line breaks to paragraph breaks
+                .replace(/\n\n+/g, '</p><p>')
+                // Convert single line breaks to <br>
+                .replace(/\n/g, '<br>')
+                // Format bullet points with proper styling
+                .replace(/•\s+/g, '<span style="display: inline-block; width: 8px; margin-right: 8px; color: inherit;">•</span>')
+                // Format bold text (**text**)
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                // Format markdown-style headers
+                .replace(/^(\*\*[^*]+\*\*)$/gm, '<strong style="display: block; margin-top: 0.5rem; margin-bottom: 0.25rem;">$1</strong>');
+            
+            // Wrap in paragraph tags if not already wrapped
+            if (!formattedContent.startsWith('<p>')) {
+                formattedContent = '<p>' + formattedContent + '</p>';
+            }
+            
             messageDiv.innerHTML = formattedContent;
             
             container.appendChild(messageDiv);
-            container.scrollTop = container.scrollHeight;
+            // Use requestAnimationFrame to avoid scroll recursion
+            requestAnimationFrame(() => {
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            });
         }
         
         function addSuggestions(suggestions) {
+            if (!suggestions || !Array.isArray(suggestions) || suggestions.length === 0) {
+                return;
+            }
+            
             const container = document.getElementById('messagesContainer');
+            if (!container) {
+                return;
+            }
+            
+            // Remove existing suggestions to prevent duplicates
+            const existingSuggestions = container.querySelector('.suggestions');
+            if (existingSuggestions) {
+                existingSuggestions.remove();
+            }
+            
             const suggestionsDiv = document.createElement('div');
             suggestionsDiv.className = 'suggestions';
             suggestionsDiv.style.marginTop = '1rem';
@@ -571,6 +790,10 @@
             suggestionsDiv.appendChild(title);
             
             suggestions.forEach(suggestion => {
+                if (!suggestion || typeof suggestion !== 'string') {
+                    return;
+                }
+                
                 const suggestionBtn = document.createElement('button');
                 suggestionBtn.className = 'suggestion-btn';
                 suggestionBtn.textContent = suggestion;
@@ -593,18 +816,48 @@
                     suggestionBtn.style.background = 'white';
                     suggestionBtn.style.color = '#3498db';
                 };
-                suggestionBtn.onclick = () => {
-                    document.getElementById('messageInput').value = suggestion;
-                    sendMessage();
+                suggestionBtn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Prevent if already sending
+                    if (isSendingMessage) {
+                        return;
+                    }
+                    
+                    const input = document.getElementById('messageInput');
+                    if (input) {
+                        input.value = suggestion;
+                        // Use setTimeout to ensure the value is set and prevent immediate recursion
+                        setTimeout(() => {
+                            if (!isSendingMessage) {
+                                sendMessage();
+                            }
+                        }, 50);
+                    }
                 };
                 suggestionsDiv.appendChild(suggestionBtn);
             });
             
             container.appendChild(suggestionsDiv);
-            container.scrollTop = container.scrollHeight;
+            // Use requestAnimationFrame to avoid scroll recursion
+            requestAnimationFrame(() => {
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            });
         }
         
+        let isLoadingChats = false;
+        
         async function loadUserChats() {
+            // Prevent concurrent calls
+            if (isLoadingChats) {
+                return;
+            }
+            
+            isLoadingChats = true;
+            
             try {
                 // Include vendor_id in query if selected
                 let url = `${API_BASE}/chat/chats/${userId}`;
@@ -615,11 +868,17 @@
                 const data = await response.json();
                 
                 const container = document.getElementById('chatsContainer');
+                if (!container) {
+                    return;
+                }
+                
                 container.innerHTML = '';
                 
                 data.chats.forEach(chat => {
                     const chatItem = document.createElement('div');
                     chatItem.className = 'chat-item';
+                    // Store chat_id as data attribute for easy access
+                    chatItem.setAttribute('data-chat-id', chat.chat_id);
                     if (currentChatId === chat.chat_id) {
                         chatItem.classList.add('active');
                     }
@@ -630,7 +889,21 @@
                     const title = document.createElement('div');
                     title.textContent = chat.title || chat.chat_id.substring(0, 20) + '...';
                     title.style.cursor = 'pointer';
-                    title.onclick = () => loadChat(chat.chat_id);
+                    title.onclick = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const clickedChatId = chat.chat_id;
+                        console.log('📱 Chat item clicked:', clickedChatId);
+                        // Always allow loading chat, even if sending (user might want to switch chats)
+                        // Clear any existing loading state to allow new load
+                        isLoadingChat = false;
+                        loadChat(clickedChatId).then(() => {
+                            console.log('✅ Successfully loaded chat from list');
+                        }).catch(err => {
+                            console.error('❌ Error loading chat from list:', err);
+                            alert('Failed to load chat: ' + (err.message || 'Unknown error'));
+                        });
+                    };
                     
                     const chatId = document.createElement('div');
                     chatId.textContent = chat.chat_id;
@@ -664,6 +937,8 @@
                 });
             } catch (error) {
                 console.error('Error loading chats:', error);
+            } finally {
+                isLoadingChats = false;
             }
         }
         
@@ -733,42 +1008,137 @@
         }
         
         async function loadChat(chatId) {
+            // Prevent concurrent calls only if already loading the same chat
+            if (isLoadingChat) {
+                console.warn('loadChat: Already loading a chat, skipping');
+                return;
+            }
+            
+            if (!chatId) {
+                console.warn('loadChat: No chatId provided');
+                return;
+            }
+            
+            // Always reload the chat to ensure fresh data
+            // Don't skip reload even if already on the same chat
+            console.log(`🔄 loadChat: Loading chat ${chatId} (current: ${currentChatId})`);
+            isLoadingChat = true;
+            
             currentChatId = chatId;
             localStorage.setItem('chatbot_currentChatId', chatId);
             updateChatIdDisplay();
             
-            // Update active state in chat list
+            // Update active state in chat list immediately
             document.querySelectorAll('.chat-item').forEach(item => {
                 item.classList.remove('active');
+                // Check data attribute first (more reliable)
+                const dataChatId = item.getAttribute('data-chat-id');
+                // Fallback to checking text content
+                const chatIdDiv = item.querySelector('.chat-item-content div:last-child');
+                const chatIdInItem = chatIdDiv?.textContent?.trim();
+                if (dataChatId === chatId || chatIdInItem === chatId) {
+                    item.classList.add('active');
+                }
             });
             
             try {
-                const response = await fetch(`${API_BASE}/chat/history/${chatId}`);
+                console.log(`🔍 loadChat: Fetching history from ${API_BASE}/chat/history/${chatId}`);
+                const response = await fetch(`${API_BASE}/chat/history/${chatId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`❌ loadChat: HTTP error ${response.status}:`, errorText);
+                    if (response.status === 404) {
+                        // Chat not found - clear it from localStorage
+                        console.warn('⚠️ Chat not found, clearing from localStorage');
+                        localStorage.removeItem('chatbot_currentChatId');
+                        currentChatId = null;
+                        updateChatIdDisplay();
+                        throw new Error('Chat not found. Starting a new chat.');
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
+                console.log(`✅ loadChat: Received data:`, { 
+                    chat_id: data.chat_id, 
+                    message_count: data.messages?.length || 0
+                });
                 
                 const container = document.getElementById('messagesContainer');
+                if (!container) {
+                    console.error('❌ loadChat: Messages container not found');
+                    isLoadingChat = false;
+                    return;
+                }
+                
+                // Clear container first
                 container.innerHTML = '';
                 
-                if (data.messages && data.messages.length > 0) {
-                    data.messages.forEach(msg => {
-                        addMessage(msg.role, msg.content);
+                if (data.messages && Array.isArray(data.messages) && data.messages.length > 0) {
+                    console.log(`📨 loadChat: Loading ${data.messages.length} messages for chat ${chatId}`);
+                    // Load messages synchronously
+                    data.messages.forEach((msg) => {
+                        if (msg && msg.role && msg.content) {
+                            addMessage(msg.role, msg.content);
+                        }
                     });
+                    // Scroll to bottom after all messages are loaded
+                    setTimeout(() => {
+                        if (container) {
+                            container.scrollTop = container.scrollHeight;
+                            console.log(`📜 loadChat: Scrolled to bottom, scrollHeight: ${container.scrollHeight}`);
+                        }
+                    }, 150);
                 } else {
-                    // Use vendor-specific greeting
-                    const greeting = currentVendorId 
-                        ? 'Hello! How can I help you today?'
-                        : 'Hello! I\'m the chatbot. How can I help you today?';
+                    console.log('⚠️ loadChat: No messages found in chat, showing greeting');
+                    // No messages in chat - show greeting
+                    const greeting = getGreetingMessage();
                     addMessage('assistant', greeting);
                 }
                 
-                // Reload chat list to update active state
-                loadUserChats();
+                // Reload chat list to update active state (async, don't wait)
+                // Use setTimeout to prevent blocking
+                setTimeout(() => {
+                    loadUserChats().then(() => {
+                        // After chat list reloads, ensure active state is correct
+                        document.querySelectorAll('.chat-item').forEach(item => {
+                            item.classList.remove('active');
+                            // Check data attribute first (more reliable)
+                            const dataChatId = item.getAttribute('data-chat-id');
+                            // Fallback to checking text content
+                            const chatIdDiv = item.querySelector('.chat-item-content div:last-child');
+                            const chatIdInItem = chatIdDiv?.textContent?.trim();
+                            if (dataChatId === chatId || chatIdInItem === chatId) {
+                                item.classList.add('active');
+                            }
+                        });
+                    }).catch(err => {
+                        console.error('Error reloading chats after loadChat:', err);
+                    });
+                }, 100);
             } catch (error) {
                 console.error('Error loading chat:', error);
-                const greeting = currentVendorId 
-                    ? 'Hello! How can I help you today?'
-                    : 'Hello! I\'m the chatbot. How can I help you today?';
-                addMessage('assistant', greeting);
+                console.error('Error details:', error.message);
+                // Try to show greeting even on error
+                const greeting = getGreetingMessage();
+                const container = document.getElementById('messagesContainer');
+                if (container) {
+                    container.innerHTML = `<div class="message assistant">${greeting}</div>`;
+                    // Scroll to bottom
+                    setTimeout(() => {
+                        if (container) {
+                            container.scrollTop = container.scrollHeight;
+                        }
+                    }, 50);
+                }
+            } finally {
+                isLoadingChat = false;
             }
         }
         
@@ -969,69 +1339,114 @@
         let modelLogEntries = [];
         let lastModel = null;
         
-        function addModelLogEntry(entry) {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            
-            // Check if model switched
-            if (lastModel && lastModel !== entry.model) {
-                addModelLogEntry({
-                    type: 'switch',
-                    model: entry.model,
-                    from: lastModel,
-                    to: entry.model
-                });
-            }
-            
-            const logEntry = {
-                ...entry,
-                timestamp: timeStr,
-                datetime: now
-            };
-            
-            modelLogEntries.unshift(logEntry); // Add to beginning
-            if (modelLogEntries.length > 50) {
-                modelLogEntries = modelLogEntries.slice(0, 50); // Keep last 50 entries
-            }
-            
-            lastModel = entry.model;
-            renderModelLog();
-        }
+        let isAddingLogEntry = false; // Prevent recursion in addModelLogEntry
         
-        function renderModelLog() {
-            const container = document.getElementById('modelLogContainer');
-            if (!container) return;
-            
-            container.innerHTML = '';
-            
-            if (modelLogEntries.length === 0) {
-                container.innerHTML = '<div style="color: #7f8c8d; font-style: italic; text-align: center; padding: 1rem;">No model usage logged yet</div>';
+        function addModelLogEntry(entry) {
+            // Prevent recursion
+            if (isAddingLogEntry) {
+                console.warn('addModelLogEntry already in progress, skipping');
                 return;
             }
             
-            modelLogEntries.forEach(entry => {
-                const entryDiv = document.createElement('div');
-                entryDiv.className = `model-log-entry ${entry.type === 'switch' ? 'model-switch' : ''}`;
+            isAddingLogEntry = true;
+            
+            try {
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 
-                if (entry.type === 'switch') {
-                    entryDiv.innerHTML = `
-                        <div class="log-time">${entry.timestamp}</div>
-                        <div style="color: #e74c3c; font-weight: 600;">🔄 Model Switched</div>
-                        <div style="color: #95a5a6; margin-top: 0.25rem;">From: <span style="color: #e74c3c;">${entry.from}</span> → To: <span style="color: #95e1d3;">${entry.to}</span></div>
-                    `;
-                } else {
-                    entryDiv.innerHTML = `
-                        <div class="log-time">${entry.timestamp}</div>
-                        <div class="log-model">🤖 Model: ${entry.model}</div>
-                        <div class="log-tokens">📊 Tokens: ${entry.tokens.toLocaleString()} | Credits: ${entry.credits || 0}</div>
-                        ${entry.retrieved_chunks > 0 ? `<div style="color: #3498db; margin-top: 0.25rem;">📚 RAG Chunks: ${entry.retrieved_chunks}</div>` : ''}
-                        <div class="log-message" title="${entry.message}">💬 Q: ${entry.message}${entry.message.length >= 50 ? '...' : ''}</div>
-                        ${entry.response ? `<div class="log-message" title="${entry.response}" style="color: #95e1d3;">💭 A: ${entry.response}${entry.response.length >= 50 ? '...' : ''}</div>` : ''}
-                    `;
+                // Check if model switched (but don't recurse - add switch entry directly)
+                if (lastModel && lastModel !== entry.model && entry.type !== 'switch') {
+                    // Add switch entry directly without recursion
+                    const switchEntry = {
+                        type: 'switch',
+                        model: entry.model,
+                        from: lastModel,
+                        to: entry.model,
+                        timestamp: timeStr,
+                        datetime: now
+                    };
+                    modelLogEntries.unshift(switchEntry);
                 }
                 
-                container.appendChild(entryDiv);
-            });
+                const logEntry = {
+                    ...entry,
+                    timestamp: timeStr,
+                    datetime: now
+                };
+                
+                modelLogEntries.unshift(logEntry); // Add to beginning
+                if (modelLogEntries.length > 50) {
+                    modelLogEntries = modelLogEntries.slice(0, 50); // Keep last 50 entries
+                }
+                
+                lastModel = entry.model;
+                // Delay renderModelLog to prevent recursion
+                setTimeout(() => {
+                    try {
+                        renderModelLog();
+                    } catch (renderError) {
+                        console.error('Error rendering model log:', renderError);
+                    }
+                }, 10);
+            } finally {
+                isAddingLogEntry = false;
+            }
+        }
+        
+        let isRenderingLog = false;
+        
+        function renderModelLog() {
+            // Prevent concurrent renders
+            if (isRenderingLog) {
+                return;
+            }
+            
+            isRenderingLog = true;
+            
+            try {
+                const container = document.getElementById('modelLogContainer');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                
+                if (modelLogEntries.length === 0) {
+                    container.innerHTML = '<div style="color: #7f8c8d; font-style: italic; text-align: center; padding: 1rem;">No model usage logged yet</div>';
+                    return;
+                }
+                
+                modelLogEntries.forEach(entry => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.className = `model-log-entry ${entry.type === 'switch' ? 'model-switch' : ''}`;
+                    
+                    if (entry.type === 'switch') {
+                        entryDiv.innerHTML = `
+                            <div class="log-time">${entry.timestamp}</div>
+                            <div style="color: #e74c3c; font-weight: 600;">🔄 Model Switched</div>
+                            <div style="color: #95a5a6; margin-top: 0.25rem;">From: <span style="color: #e74c3c;">${entry.from}</span> → To: <span style="color: #95e1d3;">${entry.to}</span></div>
+                        `;
+                    } else {
+                        entryDiv.innerHTML = `
+                            <div class="log-time">${entry.timestamp}</div>
+                            <div class="log-model">🤖 Model: ${entry.model}</div>
+                            <div class="log-tokens">📊 Tokens: ${entry.tokens.toLocaleString()} | Credits: ${entry.credits || 0}</div>
+                            ${entry.retrieved_chunks > 0 ? `<div style="color: #3498db; margin-top: 0.25rem;">📚 RAG Chunks: ${entry.retrieved_chunks}</div>` : ''}
+                            <div class="log-message" title="${entry.message}">💬 Q: ${entry.message}${entry.message.length >= 50 ? '...' : ''}</div>
+                            ${entry.response ? `<div class="log-message" title="${entry.response}" style="color: #95e1d3;">💭 A: ${entry.response}${entry.response.length >= 50 ? '...' : ''}</div>` : ''}
+                        `;
+                    }
+                    
+                    container.appendChild(entryDiv);
+                });
+                
+                // Scroll to top to show latest entry (use requestAnimationFrame to avoid recursion)
+                requestAnimationFrame(() => {
+                    if (container) {
+                        container.scrollTop = 0;
+                    }
+                });
+            } finally {
+                isRenderingLog = false;
+            }
         }
         
         function clearModelLog() {
@@ -1051,6 +1466,220 @@
         
         // Refresh model info periodically to catch switches from admin panel
         setInterval(loadCurrentModelInfo, 5000); // Every 5 seconds
+        
+        // Cache Clearing Functions
+        async function clearAllCaches() {
+            if (!confirm('⚠️ Clear ALL caches?\n\nThis will clear:\n• Main Cache (persistent)\n• Temporary Cache (per chat)\n• ChromaDB (RAG embeddings)\n\nThis cannot be undone!')) {
+                return;
+            }
+            
+            try {
+                const vendorId = currentVendorId || 'neguinho_motors';
+                let cleared = 0;
+                let errors = [];
+                
+                // Clear Main Cache
+                try {
+                    const mainResponse = await fetch(`${API_BASE}/cache/main/vendor/${vendorId}`, {
+                        method: 'DELETE'
+                    });
+                    if (mainResponse.ok) {
+                        const data = await mainResponse.json();
+                        cleared++;
+                        console.log('✅ Main cache cleared:', data);
+                    } else {
+                        errors.push('Main Cache: ' + mainResponse.statusText);
+                    }
+                } catch (e) {
+                    errors.push('Main Cache: ' + e.message);
+                }
+                
+                // Clear Temporary Cache
+                try {
+                    const tempResponse = await fetch(`${API_BASE}/cache/temporary/vendor/${vendorId}`, {
+                        method: 'DELETE'
+                    });
+                    if (tempResponse.ok) {
+                        const data = await tempResponse.json();
+                        cleared++;
+                        console.log('✅ Temporary cache cleared:', data);
+                    } else {
+                        errors.push('Temporary Cache: ' + tempResponse.statusText);
+                    }
+                } catch (e) {
+                    errors.push('Temporary Cache: ' + e.message);
+                }
+                
+                // Clear ChromaDB
+                try {
+                    const ragResponse = await fetch(`${API_BASE}/rag/clear?vendor_id=${vendorId}`, {
+                        method: 'POST'
+                    });
+                    if (ragResponse.ok) {
+                        const data = await ragResponse.json();
+                        cleared++;
+                        console.log('✅ ChromaDB cleared:', data);
+                    } else {
+                        errors.push('ChromaDB: ' + ragResponse.statusText);
+                    }
+                } catch (e) {
+                    errors.push('ChromaDB: ' + e.message);
+                }
+                
+                if (cleared > 0) {
+                    alert(`✅ Cleared ${cleared} cache(s) successfully!${errors.length > 0 ? '\n\nErrors:\n' + errors.join('\n') : ''}`);
+                } else {
+                    alert('❌ Failed to clear caches:\n' + errors.join('\n'));
+                }
+            } catch (error) {
+                console.error('Error clearing all caches:', error);
+                alert('Error clearing caches: ' + error.message);
+            }
+        }
+        
+        async function clearMainCache() {
+            if (!confirm('Clear Main Cache (persistent cache shared across all users)?\n\nThis cannot be undone!')) {
+                return;
+            }
+            
+            try {
+                const vendorId = currentVendorId || 'neguinho_motors';
+                const response = await fetch(`${API_BASE}/cache/main/vendor/${vendorId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(`✅ Main cache cleared!\n\nDeleted ${data.deleted_count || 0} entries.`);
+                    console.log('Main cache cleared:', data);
+                } else {
+                    const error = await response.json().catch(() => ({ detail: response.statusText }));
+                    throw new Error(error.detail || 'Failed to clear main cache');
+                }
+            } catch (error) {
+                console.error('Error clearing main cache:', error);
+                alert('Error clearing main cache: ' + error.message);
+            }
+        }
+        
+        async function clearTempCache() {
+            if (!confirm('Clear Temporary Cache (per-chat session cache)?\n\nThis cannot be undone!')) {
+                return;
+            }
+            
+            try {
+                const vendorId = currentVendorId || 'neguinho_motors';
+                const response = await fetch(`${API_BASE}/cache/temporary/vendor/${vendorId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(`✅ Temporary cache cleared!\n\nDeleted ${data.deleted_count || 0} entries.`);
+                    console.log('Temporary cache cleared:', data);
+                } else {
+                    const error = await response.json().catch(() => ({ detail: response.statusText }));
+                    throw new Error(error.detail || 'Failed to clear temporary cache');
+                }
+            } catch (error) {
+                console.error('Error clearing temporary cache:', error);
+                alert('Error clearing temporary cache: ' + error.message);
+            }
+        }
+        
+        async function clearChromaDB() {
+            if (!confirm('Clear ChromaDB (RAG vector database)?\n\nThis will delete all embeddings and require reloading the knowledge base.\n\nThis cannot be undone!')) {
+                return;
+            }
+            
+            try {
+                const vendorId = currentVendorId || 'neguinho_motors';
+                const response = await fetch(`${API_BASE}/rag/clear?vendor_id=${vendorId}`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(`✅ ChromaDB cleared!\n\nCollection: ${data.collection_name || 'N/A'}\n\nYou may need to reload the knowledge base.`);
+                    console.log('ChromaDB cleared:', data);
+                } else {
+                    const error = await response.json().catch(() => ({ detail: response.statusText }));
+                    throw new Error(error.detail || 'Failed to clear ChromaDB');
+                }
+            } catch (error) {
+                console.error('Error clearing ChromaDB:', error);
+                alert('Error clearing ChromaDB: ' + error.message);
+            }
+        }
+        
+        // Memory Management Functions
+        async function clearCurrentChatMemory() {
+            if (!currentChatId) {
+                alert('No active chat. Please start a chat first.');
+                return;
+            }
+            
+            if (!confirm(`Clear memory for current chat?\n\nChat ID: ${currentChatId}\n\nThis will clear conversation memory (entities, topics, intents) but keep all messages.`)) {
+                return;
+            }
+            
+            try {
+                const vendorId = currentVendorId || 'neguinho_motors';
+                const response = await fetch(`${API_BASE}/memory/chat/${currentChatId}?vendor_id=${vendorId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    alert('✅ Memory cleared successfully!');
+                    console.log('Memory cleared:', data);
+                } else {
+                    const error = await response.json().catch(() => ({ detail: response.statusText }));
+                    throw new Error(error.detail || 'Failed to clear memory');
+                }
+            } catch (error) {
+                console.error('Error clearing memory:', error);
+                alert('Error clearing memory: ' + error.message);
+            }
+        }
+        
+        async function viewCurrentChatMemory() {
+            if (!currentChatId) {
+                alert('No active chat. Please start a chat first.');
+                return;
+            }
+            
+            try {
+                const vendorId = currentVendorId || 'neguinho_motors';
+                const response = await fetch(`${API_BASE}/memory/chat/${currentChatId}?vendor_id=${vendorId}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === 'success' && data.memory) {
+                        const mem = data.memory;
+                        const memoryInfo = `
+Memory for Chat: ${currentChatId}
+
+Turn Count: ${mem.turn_count || 0}
+Topics: ${(mem.topics || []).length > 0 ? mem.topics.join(', ') : 'None'}
+Entities: ${Object.keys(mem.entities || {}).length > 0 ? JSON.stringify(mem.entities, null, 2) : 'None'}
+Intent History: ${(mem.intent_history || []).length} intents
+${mem.context_summary ? `Summary: ${mem.context_summary}` : ''}
+                        `.trim();
+                        alert(memoryInfo);
+                        console.log('Memory data:', mem);
+                    } else {
+                        alert('No memory found for this chat.');
+                    }
+                } else {
+                    const error = await response.json().catch(() => ({ detail: response.statusText }));
+                    throw new Error(error.detail || 'Failed to get memory');
+                }
+            } catch (error) {
+                console.error('Error viewing memory:', error);
+                alert('Error viewing memory: ' + error.message);
+            }
+        }
     </script>
 </body>
 </html>

@@ -27,10 +27,61 @@ class ChatbotService:
         self.vendor_id = vendor_id or settings.default_vendor_id
         self.rag_service = RAGService(vendor_id=self.vendor_id)
         self.llm_service = LLMService(db=db, vendor_id=self.vendor_id) if db else LLMService(vendor_id=self.vendor_id)  # Pass db and vendor_id to load vendor's model
-        self.memory_service = MemoryService(db) if db else None
+        self.memory_service = MemoryService(db, vendor_id=self.vendor_id) if db else None
         self.cache_service = CacheService(db=db, vendor_id=self.vendor_id) if db else CacheService(vendor_id=self.vendor_id)
         self.settings = settings
         self._load_chatbot_config()
+    
+    def _get_vendor_config(self, vendor_id: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Get vendor-specific unified config dynamically.
+        Always loads fresh from config to ensure multi-vendor support.
+        
+        Args:
+            vendor_id: Optional vendor ID, defaults to self.vendor_id
+            
+        Returns:
+            Dict with unified config (business, contact, prompts, etc.)
+        """
+        effective_vendor_id = vendor_id or self.vendor_id
+        try:
+            from backend.utils.vendor_manager import get_vendor_manager
+            vendor_manager = get_vendor_manager()
+            config_manager = vendor_manager.get_vendor_config_manager(effective_vendor_id)
+            return config_manager.load_config()
+        except Exception as e:
+            logger.warning(f"Error loading vendor config for {effective_vendor_id}: {e}")
+            return {}
+    
+    def _get_business_info(self, vendor_id: Optional[str] = None) -> Dict[str, Any]:
+        """Get business info from vendor config."""
+        unified_config = self._get_vendor_config(vendor_id)
+        return unified_config.get("business", {})
+    
+    def _get_contact_info(self, vendor_id: Optional[str] = None) -> Dict[str, Any]:
+        """Get contact info from vendor config."""
+        unified_config = self._get_vendor_config(vendor_id)
+        return unified_config.get("contact", {})
+    
+    def _get_company_name(self, vendor_id: Optional[str] = None) -> str:
+        """Get company name from vendor config."""
+        business_info = self._get_business_info(vendor_id)
+        return business_info.get("company_name", "Company")
+    
+    def _get_services_list(self, vendor_id: Optional[str] = None) -> List[str]:
+        """Get services list from vendor config."""
+        business_info = self._get_business_info(vendor_id)
+        return business_info.get("services_list", ["services"])
+    
+    def _get_contact_email(self, vendor_id: Optional[str] = None) -> str:
+        """Get primary email from vendor config."""
+        contact_info = self._get_contact_info(vendor_id)
+        return contact_info.get("primary_email", "")
+    
+    def _get_contact_phone(self, vendor_id: Optional[str] = None) -> str:
+        """Get primary phone from vendor config."""
+        contact_info = self._get_contact_info(vendor_id)
+        return contact_info.get("primary_phone", "")
     
     def get_system_prompt(self) -> str:
         """Get system prompt for LLM from vendor-specific unified config."""
@@ -45,17 +96,66 @@ class ChatbotService:
             logger.warning(f"Error loading system prompt from vendor config: {e}, using default")
             return self._get_default_system_prompt()
     
+    def _is_fallback_message(self, response: str) -> bool:
+        """
+        Check if a response is a fallback message that should not be cached.
+        
+        Args:
+            response: The response text to check
+            
+        Returns:
+            True if the response is a fallback message, False otherwise
+        """
+        if not response:
+            return False
+        
+        response_lower = response.lower().strip()
+        
+        # Common fallback message patterns
+        fallback_patterns = [
+            "i don't have that information",
+            "i don't have this information available",
+            "i don't have that information in my cache",
+            "i'm sorry, i'm experiencing technical difficulties",
+            "i can only assist with",
+            "out of domain",
+            "i can only help you with"
+        ]
+        
+        # Check if response starts with or contains any fallback pattern
+        for pattern in fallback_patterns:
+            if pattern in response_lower:
+                return True
+        
+        # Also check against configured fallback messages
+        try:
+            prompts = self.chatbot_config.get("prompts", {})
+            fallback_msg = prompts.get("fallback_message", "")
+            if fallback_msg and fallback_msg.lower().strip() in response_lower:
+                return True
+            
+            validation_config = self.chatbot_config.get("validation", {})
+            validation_fallback = validation_config.get("fallback_message", "")
+            if validation_fallback and validation_fallback.lower().strip() in response_lower:
+                return True
+        except Exception as e:
+            logger.debug(f"Error checking configured fallback messages: {e}")
+        
+        return False
+    
     def _get_default_system_prompt(self) -> str:
-        """Get default system prompt if config fails."""
-        company_name = self.business_info.get("company_name", "Company")
-        services = ", ".join(self.business_info.get("services_list", ["services"]))
+        """Get default system prompt - always loads from vendor config."""
+        company_name = self._get_company_name()
+        services_list = self._get_services_list()
+        services = ", ".join(services_list) if services_list else "services"
+        
         return f"""You are the {company_name} chatbot assistant. You help customers with {services}.
 
 CRITICAL RULES - STRICTLY ENFORCE:
 1. ONLY use information provided in the INFORMATION section below
 2. NEVER make up, guess, or hallucinate any information
 3. NEVER use knowledge from outside the provided information
-4. If information is not in the provided context, say: "I don't have that information in my knowledge base."
+4. If information is not in the provided context, say: "I don't have this information available."
 5. ONLY answer questions about {company_name} services
 6. For out-of-domain queries, redirect to appropriate services
 
@@ -173,12 +273,8 @@ RESPONSE FORMAT:
                         }
                     )
                     
-                    # Update cache stats
-                    self.cache_service.update_cache_stats(
-                        cache_id=cache_id,
-                        cache_type=cache_type,
-                        tokens_saved=tokens_saved
-                    )
+                    # Cache stats are already updated in check_cache() when match is found
+                    # No need to update again here
                     
                     # Update memory (lightweight - just track that we answered)
                     # Memory service is optional (may not have db)
@@ -333,18 +429,14 @@ RESPONSE FORMAT:
             
             # Check domain relevance
             if not self.rag_service.is_domain_relevant(message):
-                # Get out-of-domain message from unified config
-                try:
-                    from backend.utils.unified_config_manager import get_unified_config_manager
-                    config_manager = get_unified_config_manager()
-                    unified_config = config_manager.load_config()
-                    prompts = unified_config.get("prompts", {})
-                    out_of_domain_msg = prompts.get("out_of_domain_message", 
-                        f"I can only assist with {', '.join(self.business_info.get('services_list', ['our services']))} related to {self.business_info.get('company_name', 'our company')}. How can I help you with our services?")
-                except:
-                    company_name = self.business_info.get("company_name", "our company")
-                    services = ", ".join(self.business_info.get("services_list", ["our services"]))
-                    out_of_domain_msg = f"I can only assist with {services} related to {company_name}. How can I help you with our services?"
+                # Get out-of-domain message from vendor config
+                unified_config = self._get_vendor_config(effective_vendor_id)
+                prompts = unified_config.get("prompts", {})
+                company_name = self._get_company_name(effective_vendor_id)
+                services_list = self._get_services_list(effective_vendor_id)
+                services = ", ".join(services_list) if services_list else "our services"
+                out_of_domain_msg = prompts.get("out_of_domain_message", 
+                    f"I can only assist with {services} related to {company_name}. How can I help you with our services?")
                 
                 # Save assistant response for out-of-domain
                 assistant_message = self._save_message(
@@ -429,17 +521,12 @@ RESPONSE FORMAT:
                     else:
                         # NO FALLBACK - Return message that information is not available
                         # This ensures no hallucinations
-                        try:
-                            from backend.utils.unified_config_manager import get_unified_config_manager
-                            config_manager = get_unified_config_manager()
-                            unified_config = config_manager.load_config()
-                            prompts = unified_config.get("prompts", {})
-                            fallback_msg = prompts.get("fallback_message",
-                                f"I don't have that information in my knowledge base. Please contact us at {self.contact_info.get('primary_email', '')} or {self.contact_info.get('primary_phone', '')} for more details.")
-                        except:
-                            email = self.contact_info.get("primary_email", "")
-                            phone = self.contact_info.get("primary_phone", "")
-                            fallback_msg = f"I don't have that information in my knowledge base. Please contact us at {email} or {phone} for more details."
+                        unified_config = self._get_vendor_config(effective_vendor_id)
+                        prompts = unified_config.get("prompts", {})
+                        email = self._get_contact_email(effective_vendor_id)
+                        phone = self._get_contact_phone(effective_vendor_id)
+                        fallback_msg = prompts.get("fallback_message",
+                            f"I don't have this information available. Please contact us at {email} or {phone} for more details.")
                         
                         assistant_message = self._save_message(
                             chat_id,
@@ -472,34 +559,20 @@ RESPONSE FORMAT:
                 # Handle simple greetings specially
                 if is_simple_greeting:
                     # Simple greeting - use vendor-specific config
-                    try:
-                        from backend.utils.vendor_manager import get_vendor_manager
-                        vendor_manager = get_vendor_manager()
-                        config_manager = vendor_manager.get_vendor_config_manager(self.vendor_id)
-                        unified_config = config_manager.load_config()
-                        prompts = unified_config.get("prompts", {})
-                        company_name = unified_config.get("business", {}).get("company_name", "our company")
-                        greeting_template = prompts.get("greeting_prompt", 
-                            f"""The user just said: "{{message}}"\n\nRespond with a friendly greeting and offer to help with {company_name} services.\n\nKeep it brief and welcoming. Do not mention any specific information unless asked.""")
-                        user_message_content = greeting_template.format(message=message)
-                    except Exception as e:
-                        logger.warning(f"Error loading greeting prompt from vendor config: {e}")
-                        company_name = self.business_info.get("company_name", "our company")
-                        user_message_content = f"""The user just said: "{message}"
-
-Respond with a friendly greeting and offer to help with {company_name} services.
-
-Keep it brief and welcoming. Do not mention any specific information unless asked."""
+                    unified_config = self._get_vendor_config(self.vendor_id)
+                    prompts = unified_config.get("prompts", {})
+                    company_name = self._get_company_name(self.vendor_id)
+                    greeting_template = prompts.get("greeting_prompt", 
+                        f"""The user just said: "{{message}}"\n\nRespond with a friendly greeting and offer to help with {company_name} services.\n\nKeep it brief and welcoming. Do not mention any specific information unless asked.""")
+                    user_message_content = greeting_template.format(message=message)
                 else:
                     # STRICT prompt - use from vendor-specific config
-                    try:
-                        from backend.utils.vendor_manager import get_vendor_manager
-                        vendor_manager = get_vendor_manager()
-                        config_manager = vendor_manager.get_vendor_config_manager(self.vendor_id)
-                        unified_config = config_manager.load_config()
-                        prompts = unified_config.get("prompts", {})
-                        query_template = prompts.get("query_prompt",
-                            """CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.
+                    unified_config = self._get_vendor_config(self.vendor_id)
+                    prompts = unified_config.get("prompts", {})
+                    email = self._get_contact_email(self.vendor_id)
+                    phone = self._get_contact_phone(self.vendor_id)
+                    query_template = prompts.get("query_prompt",
+                        """CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.
 
 INFORMATION FROM KNOWLEDGE BASE:
 {context_text}
@@ -514,44 +587,21 @@ INSTRUCTIONS:
 - Format your answer with proper line breaks and structure
 
 ANSWER (based ONLY on the information above):""")
-                        fallback_msg = prompts.get("fallback_message", "I don't have that information in my knowledge base.")
-                        user_message_content = query_template.format(
-                            context_text=context_text, 
-                            message=message,
-                            fallback_message=fallback_msg
-                        )
-                    except:
-                        # Fallback to default
-                        email = self.contact_info.get("primary_email", "")
-                        phone = self.contact_info.get("primary_phone", "")
-                        user_message_content = f"""CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.
-
-INFORMATION FROM KNOWLEDGE BASE:
-{context_text}
-
-QUESTION: {message}
-
-INSTRUCTIONS:
-- Use ONLY facts from the INFORMATION section above
-- If the answer is not in the information, say: "I don't have that information in my knowledge base. Please contact us at {email} or {phone} for more details."
-- DO NOT make up, guess, or invent any information
-- DO NOT use knowledge from outside the provided information
-- Format your answer with proper line breaks and structure
-
-ANSWER (based ONLY on the information above):"""
+                    fallback_msg = prompts.get("fallback_message", 
+                        f"I don't have this information available. Please contact us at {email} or {phone} for more details.")
+                    user_message_content = query_template.format(
+                        context_text=context_text, 
+                        message=message,
+                        fallback_message=fallback_msg
+                    )
             else:
                 # This should not happen due to check above, but just in case
-                try:
-                    from backend.utils.unified_config_manager import get_unified_config_manager
-                    config_manager = get_unified_config_manager()
-                    unified_config = config_manager.load_config()
-                    prompts = unified_config.get("prompts", {})
-                    fallback_msg = prompts.get("fallback_message",
-                        f"I don't have that information in my knowledge base. Please contact us at {self.contact_info.get('primary_email', '')} or {self.contact_info.get('primary_phone', '')} for more details.")
-                except:
-                    email = self.contact_info.get("primary_email", "")
-                    phone = self.contact_info.get("primary_phone", "")
-                    fallback_msg = f"I don't have that information in my knowledge base. Please contact us at {email} or {phone} for more details."
+                unified_config = self._get_vendor_config(self.vendor_id)
+                prompts = unified_config.get("prompts", {})
+                email = self._get_contact_email(self.vendor_id)
+                phone = self._get_contact_phone(self.vendor_id)
+                fallback_msg = prompts.get("fallback_message",
+                    f"I don't have this information available. Please contact us at {email} or {phone} for more details.")
                 
                 assistant_message = self._save_message(
                     chat_id,
@@ -644,8 +694,10 @@ ANSWER (based ONLY on the information above):"""
                 if not self._validate_response_from_rag(response_content, retrieved_chunks, message):
                     # Response seems to contain information not in RAG - return safe message
                     logger.warning(f"Response validation failed - possible hallucination detected for query: {message[:50]}")
+                    email = self._get_contact_email(effective_vendor_id)
+                    phone = self._get_contact_phone(effective_vendor_id)
                     fallback = validation_config.get("fallback_message", 
-                        f"I don't have that information in my knowledge base. Please contact us at {self.contact_info.get('primary_email', '')} or {self.contact_info.get('primary_phone', '')} for more details.")
+                        f"I don't have this information available. Please contact us at {email} or {phone} for more details.")
                     response_content = fallback
             
             # Post-process response for better structure
@@ -668,11 +720,25 @@ ANSWER (based ONLY on the information above):"""
             # Memory service is optional (may not have db)
             if self.memory_service:
                 entities = self.memory_service.extract_entities(message, retrieved_chunks)
+                # Get chat_user_id from chat session
+                chat_user_id_int = None
+                if self.db:
+                    try:
+                        from backend.models.saas_models import ChatSession
+                        chat_session = self.db.query(ChatSession).filter(
+                            ChatSession.session_uuid == chat_id
+                        ).first()
+                        if chat_session:
+                            chat_user_id_int = chat_session.chat_user_id
+                    except Exception as e:
+                        logger.debug(f"Error getting chat_user_id for memory: {e}")
+                
                 self.memory_service.update_memory(
-                chat_id=chat_id,
-                entities=entities,
-                intent="query"
-            )
+                    chat_id=chat_id,
+                    entities=entities,
+                    intent="query",
+                    chat_user_id=chat_user_id_int
+                )
             
             # Track token usage
             if self.settings.token_tracking_enabled:
@@ -691,8 +757,9 @@ ANSWER (based ONLY on the information above):"""
                 # Credit tracking is now handled in the API layer
                 pass
             
-            # Save to cache (if enabled and not a simple greeting)
-            if cache_enabled and not is_simple_greeting and response_content:
+            # Save to cache (if enabled and not a simple greeting and not a fallback message)
+            is_fallback = self._is_fallback_message(response_content)
+            if cache_enabled and not is_simple_greeting and response_content and not is_fallback:
                 caching_config = self.chatbot_config.get("caching", {})
                 save_to_temp = caching_config.get("save_to_temporary_cache", True)
                 save_to_main = caching_config.get("save_to_main_cache", True)
@@ -746,22 +813,85 @@ ANSWER (based ONLY on the information above):"""
                         logger.debug(f"[CACHE] Question too short ({len(message.split())} words < {min_question_length}) - skipping main cache")
                 elif save_to_main:
                     logger.debug(f"[CACHE] Question not complete - skipping main cache save")
+            elif is_fallback:
+                logger.info(f"[CACHE] ⚠️ Skipping cache save - response is a fallback message (not cached)")
             
-            # Generate helpful suggestions based on conversation history and current topic
-            # For initial chat or greetings, show general suggestions
-            # For ongoing chat, only show suggestions if question was incomplete/ambiguous
-            suggestions = []
-            if is_initial_chat or is_simple_greeting:
-                # Initial chat or greeting - show general helpful suggestions from config
-                suggestions = self.chatbot_config.get("greetings", {}).get("initial_suggestions", [
-                    "What services do you offer?",
-                    "Tell me about rental bikes",
-                    "What are your opening hours?",
-                    "Where are your branches located?"
-                ])
-            elif not (is_complete_question and topic_changed):
-                # Ongoing chat - only show suggestions if question was incomplete/ambiguous
-                suggestions = self._generate_suggestions(chat_id, message, retrieved_chunks, current_topics=current_topics)
+            # ALWAYS generate helpful suggestions based on RAG data after every response
+            # Check cache first
+            suggestions = None
+            effective_vendor_id = vendor_id or self.vendor_id
+            if self.db:
+                try:
+                    from backend.services.suggestion_service import SuggestionService
+                    from backend.models.saas_models import ChatSession
+                    
+                    # Get chat_user_id from chat session
+                    chat_user_id_int = None
+                    chat_session = self.db.query(ChatSession).filter(
+                        ChatSession.session_uuid == chat_id
+                    ).first()
+                    if chat_session:
+                        chat_user_id_int = chat_session.chat_user_id
+                    
+                    suggestion_service = SuggestionService(db=self.db, vendor_id=effective_vendor_id)
+                    suggestions = suggestion_service.get_cached_suggestions(
+                        chat_id=chat_id,
+                        message=message,
+                        chunks=retrieved_chunks,
+                        topics=current_topics,
+                        chat_user_id=chat_user_id_int
+                    )
+                except Exception as e:
+                    logger.debug(f"Error checking suggestion cache: {e}")
+            
+            # If not cached, generate new suggestions
+            if not suggestions:
+                suggestions = self._generate_suggestions_from_rag(chat_id, message, retrieved_chunks, current_topics=current_topics)
+                
+                # Filter out generic suggestions completely
+                suggestions = self._filter_generic_suggestions(suggestions)
+                
+                # If no suggestions from RAG, fallback to config-based suggestions
+                if not suggestions:
+                    if is_initial_chat or is_simple_greeting:
+                        # Initial chat or greeting - show general helpful suggestions from config
+                        suggestions = self.chatbot_config.get("greetings", {}).get("initial_suggestions", [
+                            "What services do you offer?",
+                            "Tell me about rental bikes",
+                            "What are your opening hours?",
+                            "Where are your branches located?"
+                        ])
+                    else:
+                        # Fallback to conversation-based suggestions
+                        suggestions = self._generate_suggestions(chat_id, message, retrieved_chunks, current_topics=current_topics)
+                
+                # Filter again after fallback
+                suggestions = self._filter_generic_suggestions(suggestions)
+                
+                # Cache the suggestions
+                if self.db and suggestions:
+                    try:
+                        from backend.services.suggestion_service import SuggestionService
+                        from backend.models.saas_models import ChatSession
+                        
+                        chat_user_id_int = None
+                        chat_session = self.db.query(ChatSession).filter(
+                            ChatSession.session_uuid == chat_id
+                        ).first()
+                        if chat_session:
+                            chat_user_id_int = chat_session.chat_user_id
+                        
+                        suggestion_service = SuggestionService(db=self.db, vendor_id=effective_vendor_id)
+                        suggestion_service.cache_suggestions(
+                            suggestions=suggestions,
+                            chat_id=chat_id,
+                            message=message,
+                            chunks=retrieved_chunks,
+                            topics=current_topics,
+                            chat_user_id=chat_user_id_int
+                        )
+                    except Exception as e:
+                        logger.debug(f"Error caching suggestions: {e}")
             
             total_processing_time = time.time() - start_time
             logger.info(f"[SUMMARY] ✅ Response generated - Total time: {total_processing_time:.3f}s, Tokens: {tokens_used}, Model: {llm_response.get('model_used', 'unknown')}")
@@ -784,17 +914,12 @@ ANSWER (based ONLY on the information above):"""
             traceback.print_exc()
             # Ensure we have chat_id even on error
             try:
-                # Get error message from unified config
-                try:
-                    from backend.utils.unified_config_manager import get_unified_config_manager
-                    config_manager = get_unified_config_manager()
-                    unified_config = config_manager.load_config()
-                    prompts = unified_config.get("prompts", {})
-                    error_msg = prompts.get("error_message",
-                        f"I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at {self.contact_info.get('primary_email', '')}")
-                except:
-                    email = self.contact_info.get("primary_email", "")
-                    error_msg = f"I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at {email}"
+                # Get error message from vendor config
+                unified_config = self._get_vendor_config(effective_vendor_id)
+                prompts = unified_config.get("prompts", {})
+                email = self._get_contact_email(effective_vendor_id)
+                error_msg = prompts.get("error_message",
+                    f"I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at {email}")
                 
                 chat = self._get_or_create_chat(chat_id, user_id, vendor_id or settings.default_vendor_id)
                 error_message = self._save_message(
@@ -818,16 +943,11 @@ ANSWER (based ONLY on the information above):"""
                 }
             except:
                 # Fallback if even chat creation fails
-                try:
-                    from backend.utils.unified_config_manager import get_unified_config_manager
-                    config_manager = get_unified_config_manager()
-                    unified_config = config_manager.load_config()
-                    prompts = unified_config.get("prompts", {})
-                    error_msg = prompts.get("error_message",
-                        f"I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at {self.contact_info.get('primary_email', '')}")
-                except:
-                    email = self.contact_info.get("primary_email", "")
-                    error_msg = f"I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at {email}"
+                unified_config = self._get_vendor_config(effective_vendor_id)
+                prompts = unified_config.get("prompts", {})
+                email = self._get_contact_email(effective_vendor_id)
+                error_msg = prompts.get("error_message",
+                    f"I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at {email}")
                 
                 return {
                     "response": error_msg,
@@ -1060,6 +1180,281 @@ ANSWER (based ONLY on the information above):"""
         
         return current_message
     
+    def _generate_suggestions_from_rag(self, chat_id: str, current_message: str, chunks: List[Dict], current_topics: Optional[set] = None) -> List[str]:
+        """
+        Generate helpful question suggestions directly from RAG knowledge base chunks.
+        This method extracts questions from the knowledge base metadata (keywords, tags, symbols).
+        
+        Args:
+            chat_id: Chat session ID
+            current_message: Current user message
+            chunks: Retrieved RAG chunks with metadata
+            current_topics: Current message topics (if already extracted)
+            
+        Returns:
+            List of suggested questions based on RAG data
+        """
+        suggestions = []
+        
+        try:
+            # Get all chunks from knowledge base to generate suggestions
+            # Use the RAG service to get all available chunks
+            from backend.utils.vendor_manager import get_vendor_manager
+            from backend.config import get_settings
+            
+            settings = get_settings()
+            vendor_id = self.vendor_id or settings.default_vendor_id
+            
+            # Get all chunks from the collection
+            if hasattr(self.rag_service, 'collection') and self.rag_service.collection:
+                try:
+                    # Get all chunks from ChromaDB collection
+                    all_chunks_data = self.rag_service.collection.get()
+                    
+                    if all_chunks_data and all_chunks_data.get("ids"):
+                        # Extract unique keywords and symbols from all chunks
+                        seen_suggestions = set()
+                        chunk_suggestions = []
+                        
+                        # First, prioritize chunks similar to current query
+                        for chunk in chunks[:5]:  # Top 5 retrieved chunks
+                            metadata = chunk.get("metadata", {})
+                            symbol = metadata.get("symbol", "")
+                            keyword = metadata.get("keyword", "")
+                            tags = metadata.get("tags", "")
+                            content = chunk.get("content", "")
+                            
+                            # Generate question from chunk metadata
+                            if symbol and symbol not in seen_suggestions:
+                                # Convert symbol to question (e.g., "RENTAL_001" -> "Tell me about rental")
+                                if "RENTAL" in symbol:
+                                    suggestion = "Tell me about bike rental options"
+                                elif "SALE" in symbol:
+                                    suggestion = "What bikes do you have for sale?"
+                                elif "FINANCE" in symbol:
+                                    suggestion = "What finance options are available?"
+                                elif "SERVICE" in symbol or "SERVICING" in symbol:
+                                    suggestion = "What servicing do you offer?"
+                                elif "MOT" in symbol:
+                                    suggestion = "Do you do MOT testing?"
+                                elif "DELIVERY" in symbol:
+                                    suggestion = "Do you offer delivery service?"
+                                elif "BRANCH" in symbol:
+                                    suggestion = "Where are your branches located?"
+                                elif "CONTACT" in symbol:
+                                    suggestion = "How can I contact you?"
+                                else:
+                                    # Skip generic keywords that generate bad suggestions
+                                    if keyword:
+                                        keyword_lower = keyword.lower()
+                                        # Block generic keywords
+                                        blocked_keywords = ["greeting", "introduction", "hello", "welcome", "hi", 
+                                                           "fallback", "domain", "restriction", "boundary", "scope", 
+                                                           "policy", "warranty", "returns", "loyalty", "ngn_club", 
+                                                           "membership", "bot", "chatbot", "general", "default"]
+                                        
+                                        # Check if keyword contains blocked terms
+                                        if any(blocked in keyword_lower for blocked in blocked_keywords):
+                                            continue
+                                        
+                                        # Only generate from service-related keywords
+                                        service_keywords = ["rental", "sale", "finance", "service", "servicing", 
+                                                          "mot", "delivery", "branch", "contact", "model", 
+                                                          "accessories", "accident", "bike", "motorcycle", "scooter"]
+                                        
+                                        if any(service_kw in keyword_lower for service_kw in service_keywords):
+                                            keywords_list = keyword.split("_")
+                                            if len(keywords_list) > 1:
+                                                # Use first meaningful keyword
+                                                first_keyword = keywords_list[0].lower()
+                                                if first_keyword in service_keywords:
+                                                    if first_keyword == "rental":
+                                                        suggestion = "Tell me about bike rental"
+                                                    elif first_keyword == "sale":
+                                                        suggestion = "What bikes are for sale?"
+                                                    elif first_keyword == "finance":
+                                                        suggestion = "What finance options are available?"
+                                                    elif first_keyword in ["service", "servicing"]:
+                                                        suggestion = "What servicing do you offer?"
+                                                    elif first_keyword == "mot":
+                                                        suggestion = "Do you do MOT testing?"
+                                                    elif first_keyword == "delivery":
+                                                        suggestion = "Do you offer delivery?"
+                                                    elif first_keyword == "branch":
+                                                        suggestion = "Where are your branches?"
+                                                    else:
+                                                        continue  # Skip if not a service keyword
+                                                else:
+                                                    continue  # Skip non-service keywords
+                                            else:
+                                                continue  # Skip single-word non-service keywords
+                                        else:
+                                            continue  # Skip non-service keywords
+                                    else:
+                                        continue
+                                
+                                if suggestion and suggestion not in seen_suggestions:
+                                    chunk_suggestions.append(suggestion)
+                                    seen_suggestions.add(suggestion)
+                        
+                        # If we don't have enough from retrieved chunks, get from all chunks
+                        if len(chunk_suggestions) < 3:
+                            # Extract from all chunks in knowledge base
+                            all_ids = all_chunks_data.get("ids", [])
+                            all_metadatas = all_chunks_data.get("metadatas", [])
+                            
+                            # Get diverse suggestions from different categories
+                            categories_found = set()
+                            for i, metadata in enumerate(all_metadatas[:20]):  # Check first 20 chunks
+                                if len(chunk_suggestions) >= 5:
+                                    break
+                                
+                                symbol = metadata.get("symbol", "") if isinstance(metadata, dict) else ""
+                                keyword = metadata.get("keyword", "") if isinstance(metadata, dict) else ""
+                                category = metadata.get("category", "") if isinstance(metadata, dict) else ""
+                                
+                                # Skip if we already have suggestions from this category
+                                if category in categories_found:
+                                    continue
+                                
+                                # Generate question based on symbol/keyword
+                                suggestion = None
+                                if "RENTAL" in symbol:
+                                    suggestion = "What are the rental prices?"
+                                elif "SALE" in symbol:
+                                    suggestion = "What bikes are available for purchase?"
+                                elif "FINANCE" in symbol:
+                                    suggestion = "What are the finance terms?"
+                                elif "SERVICE" in symbol or "SERVICING" in symbol:
+                                    suggestion = "What servicing packages do you offer?"
+                                elif "MOT" in symbol:
+                                    suggestion = "How much does MOT cost?"
+                                elif "DELIVERY" in symbol:
+                                    suggestion = "What are your delivery options?"
+                                elif "BRANCH" in symbol:
+                                    suggestion = "What are your opening hours?"
+                                elif keyword:
+                                    # Skip generic keywords - only use service-related ones
+                                    keyword_lower = keyword.lower()
+                                    blocked_keywords = ["greeting", "introduction", "hello", "welcome", "hi", 
+                                                       "fallback", "domain", "restriction", "boundary", "scope", 
+                                                       "policy", "warranty", "returns", "loyalty", "ngn_club", 
+                                                       "membership", "bot", "chatbot", "general", "default"]
+                                    
+                                    if any(blocked in keyword_lower for blocked in blocked_keywords):
+                                        continue
+                                    
+                                    # Only generate from service-related keywords
+                                    service_keywords = ["rental", "sale", "finance", "service", "servicing", 
+                                                      "mot", "delivery", "branch", "contact", "model", 
+                                                      "accessories", "accident", "bike", "motorcycle", "scooter"]
+                                    
+                                    if any(service_kw in keyword_lower for service_kw in service_keywords):
+                                        # Map to proper questions
+                                        if "rental" in keyword_lower:
+                                            suggestion = "Tell me about bike rental"
+                                        elif "sale" in keyword_lower:
+                                            suggestion = "What bikes are for sale?"
+                                        elif "finance" in keyword_lower:
+                                            suggestion = "What finance options are available?"
+                                        elif "service" in keyword_lower or "servicing" in keyword_lower:
+                                            suggestion = "What servicing do you offer?"
+                                        elif "mot" in keyword_lower:
+                                            suggestion = "Do you do MOT testing?"
+                                        elif "delivery" in keyword_lower:
+                                            suggestion = "Do you offer delivery?"
+                                        elif "branch" in keyword_lower:
+                                            suggestion = "Where are your branches?"
+                                        else:
+                                            continue  # Skip if not clearly service-related
+                                    else:
+                                        continue  # Skip non-service keywords
+                                
+                                if suggestion and suggestion not in seen_suggestions:
+                                    chunk_suggestions.append(suggestion)
+                                    seen_suggestions.add(suggestion)
+                                    if category:
+                                        categories_found.add(category)
+                        
+                        suggestions = chunk_suggestions[:5]  # Limit to 5 suggestions
+                        
+                except Exception as e:
+                    logger.debug(f"Error generating suggestions from RAG collection: {e}")
+            
+            # If still no suggestions, try to generate from chunk content directly
+            if not suggestions and chunks:
+                for chunk in chunks[:3]:
+                    content = chunk.get("content", "")
+                    metadata = chunk.get("metadata", {})
+                    
+                    # Extract key phrases from content to form questions
+                    if "rental" in content.lower() and "rental" not in [s.lower() for s in suggestions]:
+                        suggestions.append("What are the rental terms?")
+                    if "sale" in content.lower() or "buy" in content.lower() and "sale" not in [s.lower() for s in suggestions]:
+                        suggestions.append("What bikes are for sale?")
+                    if "finance" in content.lower() and "finance" not in [s.lower() for s in suggestions]:
+                        suggestions.append("What finance options are available?")
+                    if "service" in content.lower() and "service" not in [s.lower() for s in suggestions]:
+                        suggestions.append("What servicing do you offer?")
+                    if "delivery" in content.lower() and "delivery" not in [s.lower() for s in suggestions]:
+                        suggestions.append("Do you offer delivery?")
+                    
+                    if len(suggestions) >= 5:
+                        break
+            
+        except Exception as e:
+            logger.debug(f"Error in _generate_suggestions_from_rag: {e}")
+        
+        return suggestions[:5]  # Return max 5 suggestions
+    
+    def _filter_generic_suggestions(self, suggestions: List[str]) -> List[str]:
+        """
+        Filter out generic or irrelevant suggestions that shouldn't be shown to users.
+        
+        Args:
+            suggestions: List of suggestion strings
+            
+        Returns:
+            Filtered list of suggestions with generic ones removed
+        """
+        if not suggestions:
+            return []
+        
+        # Generic terms to filter out
+        generic_terms = [
+            "bot", "chatbot", "greeting", "domain", "introduction", "hello", 
+            "welcome", "hi", "fallback", "restriction", "boundary", "scope",
+            "policy", "warranty", "returns", "loyalty", "membership", "general",
+            "default", "out of domain", "out-of-domain"
+        ]
+        
+        filtered = []
+        for suggestion in suggestions:
+            if not suggestion or not isinstance(suggestion, str):
+                continue
+            
+            suggestion_lower = suggestion.lower()
+            
+            # Skip suggestions that contain generic terms
+            should_skip = False
+            for term in generic_terms:
+                if term in suggestion_lower:
+                    should_skip = True
+                    break
+            
+            # Skip suggestions that are too generic (e.g., "Tell me about bot")
+            if should_skip:
+                continue
+            
+            # Skip very short or meaningless suggestions
+            if len(suggestion.strip()) < 10:
+                continue
+            
+            # Only keep meaningful, service-related suggestions
+            filtered.append(suggestion)
+        
+        return filtered
+    
     def _generate_suggestions(self, chat_id: str, current_message: str, chunks: List[Dict], current_topics: Optional[set] = None) -> List[str]:
         """
         Generate helpful question suggestions based on conversation history and retrieved chunks.
@@ -1078,11 +1473,22 @@ ANSWER (based ONLY on the information above):"""
         
         try:
             # Get all user messages from chat history to analyze conversation
-            all_user_messages = self.db.query(Message).filter(
-                Message.chat_id == chat_id,
-                Message.role == "user"
+            from backend.models.saas_models import ChatMessage, ChatSession
+            
+            # First, find the ChatSession by session_uuid
+            chat_session = self.db.query(ChatSession).filter(
+                ChatSession.session_uuid == chat_id
+            ).first()
+            
+            if not chat_session:
+                return []
+            
+            # Get all user messages for this chat session
+            all_user_messages = self.db.query(ChatMessage).filter(
+                ChatMessage.session_id == chat_session.id,
+                ChatMessage.role == "user"
             ).order_by(
-                Message.created_at.asc()
+                ChatMessage.created_at.asc()
             ).all()
             
             # Extract all topics from entire conversation
@@ -1326,7 +1732,7 @@ ANSWER (based ONLY on the information above):"""
         # Check if response mentions specific details that should be in RAG
         # If response is very generic or just contact info, it's likely safe
         response_lower = response.lower()
-        email = self.contact_info.get("primary_email", "").lower()
+        email = self._get_contact_email().lower()
         
         # If response is just contact info or "don't have info", it's valid
         if "contact" in response_lower and email and email in response_lower:
@@ -1346,6 +1752,7 @@ ANSWER (based ONLY on the information above):"""
     def _format_response(self, response: str, query: str, chunks: List[Dict]) -> str:
         """
         Post-process response to ensure consistent formatting and structure.
+        Beautifies lists, bullet points, line breaks, and overall structure.
         
         Args:
             response: Raw LLM response
@@ -1353,27 +1760,19 @@ ANSWER (based ONLY on the information above):"""
             chunks: Retrieved RAG chunks (used for context-aware formatting)
             
         Returns:
-            Formatted response string
+            Formatted response string with proper line breaks and structure
         """
         import re
         
         if not response or not isinstance(response, str):
             return response or ""
         
-        # First, fix common line break issues in addresses, postcodes, and times
+        # Step 1: Fix common line break issues in addresses, postcodes, and times
         # Fix UK postcodes that have been split (e.g., "SE6 4\nNU" -> "SE6 4NU")
-        # Pattern: UK postcode format (1-2 letters, 1-2 digits, space, digit, newline, 2-3 letters)
         response = re.sub(r'(\b[A-Z]{1,2}\d{1,2}[A-Z]?\s+\d)\s*\n\s*([A-Z]{2,3}\b)', r'\1\2', response)
         
         # Fix time formats that have been split (e.g., "9:\n00 AM" -> "9:00 AM")
         response = re.sub(r'(\d{1,2}):\s*\n\s*(\d{2}\s*(?:AM|PM|am|pm))', r'\1:\2', response)
-        
-        # Fix addresses that have been split mid-word (e.g., "SE6 4\nNU" -> "SE6 4NU")
-        # This handles cases where postcodes are split (alternative pattern)
-        response = re.sub(r'(\b\d{1,2}[A-Z]?\d{1,2}[A-Z]?\s+)\s*\n\s*([A-Z]{2,3}\b)', r'\1\2', response)
-        
-        # Fix postcodes at end of lines (e.g., "SE6 4\nNU" when on separate lines)
-        response = re.sub(r'(\b[A-Z]{1,2}\d{1,2}[A-Z]?\s+\d)\s*\n\s*([A-Z]{2,3})\b', r'\1\2', response)
         
         # Fix phone numbers that might have been split
         response = re.sub(r'(\d{4})\s*\n\s*(\d{4})', r'\1 \2', response)
@@ -1382,59 +1781,61 @@ ANSWER (based ONLY on the information above):"""
         response = re.sub(r'(\bUnit\s+\d+)\s*\n\s*', r'\1 ', response)
         response = re.sub(r'(\b\d+[A-Z]?)\s*\n\s*([A-Z][a-z]+)', r'\1 \2', response)
         
-        # Remove excessive blank lines (more than 2 consecutive)
-        response = re.sub(r'\n{3,}', '\n\n', response)
-        
-        # Fix numbered lists that have been split (e.g., "1.\nCATFORD" -> "1. CATFORD")
-        response = re.sub(r'(\d+\.)\s*\n\s*([A-Z])', r'\1 \2', response)
+        # Step 2: Improve list formatting - ensure each list item is on its own line
+        # Fix bullet points that are on the same line
+        response = re.sub(r'(•\s+[^\n•]+)(•)', r'\1\n\2', response)
         
         # Ensure proper spacing around bullet points
         response = re.sub(r'(\S)(•)', r'\1 \2', response)  # Add space before bullet if missing
         response = re.sub(r'(•)(\S)', r'\1 \2', response)  # Add space after bullet if missing
         
-        # Ensure proper spacing around prices
-        response = re.sub(r'£(\d+)', r'£\1', response)  # Ensure no space after £
-        response = re.sub(r'(\d+)(/[a-z]+)', r'\1\2', response)  # Ensure no space before /week, /month, etc.
+        # Fix numbered lists that have been split (e.g., "1.\nCATFORD" -> "1. CATFORD")
+        response = re.sub(r'(\d+\.)\s*\n\s*([A-Z])', r'\1 \2', response)
         
-        # Fix section headers - ensure proper spacing
-        # Don't add line breaks if it's already properly formatted
-        response = re.sub(r'([A-Z][A-Z\s]{2,}BRANCH)\s*\n\s*', r'\1\n\n', response)
+        # Ensure each bullet point item is on a separate line (handle inline bullets)
+        # Pattern: bullet, content, then another bullet on same line
+        response = re.sub(r'(•\s+[^\n•]+?)(•\s+)', r'\1\n\2', response)
+        
+        # Step 3: Improve section headers and structure
+        # Ensure line breaks before section headers (lines starting with ** or capital letters followed by colon)
+        response = re.sub(r'([^\n])(\n?(\*\*)?[A-Z][A-Za-z\s]{3,}:)', r'\1\n\n\2', response)
         
         # Ensure line breaks after section headers (if they end with :)
-        response = re.sub(r'([A-Z][^:\n]*:)([^\n\s])', r'\1 \2', response)
+        response = re.sub(r'([A-Z][^:\n]*:)([^\n\s])', r'\1\n\2', response)
         
-        # Fix line breaking issues - but be more careful
-        # Only add line breaks after periods that are clearly new sentences
-        # Avoid breaking on abbreviations, postcodes, times, etc.
-        response = re.sub(r'\.([A-Z][a-z]{2,})', r'. \1', response)
+        # Fix markdown bold headers (ensure proper spacing)
+        response = re.sub(r'(\*\*)([A-Z][A-Za-z\s]+)(\*\*)', r'\1\2\3', response)
         
-        # Ensure line breaks after list items (bullet points)
-        # Each bullet point should be on its own line
-        response = re.sub(r'(•)\s*([^\n])', r'\1 \2', response)
-        
-        # Ensure line breaks before section headers (lines starting with capital letters followed by colon)
-        # But only if not already on a new line and it's a proper header
-        response = re.sub(r'([^\n])(\n?[A-Z][A-Za-z\s]{3,}:)', r'\1\n\2', response)
-        
-        # Ensure each bullet point item is on a separate line
-        response = re.sub(r'(•[^\n•]+)(•)', r'\1\n\2', response)
-        
-        # Fix branch information formatting
-        # Ensure branch names are on their own line
-        response = re.sub(r'(\d+\.)\s*([A-Z][A-Z\s]+BRANCH)', r'\1\n\n\2', response)
-        
-        # Normalize whitespace (but preserve intentional line breaks)
+        # Step 4: Improve list item formatting
+        # Ensure each list item (bullet or dash) starts on a new line
         lines = response.split('\n')
         formatted_lines = []
         for i, line in enumerate(lines):
-            # Strip trailing whitespace but preserve leading (for indentation)
-            line = line.rstrip()
+            line = line.strip()
             
-            # Skip empty lines that are duplicates
+            # Skip empty lines (we'll add them back strategically)
             if not line:
                 if formatted_lines and formatted_lines[-1]:  # Add blank line only if previous line wasn't blank
                     formatted_lines.append('')
                 continue
+            
+            # Check if line contains multiple list items (bullet points or dashes)
+            # Split them into separate lines
+            if '•' in line and line.count('•') > 1:
+                # Split by bullet points
+                parts = re.split(r'(•\s+)', line)
+                for j in range(1, len(parts), 2):
+                    if j + 1 < len(parts):
+                        item = (parts[j] + parts[j + 1]).strip()
+                        if item:
+                            formatted_lines.append(item)
+                continue
+            
+            # Check if line has a dash list item that should be on its own line
+            if re.match(r'^-\s+', line) and i > 0 and formatted_lines and formatted_lines[-1]:
+                # Ensure previous line ends properly
+                if not formatted_lines[-1].endswith((':', '.', '!', '?')):
+                    formatted_lines.append('')
             
             # Fix lines that start with lowercase after a number (likely continuation)
             if i > 0 and formatted_lines:
@@ -1451,48 +1852,57 @@ ANSWER (based ONLY on the information above):"""
         
         response = '\n'.join(formatted_lines)
         
-        # Fix any double line breaks that might have been created
+        # Step 5: Ensure proper spacing around prices and special characters
+        response = re.sub(r'£(\d+)', r'£\1', response)  # Ensure no space after £
+        response = re.sub(r'(\d+)(/[a-z]+)', r'\1\2', response)  # Ensure no space before /week, /month, etc.
+        
+        # Step 6: Clean up excessive blank lines (more than 2 consecutive)
         response = re.sub(r'\n{3,}', '\n\n', response)
         
-        # Clean up spacing around colons in addresses and times
-        response = re.sub(r':\s*\n\s*', ': ', response)  # Fix "Address:\n" -> "Address: "
+        # Step 7: Improve list item spacing - ensure blank line before major sections
+        # Add blank line before sections that start with ** (bold headers)
+        response = re.sub(r'([^\n])(\n\*\*)', r'\1\n\2', response)
         
-        # Ensure response ends with proper punctuation if it's a sentence
+        # Step 8: Fix spacing around colons in addresses and times
+        response = re.sub(r':\s*\n\s*([A-Z])', r': \1', response)  # Fix "Address:\n" -> "Address: "
+        
+        # Step 9: Ensure proper line breaks after periods that start new sentences
+        # But avoid breaking on abbreviations, postcodes, times, etc.
+        response = re.sub(r'\.([A-Z][a-z]{2,})', r'. \1', response)
+        
+        # Step 10: Ensure response ends with proper punctuation if it's a sentence
         if response and len(response) > 0:
-            # Check if last character needs punctuation
             if response[-1] not in '.!?:':
-                # Check if last line looks like it should end with punctuation
                 response_lines = response.split('\n')
                 if response_lines:
                     last_line = response_lines[-1].strip()
                     if last_line and not last_line.endswith(('•', '-', ')', ':')):
-                        # Only add if it's a complete sentence (has verb-like structure)
                         if any(word in last_line.lower() for word in ['contact', 'phone', 'email', 'call', 'visit', 'reach']):
                             response += '.'
         
-        # Add contact information if not present and response is about services
+        # Step 11: Add contact information if not present and response is about services
         formatting_config = self.chatbot_config.get("response_formatting", {})
         if formatting_config.get("add_contact_info", True) and query and isinstance(query, str):
             query_lower = query.lower()
             contact_keywords = formatting_config.get("contact_keywords", ["service", "rental", "sale", "finance"])
             min_length = formatting_config.get("min_response_length_for_contact", 50)
             contact_info_template = formatting_config.get("contact_info", "{contact_format}")
-            # Resolve contact format
-            contact_format = self.contact_info.get("contact_format", "Contact: {phone} or {email}").format(
-                phone=self.contact_info.get("primary_phone", ""),
-                email=self.contact_info.get("primary_email", "")
+            # Resolve contact format from vendor config
+            contact_info_dict = self._get_contact_info()
+            phone = self._get_contact_phone()
+            email = self._get_contact_email()
+            contact_format = contact_info_dict.get("contact_format", "Contact: {phone} or {email}").format(
+                phone=phone,
+                email=email
             )
             contact_info = contact_info_template.replace("{contact_format}", contact_format)
-            
-            phone = self.contact_info.get("primary_phone", "")
-            email = self.contact_info.get("primary_email", "")
             if any(keyword in query_lower for keyword in contact_keywords):
                 if phone not in response and email not in response:
                     # Only add if response is substantial
                     if len(response) > min_length:
                         response += f"\n\n{contact_info}"
         
-        # Clean up any remaining formatting issues
+        # Step 12: Final cleanup
         response = response.strip()
         
         # Final check: ensure response is not empty
@@ -1502,14 +1912,15 @@ ANSWER (based ONLY on the information above):"""
         return response
     
     def _load_chatbot_config(self):
-        """Load chatbot service configuration from vendor-specific unified config."""
+        """
+        Load chatbot service configuration from vendor-specific unified config.
+        Note: This is kept for backward compatibility, but all methods should use
+        _get_vendor_config() for dynamic multi-vendor support.
+        """
         try:
-            from backend.utils.vendor_manager import get_vendor_manager
-            vendor_manager = get_vendor_manager()
-            config_manager = vendor_manager.get_vendor_config_manager(self.vendor_id)
-            unified_config = config_manager.load_config()
+            unified_config = self._get_vendor_config(self.vendor_id)
             self.chatbot_config = unified_config.get("chatbot_service", {})
-            # Also store business and contact info for easy access
+            # Store for backward compatibility (but prefer using _get_vendor_config methods)
             self.business_info = unified_config.get("business", {})
             self.contact_info = unified_config.get("contact", {})
             logger.info(f"Chatbot service configuration loaded from vendor {self.vendor_id} config")

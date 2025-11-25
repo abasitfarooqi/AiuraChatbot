@@ -17,15 +17,18 @@ def get_mysql_database_url() -> str:
     # Check environment variables first
     db_host = os.getenv("MYSQL_HOST", "localhost")
     db_port = os.getenv("MYSQL_PORT", "3306")
-    db_user = os.getenv("MYSQL_USER", "aiura_chatbot")
+    db_user = os.getenv("MYSQL_USER", "root")  # Changed to root as per successful connection
     db_password = os.getenv("MYSQL_PASSWORD", "abc123")
     db_name = os.getenv("MYSQL_DATABASE", "aiura_chatbots")
     
     # If password is empty, don't include it in URL
+    # URL-encode password to handle special characters
+    from urllib.parse import quote_plus
     if not db_password:
         database_url = f"mysql+pymysql://{db_user}@{db_host}:{db_port}/{db_name}?charset=utf8mb4"
     else:
-        database_url = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}?charset=utf8mb4"
+        encoded_password = quote_plus(str(db_password))
+        database_url = f"mysql+pymysql://{db_user}:{encoded_password}@{db_host}:{db_port}/{db_name}?charset=utf8mb4"
     
     # Return URL (already constructed above)
     return database_url
@@ -50,6 +53,13 @@ def get_database_engine():
         "pool_pre_ping": True,  # Verify connections before using
         "pool_recycle": 3600,  # Recycle connections after 1 hour
     }
+    
+    # Add MySQL-specific connection arguments for authentication
+    if "mysql" in database_url:
+        engine_kwargs["connect_args"] = {
+            "charset": "utf8mb4",
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'"
+        }
     
     # SQLite-specific options
     if "sqlite" in database_url:
@@ -102,8 +112,8 @@ def create_database_if_not_exists():
     
     db_host = os.getenv("MYSQL_HOST", "localhost")
     db_port = int(os.getenv("MYSQL_PORT", "3306"))
-    db_user = os.getenv("MYSQL_USER", "aiura_chatbot")
-    db_password = os.getenv("MYSQL_PASSWORD", "")
+    db_user = os.getenv("MYSQL_USER", "root")  # Changed to root as per successful connection
+    db_password = os.getenv("MYSQL_PASSWORD", "abc123")
     db_name = os.getenv("MYSQL_DATABASE", "aiura_chatbots")
     
     if os.getenv("USE_MYSQL", "false").lower() != "true":

@@ -302,7 +302,14 @@ async def get_user_full_data(
             raise HTTPException(status_code=404, detail=f"User {user_id} not found")
         
         # Get all chat sessions for this user
-        chats = db.query(ChatSession).filter(ChatSession.user_id == user_id).all()
+        # Note: ChatSession now uses chat_user_id, not user_id
+        # This endpoint may need to be updated to use chat_users
+        from backend.models.saas_models import ChatUser
+        chat_user = db.query(ChatUser).filter(ChatUser.id == user_id).first()
+        if chat_user:
+            chats = db.query(ChatSession).filter(ChatSession.chat_user_id == chat_user.id).all()
+        else:
+            chats = []
         
         # Get all messages for user's chats
         session_ids = [chat.id for chat in chats]

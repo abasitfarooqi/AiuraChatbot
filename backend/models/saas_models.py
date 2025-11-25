@@ -142,6 +142,7 @@ class Vendor(Base):
     # Relationships
     default_model = relationship("Model", foreign_keys=[default_model_id])
     users = relationship("User", back_populates="vendor", cascade="all, delete-orphan")
+    chat_users = relationship("ChatUser", back_populates="vendor", cascade="all, delete-orphan")
     vendor_configs = relationship("VendorConfig", back_populates="vendor", cascade="all, delete-orphan")
     knowledge_bases = relationship("KnowledgeBase", back_populates="vendor", cascade="all, delete-orphan")
     chat_sessions = relationship("ChatSession", back_populates="vendor", cascade="all, delete-orphan")
@@ -196,7 +197,6 @@ class User(Base):
     # Relationships
     vendor = relationship("Vendor", back_populates="users")
     user_roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
-    chat_sessions = relationship("ChatSession", back_populates="user", cascade="all, delete-orphan")
     usage_records = relationship("UsageRecord", back_populates="user")
     # audit_logs relationship removed - query with filters instead
     
@@ -433,13 +433,40 @@ class Payment(Base):
     )
 
 
+class ChatUser(Base):
+    """Chat users - users who actually chat (separate from vendor users)."""
+    __tablename__ = "chat_users"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False, index=True)  # Which vendor this chat user belongs to
+    identifier = Column(String(255), nullable=False, index=True)  # Email, phone, or anonymous ID
+    name = Column(String(255), nullable=True)  # Optional name
+    email = Column(String(255), nullable=True, index=True)  # Optional email
+    phone = Column(String(50), nullable=True)  # Optional phone
+    is_anonymous = Column(Boolean, default=True, nullable=False)  # True for anonymous chat users
+    meta = Column(JSON, default=dict)  # Additional metadata (browser info, location, etc.)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    last_chat_at = Column(DateTime, nullable=True, index=True)  # Last time they chatted
+    
+    # Relationships
+    vendor = relationship("Vendor", back_populates="chat_users")
+    chat_sessions = relationship("ChatSession", back_populates="chat_user", cascade="all, delete-orphan")
+    
+    __table_args__ = (
+        UniqueConstraint("vendor_id", "identifier", name="uq_vendor_chat_user"),
+        Index("idx_chat_user_vendor_identifier", "vendor_id", "identifier"),
+        Index("idx_chat_user_last_chat", "last_chat_at"),
+    )
+
+
 class ChatSession(Base):
     """Chat sessions."""
     __tablename__ = "chat_sessions"
     
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False, index=True)  # Changed to Integer for MySQL compatibility
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)  # Changed to Integer for MySQL compatibility
+    chat_user_id = Column(Integer, ForeignKey("chat_users.id"), nullable=True, index=True)  # Link to chat_user (not vendor user) - nullable for migration compatibility
     session_uuid = Column(String(36), unique=True, nullable=False, index=True)  # UUID
     title = Column(String(500), nullable=True)
     model_id = Column(Integer, ForeignKey("models.id"), nullable=True, index=True)  # Changed to Integer for MySQL compatibility
@@ -451,12 +478,14 @@ class ChatSession(Base):
     
     # Relationships
     vendor = relationship("Vendor", back_populates="chat_sessions")
-    user = relationship("User", back_populates="chat_sessions")
+    chat_user = relationship("ChatUser", back_populates="chat_sessions")
     model = relationship("Model")
     messages = relationship("ChatMessage", back_populates="session", cascade="all, delete-orphan", order_by="ChatMessage.created_at")
     usage_records = relationship("UsageRecord", foreign_keys="UsageRecord.session_id", overlaps="session")
     
     __table_args__ = (
+        Index("idx_chat_session_vendor", "vendor_id", "created_at"),
+        Index("idx_chat_session_chat_user", "chat_user_id", "created_at"),
         Index("idx_session_vendor_status", "vendor_id", "status", "created_at"),
     )
 
@@ -668,8 +697,8 @@ class ModelPreset(Base):
     id = Column(BigInteger, primary_key=True, autoincrement=True, nullable=False)
     name = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
-    model_id = Column(BigInteger, ForeignKey("models.id", ondelete="CASCADE"), nullable=True)  # Optional: preset for specific model
-    vendor_id = Column(BigInteger, ForeignKey("vendors.id", ondelete="CASCADE"), nullable=True)  # Optional: preset for specific vendor
+    model_id = Column(Integer, ForeignKey("models.id", ondelete="CASCADE"), nullable=True)  # Changed to Integer for MySQL compatibility
+    vendor_id = Column(Integer, ForeignKey("vendors.id", ondelete="CASCADE"), nullable=True)  # Changed to Integer for MySQL compatibility
     
     # LLM Configuration
     max_tokens = Column(Integer, nullable=False, default=4000)
@@ -680,7 +709,7 @@ class ModelPreset(Base):
     # Metadata
     is_default = Column(Boolean, default=False, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
-    created_by = Column(BigInteger, ForeignKey("admins.id", ondelete="SET NULL"), nullable=True)
+    created_by = Column(Integer, ForeignKey("admins.id", ondelete="SET NULL"), nullable=True)  # Changed to Integer for MySQL compatibility
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     deleted_at = Column(DateTime, nullable=True)
@@ -825,4 +854,133 @@ class DataExportRequest(Base):
     # Relationships
     vendor = relationship("Vendor")
     user = relationship("User")
+
+
+class MainCache(Base):
+    """Main persistent cache for Q&A pairs per vendor."""
+    __tablename__ = "main_cache"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    cache_id = Column(String(100), unique=True, nullable=False, index=True)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False, index=True)  # Integer for MySQL compatibility
+    question = Column(Text, nullable=False)
+    answer = Column(Text, nullable=False)
+    question_embedding = Column(JSON, nullable=True)  # Store embedding for similarity search
+    similarity_threshold = Column(Float, default=0.85)  # Minimum similarity to match
+    usage_count = Column(Integer, default=0)  # How many times this cache was used
+    tokens_saved = Column(Integer, default=0)  # Total tokens saved by using this cache
+    credits_saved = Column(Integer, default=0)  # Total credits saved
+    is_active = Column(Boolean, default=True)  # Can be disabled from admin
+    cache_metadata = Column(JSON, default=dict)  # Additional metadata (topics, tags, etc.)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    last_used_at = Column(DateTime, nullable=True)  # Last time this cache was used
+    
+    # Relationships
+    vendor = relationship("Vendor")
+    
+    __table_args__ = (
+        Index("idx_main_cache_vendor_active", "vendor_id", "is_active"),
+        Index("idx_main_cache_last_used", "last_used_at"),
+    )
+
+
+class TemporaryCache(Base):
+    """Temporary cache for Q&A pairs per chat session."""
+    __tablename__ = "temporary_cache"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    cache_id = Column(String(100), unique=True, nullable=False, index=True)
+    chat_id = Column(String(100), nullable=False, index=True)  # Chat session UUID (no FK to avoid circular dependency)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False, index=True)  # Integer for MySQL compatibility
+    question = Column(Text, nullable=False)
+    answer = Column(Text, nullable=False)
+    question_embedding = Column(JSON, nullable=True)  # Store embedding for similarity search
+    similarity_threshold = Column(Float, default=0.85)  # Minimum similarity to match
+    usage_count = Column(Integer, default=0)  # How many times this cache was used in this chat
+    tokens_saved = Column(Integer, default=0)  # Tokens saved in this chat
+    cache_metadata = Column(JSON, default=dict)  # Additional metadata
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    last_used_at = Column(DateTime, nullable=True)  # Last time this cache was used
+    
+    # Relationships
+    vendor = relationship("Vendor")
+    
+    __table_args__ = (
+        Index("idx_temp_cache_vendor_chat", "vendor_id", "chat_id"),
+        Index("idx_temp_cache_last_used", "last_used_at"),
+    )
+
+
+class ConversationMemory(Base):
+    """Persistent conversation memory per chat session."""
+    __tablename__ = "conversation_memories"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False, index=True)
+    chat_user_id = Column(Integer, ForeignKey("chat_users.id"), nullable=True, index=True)  # Chat user who owns this memory
+    chat_id = Column(String(100), nullable=False, index=True)  # Chat session UUID
+    session_id = Column(Integer, ForeignKey("chat_sessions.id"), nullable=True, index=True)  # FK to ChatSession
+    
+    # Memory data
+    entities = Column(JSON, default=dict)  # Extracted entities (e.g., {"product": "bike", "location": "london"})
+    intent_history = Column(JSON, default=list)  # History of detected intents
+    topics = Column(JSON, default=list)  # Conversation topics
+    context_summary = Column(Text, nullable=True)  # LLM-generated summary of conversation
+    turn_count = Column(Integer, default=0, nullable=False)  # Number of conversation turns
+    
+    # Metadata
+    memory_metadata = Column(JSON, default=dict)  # Additional metadata
+    is_active = Column(Boolean, default=True, nullable=False)  # Can be disabled
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    last_accessed_at = Column(DateTime, nullable=True, index=True)  # Last time memory was accessed
+    
+    # Relationships
+    vendor = relationship("Vendor")
+    chat_user = relationship("ChatUser")
+    session = relationship("ChatSession", foreign_keys=[session_id])
+    
+    __table_args__ = (
+        UniqueConstraint("vendor_id", "chat_id", name="uq_vendor_chat_memory"),
+        Index("idx_memory_vendor_chat", "vendor_id", "chat_id", "is_active"),
+        Index("idx_memory_chat_user_vendor", "chat_user_id", "vendor_id"),
+        Index("idx_memory_last_accessed", "last_accessed_at"),
+    )
+
+
+class SuggestionCache(Base):
+    """Cached suggestions per vendor/chat_user with TTL."""
+    __tablename__ = "suggestion_cache"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    vendor_id = Column(Integer, ForeignKey("vendors.id"), nullable=False, index=True)
+    chat_user_id = Column(Integer, ForeignKey("chat_users.id"), nullable=True, index=True)  # Optional: chat_user-specific suggestions
+    chat_id = Column(String(100), nullable=True, index=True)  # Optional: chat-specific suggestions
+    
+    # Suggestion data
+    suggestions = Column(JSON, default=list)  # List of suggestion strings
+    context_hash = Column(String(64), nullable=True, index=True)  # Hash of context that generated these suggestions
+    
+    # TTL management
+    expires_at = Column(DateTime, nullable=True, index=True)  # When this cache expires
+    ttl_seconds = Column(Integer, default=3600, nullable=False)  # Time to live in seconds (default 1 hour)
+    
+    # Metadata
+    is_active = Column(Boolean, default=True, nullable=False)
+    usage_count = Column(Integer, default=0, nullable=False)  # How many times used
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    last_used_at = Column(DateTime, nullable=True, index=True)
+    
+    # Relationships
+    vendor = relationship("Vendor")
+    chat_user = relationship("ChatUser")
+    
+    __table_args__ = (
+        Index("idx_suggestion_vendor_chat_user", "vendor_id", "chat_user_id", "is_active"),
+        Index("idx_suggestion_expires", "expires_at", "is_active"),
+        Index("idx_suggestion_chat", "chat_id", "vendor_id"),
+    )
 

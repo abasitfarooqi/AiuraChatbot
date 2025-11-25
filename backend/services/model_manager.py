@@ -42,7 +42,7 @@ class ModelManager:
     def list_ollama_models(self) -> List[Dict[str, Any]]:
         """List available Ollama models."""
         try:
-            with httpx.Client(timeout=10.0) as client:
+            with httpx.Client(timeout=60.0) as client:
                 response = client.get(f"{self.settings.llm_base_url}/api/tags")
                 if response.status_code == 200:
                     data = response.json()

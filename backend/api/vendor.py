@@ -79,33 +79,76 @@ async def get_vendor(vendor_id: str):
 
 
 @router.post("/create")
-async def create_vendor(request: VendorCreateRequest):
-    """Create a new vendor."""
+async def create_vendor(request: VendorCreateRequest, db: Session = Depends(get_db)):
+    """Create a new vendor (files + database entry)."""
     try:
+        from backend.models.saas_models import Vendor as SaaSVendor, VendorStatus
+        
         vendor_manager = get_vendor_manager()
         
-        # Check if vendor already exists
-        existing = vendor_manager.get_vendor(request.vendor_id)
-        if existing:
-            raise HTTPException(status_code=400, detail=f"Vendor {request.vendor_id} already exists")
+        # Check if vendor already exists in database
+        existing_db = db.query(SaaSVendor).filter(
+            SaaSVendor.slug == request.vendor_id,
+            SaaSVendor.deleted_at.is_(None)
+        ).first()
+        if existing_db:
+            raise HTTPException(status_code=400, detail=f"Vendor {request.vendor_id} already exists in database")
         
-        vendor_info = vendor_manager.create_vendor(
-            vendor_id=request.vendor_id,
-            vendor_name=request.vendor_name,
+        # Check if vendor files already exist
+        existing_files = vendor_manager.get_vendor(request.vendor_id)
+        if existing_files:
+            logger.warning(f"Vendor files exist for {request.vendor_id}, but no database entry. Creating database entry...")
+        else:
+            # Create vendor file structure
+            vendor_info = vendor_manager.create_vendor(
+                vendor_id=request.vendor_id,
+                vendor_name=request.vendor_name,
+                company_name=request.company_name,
+                business_type=request.business_type,
+                copy_from_vendor=request.copy_from_vendor
+            )
+            vendor_info = existing_files or vendor_info
+        
+        # Create database entry
+        vendor_db = SaaSVendor(
+            slug=request.vendor_id,
+            name=request.vendor_name,
             company_name=request.company_name,
             business_type=request.business_type,
-            copy_from_vendor=request.copy_from_vendor
+            plan_code="free",
+            status=VendorStatus.ACTIVE,
+            config_path=vendor_info.get("config_path"),
+            rag_path=vendor_info.get("rag_path"),
+            chroma_collection=vendor_info.get("chroma_collection"),
+            credit_balance=0.0
         )
+        db.add(vendor_db)
+        db.commit()
+        db.refresh(vendor_db)
+        
+        logger.info(f"✅ Created vendor {request.vendor_id} in database (ID: {vendor_db.id})")
         
         return {
             "status": "success",
             "message": f"Vendor {request.vendor_id} created successfully",
-            "vendor": vendor_info
+            "vendor": {
+                "id": vendor_db.id,
+                "vendor_id": vendor_db.slug,
+                "vendor_name": vendor_db.name,
+                "company_name": vendor_db.company_name,
+                "config_path": vendor_info.get("config_path"),
+                "rag_path": vendor_info.get("rag_path"),
+                "chroma_collection": vendor_info.get("chroma_collection")
+            }
         }
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error creating vendor: {e}")
+        import traceback
+        traceback.print_exc()
+        if db:
+            db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
 

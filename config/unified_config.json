@@ -102,7 +102,15 @@
     "similarity_threshold": 0.2,
     "enable_filtering": true,
     "enable_reranking": false,
-    "knowledge_base_path": "./rag_knowledge_base.json"
+    "knowledge_base_path": "./rag_knowledge_base.json",
+    "mvs": {
+      "enabled": true,
+      "dense_weight": 0.6,
+      "sparse_weight": 0.4,
+      "sparse_model": "bm25",
+      "fusion_method": "rrf",
+      "rrf_k": 60
+    }
   },
   "memory": {
     "enabled": true,
@@ -161,7 +169,7 @@
     "main_system_prompt": "You are the {company_name} chatbot assistant. {company_name} is a London-based AI chatbot solutions company, partnered with mPhenom Ltd UK. You help customers with {services_list}.\n\nCRITICAL RULES - STRICTLY ENFORCE:\n1. ONLY use information provided in the INFORMATION section below\n2. NEVER make up, guess, or hallucinate any information\n3. NEVER use knowledge from outside the provided information\n4. If information is not in the provided context, say: \"{fallback_message}\"\n5. ONLY answer questions about {company_name} services and the chatbot platform\n6. For out-of-domain queries, say: \"{out_of_domain_message}\"\n\nRESPONSE FORMAT:\n- Use ONLY facts from the provided INFORMATION section\n- If a detail is not mentioned in the information, do NOT invent it\n- Be accurate and precise\n- Format responses with proper line breaks and structure\n- Mention the partnership with mPhenom Ltd UK when relevant",
     "greeting_prompt": "The user just said: \"{message}\"\n\nRespond with a friendly greeting and offer to help with {company_name} services ({services_list}).\n\nKeep it brief and welcoming. Do not mention any specific information unless asked.",
     "query_prompt": "CRITICAL: Answer the question using ONLY the information provided below. DO NOT use any knowledge outside of this information.\n\nINFORMATION FROM KNOWLEDGE BASE:\n{context_text}\n\nQUESTION: {message}\n\nINSTRUCTIONS:\n- Use ONLY facts from the INFORMATION section above\n- If the answer is not in the information, say: \"{fallback_message}\"\n- DO NOT make up, guess, or invent any information\n- DO NOT use knowledge from outside the provided information\n- Format your answer with proper line breaks and structure\n\nANSWER (based ONLY on the information above):",
-    "fallback_message": "I don't have that information in my knowledge base. Please contact us at {contact_email} or {contact_phone} for more details.",
+    "fallback_message": "I don't have this information available. Please contact us at {contact_email} or {contact_phone} for more details.",
     "out_of_domain_message": "I can only assist with {services_list} related to {company_name}. How can I help you with our services?",
     "error_message": "I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us at {contact_email}"
   },
@@ -328,7 +336,7 @@
     },
     "validation": {
       "enable_response_validation": true,
-      "fallback_message": "I don't have that information in my knowledge base. Please contact us at {contact_email} or {contact_phone} for more details."
+      "fallback_message": "I don't have this information available. Please contact us at {contact_email} or {contact_phone} for more details."
     }
   }
 }

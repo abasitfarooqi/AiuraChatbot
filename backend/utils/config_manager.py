@@ -221,7 +221,7 @@ class ConfigManager:
             "main_system_prompt": "You are the Neguinho Motors chatbot assistant.",
             "greeting_prompt": "Respond with a friendly greeting.",
             "query_prompt": "Answer the question using ONLY the information provided.",
-            "fallback_message": "I don't have that information in my knowledge base.",
+            "fallback_message": "I don't have this information available.",
             "out_of_domain_message": "I can only assist with Neguinho Motors services.",
             "error_message": "I'm sorry, I'm experiencing technical difficulties."
         }

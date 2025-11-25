@@ -26,7 +26,7 @@ def get_ollama_models() -> list:
     """Get list of models from Ollama."""
     try:
         if httpx:
-            with httpx.Client(timeout=10.0) as client:
+            with httpx.Client(timeout=60.0) as client:
                 response = client.get("http://localhost:11434/api/tags")
                 if response.status_code == 200:
                     data = response.json()

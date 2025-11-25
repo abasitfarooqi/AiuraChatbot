@@ -5,19 +5,17 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
-from backend.models.database import get_session_local
+from backend.config.database import get_db_session
 from backend.services.cache_service import CacheService
-from backend.models.database import MainCache, TemporaryCache
+from backend.models.saas_models import MainCache, TemporaryCache
 from loguru import logger
-
-SessionLocal = get_session_local()
 
 router = APIRouter(prefix="/cache", tags=["cache"])
 
 
 def get_db():
     """Dependency for database session."""
-    db = SessionLocal()
+    db = next(get_db_session())
     try:
         yield db
     finally:
@@ -204,22 +202,45 @@ async def get_main_cache(
     vendor_id: Optional[str] = None,
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
-    active_only: bool = Query(True),
+    active_only: bool = Query(False),  # Changed default to False to show all
     db: Session = Depends(get_db)
 ):
     """Get main cache entries for a vendor."""
     try:
         from backend.config import get_settings
+        from backend.models.saas_models import Vendor
+        
         settings = get_settings()
         effective_vendor_id = vendor_id or settings.default_vendor_id
         
-        query = db.query(MainCache).filter(MainCache.vendor_id == effective_vendor_id)
+        # Convert vendor slug to vendor.id (Integer)
+        vendor_obj = db.query(Vendor).filter(
+            Vendor.slug == effective_vendor_id,
+            Vendor.deleted_at.is_(None)
+        ).first()
+        
+        if not vendor_obj:
+            return {
+                "vendor_id": effective_vendor_id,
+                "total": 0,
+                "offset": offset,
+                "limit": limit,
+                "entries": []
+            }
+        
+        query = db.query(MainCache).filter(MainCache.vendor_id == vendor_obj.id)
         
         if active_only:
             query = query.filter(MainCache.is_active == True)
         
         total = query.count()
-        entries = query.order_by(MainCache.last_used_at.desc().nullslast(), MainCache.created_at.desc()).offset(offset).limit(limit).all()
+        # MySQL doesn't support NULLS LAST, use case when for MySQL compatibility
+        from sqlalchemy import case
+        entries = query.order_by(
+            case((MainCache.last_used_at.is_(None), 0), else_=1).desc(),
+            MainCache.last_used_at.desc(),
+            MainCache.created_at.desc()
+        ).offset(offset).limit(limit).all()
         
         return {
             "vendor_id": effective_vendor_id,
@@ -253,24 +274,74 @@ async def get_main_cache(
 async def get_temporary_cache(
     chat_id: Optional[str] = None,
     vendor_id: Optional[str] = None,
+    chat_user_id: Optional[int] = Query(None, description="Chat User ID (optional filter)"),
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db)
 ):
-    """Get temporary cache entries (optionally filtered by chat_id)."""
+    """Get temporary cache entries (optionally filtered by chat_id and chat_user_id)."""
     try:
         from backend.config import get_settings
+        from backend.models.saas_models import Vendor, ChatSession
+        
         settings = get_settings()
         effective_vendor_id = vendor_id or settings.default_vendor_id
         
-        query = db.query(TemporaryCache).filter(TemporaryCache.vendor_id == effective_vendor_id)
+        # Convert vendor slug to vendor.id (Integer)
+        vendor_obj = db.query(Vendor).filter(
+            Vendor.slug == effective_vendor_id,
+            Vendor.deleted_at.is_(None)
+        ).first()
+        
+        if not vendor_obj:
+            return {
+                "vendor_id": effective_vendor_id,
+                "chat_id": chat_id,
+                "chat_user_id": chat_user_id,
+                "total": 0,
+                "offset": offset,
+                "limit": limit,
+                "entries": []
+            }
+        
+        # If chat_user_id provided, get chat_ids for that chat_user
+        chat_ids_for_chat_user = None
+        if chat_user_id:
+            chat_user_sessions = db.query(ChatSession).filter(
+                ChatSession.vendor_id == vendor_obj.id,
+                ChatSession.chat_user_id == chat_user_id
+            ).all()
+            chat_ids_for_chat_user = [session.session_uuid for session in chat_user_sessions]
+        
+        query = db.query(TemporaryCache).filter(TemporaryCache.vendor_id == vendor_obj.id)
         
         if chat_id:
             query = query.filter(TemporaryCache.chat_id == chat_id)
+        elif chat_user_id and chat_ids_for_chat_user:
+            # Filter by chat_user's chat sessions
+            query = query.filter(TemporaryCache.chat_id.in_(chat_ids_for_chat_user))
+        elif chat_user_id and not chat_ids_for_chat_user:
+            # Chat user has no chats, return empty
+            return {
+                "vendor_id": effective_vendor_id,
+                "chat_id": chat_id,
+                "chat_user_id": chat_user_id,
+                "total": 0,
+                "offset": offset,
+                "limit": limit,
+                "entries": []
+            }
         
         total = query.count()
-        entries = query.order_by(TemporaryCache.last_used_at.desc().nullslast(), TemporaryCache.created_at.desc()).offset(offset).limit(limit).all()
+        # MySQL doesn't support NULLS LAST, use case when for MySQL compatibility
+        from sqlalchemy import case
+        entries = query.order_by(
+            case((TemporaryCache.last_used_at.is_(None), 0), else_=1).desc(),
+            TemporaryCache.last_used_at.desc(),
+            TemporaryCache.created_at.desc()
+        ).offset(offset).limit(limit).all()
         
+        # TemporaryCache.chat_id stores the session UUID directly (String)
         return {
             "vendor_id": effective_vendor_id,
             "chat_id": chat_id,
@@ -280,7 +351,8 @@ async def get_temporary_cache(
             "entries": [
                 {
                     "cache_id": entry.cache_id,
-                    "chat_id": entry.chat_id,
+                    "chat_id": entry.chat_id,  # This is the session UUID (String)
+                    "session_uuid": entry.chat_id,  # Alias for clarity
                     "question": entry.question,
                     "answer": entry.answer,
                     "usage_count": entry.usage_count,
@@ -307,11 +379,15 @@ async def create_main_cache_entry(
 ):
     """Create a main cache entry."""
     try:
-        cache_service = CacheService(db=db, vendor_id=vendor_id)
+        from backend.config import get_settings
+        settings = get_settings()
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        
+        cache_service = CacheService(db=db, vendor_id=effective_vendor_id)
         cache_id = cache_service.save_to_main_cache(
             question=request.question,
             answer=request.answer,
-            vendor_id=vendor_id,
+            vendor_id=effective_vendor_id,
             tokens_used=0,  # Will be updated when used
             similarity_threshold=request.similarity_threshold,
             metadata=request.metadata
@@ -341,12 +417,16 @@ async def create_temporary_cache_entry(
 ):
     """Create a temporary cache entry."""
     try:
-        cache_service = CacheService(db=db, vendor_id=vendor_id)
+        from backend.config import get_settings
+        settings = get_settings()
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        
+        cache_service = CacheService(db=db, vendor_id=effective_vendor_id)
         cache_id = cache_service.save_to_temporary_cache(
             chat_id=chat_id,
             question=request.question,
             answer=request.answer,
-            vendor_id=vendor_id,
+            vendor_id=effective_vendor_id,
             tokens_used=0,
             metadata=request.metadata
         )
@@ -374,10 +454,14 @@ async def promote_to_main_cache(
 ):
     """Promote a temporary cache entry to main cache."""
     try:
-        cache_service = CacheService(db=db, vendor_id=vendor_id)
+        from backend.config import get_settings
+        settings = get_settings()
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        
+        cache_service = CacheService(db=db, vendor_id=effective_vendor_id)
         main_cache_id = cache_service.promote_to_main_cache(
             temp_cache_id=request.temp_cache_id,
-            vendor_id=vendor_id
+            vendor_id=effective_vendor_id
         )
         
         if not main_cache_id:
@@ -506,12 +590,31 @@ async def clear_main_cache_for_vendor(
 ):
     """Clear all main cache entries for a vendor."""
     try:
-        deleted_count = db.query(MainCache).filter(MainCache.vendor_id == vendor_id).delete()
+        from backend.config import get_settings
+        from backend.models.saas_models import Vendor
+        
+        settings = get_settings()
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        
+        # Convert vendor slug to vendor.id (Integer)
+        vendor_obj = db.query(Vendor).filter(
+            Vendor.slug == effective_vendor_id,
+            Vendor.deleted_at.is_(None)
+        ).first()
+        
+        if not vendor_obj:
+            return {
+                "status": "success",
+                "message": f"Vendor {effective_vendor_id} not found",
+                "deleted_count": 0
+            }
+        
+        deleted_count = db.query(MainCache).filter(MainCache.vendor_id == vendor_obj.id).delete()
         db.commit()
         
         return {
             "status": "success",
-            "message": f"Deleted {deleted_count} main cache entries for vendor {vendor_id}",
+            "message": f"Deleted {deleted_count} main cache entries for vendor {effective_vendor_id}",
             "deleted_count": deleted_count
         }
     except Exception as e:
@@ -527,12 +630,31 @@ async def clear_temporary_cache_for_vendor(
 ):
     """Clear all temporary cache entries for a vendor."""
     try:
-        deleted_count = db.query(TemporaryCache).filter(TemporaryCache.vendor_id == vendor_id).delete()
+        from backend.config import get_settings
+        from backend.models.saas_models import Vendor
+        
+        settings = get_settings()
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        
+        # Convert vendor slug to vendor.id (Integer)
+        vendor_obj = db.query(Vendor).filter(
+            Vendor.slug == effective_vendor_id,
+            Vendor.deleted_at.is_(None)
+        ).first()
+        
+        if not vendor_obj:
+            return {
+                "status": "success",
+                "message": f"Vendor {effective_vendor_id} not found",
+                "deleted_count": 0
+            }
+        
+        deleted_count = db.query(TemporaryCache).filter(TemporaryCache.vendor_id == vendor_obj.id).delete()
         db.commit()
         
         return {
             "status": "success",
-            "message": f"Deleted {deleted_count} temporary cache entries for vendor {vendor_id}",
+            "message": f"Deleted {deleted_count} temporary cache entries for vendor {effective_vendor_id}",
             "deleted_count": deleted_count
         }
     except Exception as e:

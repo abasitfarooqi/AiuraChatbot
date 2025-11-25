@@ -1176,7 +1176,15 @@ Return ONLY valid JSON, no markdown, no code blocks, no explanations, just the J
                 "similarity_threshold": 0.2,
                 "enable_filtering": True,
                 "enable_reranking": False,
-                "knowledge_base_path": f"./rag_knowledge_base/{vendor_id}/knowledge_base.json"
+                "knowledge_base_path": f"./rag_knowledge_base/{vendor_id}/knowledge_base.json",
+                "mvs": {
+                    "enabled": True,
+                    "dense_weight": 0.6,
+                    "sparse_weight": 0.4,
+                    "sparse_model": "bm25",
+                    "fusion_method": "rrf",
+                    "rrf_k": 60
+                }
             },
             "memory": {
                 "enabled": True,
@@ -1237,7 +1245,7 @@ Return ONLY valid JSON, no markdown, no code blocks, no explanations, just the J
             "main_system_prompt": f"You are the {company_name} chatbot assistant. You help customers with their inquiries.\n\nCRITICAL RULES:\n1. ONLY use information provided in the INFORMATION section\n2. NEVER make up or guess information\n3. Be helpful, friendly, and professional\n4. If you don't know something, direct customers to contact us",
             "greeting_prompt": f"The user just said: \"{{message}}\"\n\nRespond with a friendly greeting and offer to help with {company_name} services.",
             "query_prompt": "CRITICAL: Answer the question using ONLY the information provided below.\n\nINFORMATION FROM KNOWLEDGE BASE:\n{context_text}\n\nQUESTION: {message}\n\nANSWER (based ONLY on the information above):",
-            "fallback_message": f"I don't have that information in my knowledge base. Please contact us for more details.",
+            "fallback_message": f"I don't have this information available. Please contact us for more details.",
             "out_of_domain_message": f"I can help you with {company_name} services. How can I assist you?",
             "error_message": f"I'm sorry, I'm experiencing technical difficulties. Please try again later or contact us."
         }

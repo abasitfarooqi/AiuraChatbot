@@ -1,0 +1,927 @@
+{
+    "metadata": {
+      "version": "2.0.0",
+      "last_updated": "2025-01-27",
+      "description": "Conversational knowledge base built from real chat queries and answers with users of Neguinho Motors. Optimized tagging and expanded keywords for better LLM/RAG retrieval across queries about rentals, sales, service, delivery, location, payments, policies & more.",
+      "chunking_strategy": "user_query_driven_qa",
+      "embedding_model": "configurable",
+      "vector_db": "chromadb",
+      "vendor_id": "neguinho_motors"
+    },
+    "chunks": [
+      {
+        "symbol": "CHAT_HELLO",
+        "keyword": "greeting_introduction_hello_welcome_hi",
+        "tags": [
+          "greeting", "introduction", "hello", "hi", "hey", "welcome", "start_chat", "begin", "just_arrived", "who_are_you", "new_user", "customer_greeting", "say_hi", "how_can_you_help", "about_you"
+        ],
+        "mapping": {
+          "category": "general",
+          "subcategory": "introduction",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "chat_example",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Hello! Welcome to Neguinho Motors Ltd. We're here to help with everything you need for bikes and scooters: rentals, sales, finance, servicing, MOT testing, delivery, accessories, and repairs. How can we help you today? (Ask anything about bikes, services, branches, or our company.)"
+      },
+      {
+        "symbol": "CHAT_RENTAL_OVERVIEW",
+        "keyword": "rental_options_hire_bike_rental_how_to_rent_rent_a_bike_availability",
+        "tags": [
+          "rental", "rental options", "hire", "bike rental", "rent bike", "bike hire", "rentals", "can_i_rent", "available_bikes", "rental_availability", "motorcycle_hire", "bike_hire_cost", "weekly_rental", "rental_process", "how_to_rent", "get_a_bike", "start_rental", "rental_contract", "rent_scooter", "leasing", "long_term_rental"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "rentals",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "chat_example",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Bike Rental Options:\n\nAvailable bikes:\n- Honda Vision 125 (£70/week)\n- Honda Forza 125, PCX 125, SH 125 (£75/week)\n- Yamaha NMAX 125 (£75/week)\n- Yamaha XMAX 125 (£100/week)\n\nRental Terms:\n- Minimum rental 6 weeks, up to 1 year\n- Monthly payments via bank transfer\n- Refundable security deposit (paid back within 14 days of return)\n- Rental includes tax, MOT, and weekly maintenance\n- You must provide your own comprehensive insurance & valid UK driving licence (CBT, A1, A2, A)\n- Interest-free finance plans (max 12 months) available on rentals—deposit required\n- Delivery (insured) available\nContact us for details: 0208 314 1498 or enquiries@neguinhomotors.co.uk"
+      },
+      {
+        "symbol": "BRANCH_002",
+        "keyword": "tooting_branch_location_address_contact_opening_hours_shop_store_find_to_tooting",
+        "tags": [
+          "branch", "location", "tooting", "address", "postcode", "shop_address", "where_is_tooting", "find_branch", "opening_hours", "store_hours", "contact", "how_to_reach", "visit_to_tooting", "find_us", "branch_details", "working_hours", "directions", "nearest_branch_tooting", "branch_phone", "whatsapp", "store_tooting", "tooting_store"
+        ],
+        "mapping": {
+          "category": "branches",
+          "subcategory": "tooting",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "branches",
+          "location": "Tooting",
+          "postcode": "SW16 6RE",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Tooting Branch Address:\n4A Penwortham Road, London SW16 6RE\nPhone: 0203 409 5478\nEmail: enquiries@neguinhomotors.co.uk\nWhatsApp available\nOpening hours: Monday-Saturday 09:00–18:00, Sunday closed\nServices offered: Sales, rentals, servicing, repairs, MOT, delivery\nParking on site"
+      },
+      {
+        "symbol": "BRANCH_003",
+        "keyword": "sutton_branch_location_address_contact_opening_hours_shop_store_find_to_sutton",
+        "tags": [
+          "branch", "location", "sutton", "address", "postcode", "shop_address", "where_is_sutton", "find_branch", "opening_hours", "store_hours", "contact", "how_to_reach", "visit_to_sutton", "find_us", "branch_details", "working_hours", "directions", "nearest_branch_sutton", "branch_phone", "store_sutton", "sutton_store"
+        ],
+        "mapping": {
+          "category": "branches",
+          "subcategory": "sutton",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "branches",
+          "location": "Sutton",
+          "postcode": "SM1 1LW",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Sutton Branch Address:\n329 High St, Sutton SM1 1LW\nPhone: 0208 412 9275\nEmail: enquiries@neguinhomotors.co.uk\nWhatsApp available\nOpening hours: Monday-Saturday 09:00–18:00, Sunday closed\nServices: Sales, rentals, repairs, MOT, servicing, delivery\nParking on site"
+      },
+      {
+        "symbol": "BRANCH_004",
+        "keyword": "branches_location_summary_all_branches_how_many_locations_where_branches_addresses_find",
+        "tags": [
+          "branch", "branches", "location", "locations", "all_branches", "where_branches", "where_are_you", "address", "situated", "how_many", "store_list", "shop_locations", "map", "coverage", "branch_phone", "branch_contact", "branch_emails", "branches_london", "opening_hours", "store_hours"
+        ],
+        "mapping": {
+          "category": "branches",
+          "subcategory": "summary",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "branches",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Neguinho Motors Ltd has three locations in London:\n\n1. CATFORD BRANCH:\n9-13 Unit 1179 Catford Hill, London SE6 4NU. Phone: 0208 314 1498\n2. TOOTING BRANCH:\n4A Penwortham Road, SW16 6RE. Phone: 0203 409 5478\n3. SUTTON BRANCH:\n329 High St, Sutton SM1 1LW. Phone: 0208 412 9275\nEmail for all: enquiries@neguinhomotors.co.uk\nAll open Mon–Sat 9:00–18:00, closed Sun. WhatsApp & parking at all stores."
+      },
+      {
+        "symbol": "RENTAL_001",
+        "keyword": "rental_overview_terms_contract_rent_a_bike_rental_conditions_hire_bike_requirements",
+        "tags": [
+          "rental", "hire", "contracts", "agreement", "terms", "how_rental_works", "how_to_rent", "rental_process", "rental_overview", "rental_requirements", "rental_info", "service", "rental_policy", "bike_rental_conditions", "getting_started", "rental_duration", "minimum_rental", "what_needed_to_rent", "deposit_requirements", "license_needed", "insurance_needed"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "rentals",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.rentals",
+          "service_type": "rental",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Bike rental requirements:\n– Valid UK driving licence (CBT, A1, A2, or A)\n– Customer provides comprehensive insurance\n– Payment monthly in advance by bank transfer\n– Security deposit, refunded within 14 days\n– Rental term: 6 weeks to 1 year\n– Includes tax, MOT, and weekly maintenance\n– Delivery available\nContact: 0208 314 1498 or enquiries@neguinhomotors.co.uk"
+      },
+      {
+        "symbol": "RENTAL_002",
+        "keyword": "rental_prices_weekly_cost_rates_honda_yamaha_rental_costs_how_much_rent_bike_price",
+        "tags": [
+          "rental", "rental price", "weekly cost", "prices", "how_much", "rent_a_bike_price", "cost", "how_expensive", "rental_fees", "honda", "yamaha", "pricing", "list_rental_prices", "bike_hire_cost", "weekly_rates", "bike_rental_price", "cheapest_rental", "rental_tariff", "compare_prices"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "rentals",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.rentals.weekly_prices",
+          "service_type": "rental",
+          "price_type": "weekly",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Weekly rental prices:\n– Honda Vision 125: £70/week\n– Honda Forza 125, PCX 125, SH 125: £75/week\n– Yamaha NMAX 125: £75/week\n– Yamaha XMAX 125: £100/week\nPrices start from £70/week. For latest bike models and prices, call 0208 314 1498 or email enquiries@neguinhomotors.co.uk."
+      },
+      {
+        "symbol": "RENTAL_003",
+        "keyword": "rental_deposit_security_refund_deposit_payment_deposit_back_rental_bike",
+        "tags": [
+          "rental", "deposit", "rental_deposit", "security", "security_deposit", "payment_of_deposit", "refundable_deposit", "deposit_back", "refund", "rental_bike_deposit", "get_deposit_back", "how_much_deposit", "deposit_amount", "rent_bike_deposit", "deposit_policy", "deposit_terms"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "rentals",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.rentals.deposit",
+          "service_type": "rental",
+          "last_verified": "2025-01-27",
+          "confidence": "medium",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "All rentals require a security deposit (amount varies by model)—refunded within 14 days after you return the bike (minus any extra charges). For current deposit rates: 0208 314 1498 or enquiries@neguinhomotors.co.uk."
+      },
+      {
+        "symbol": "RENTAL_004",
+        "keyword": "rental_insurance_comprehensive_cover_bike_insurance_required_rent_bike",
+        "tags": [
+          "rental", "insurance", "comprehensive", "insurance_required", "bike_insurance", "hire_insurance", "do_i_need_insurance", "what_cover_required", "proof_of_insurance", "cover", "insurance_policy", "rental_insurance_terms", "provide_insurance"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "rentals",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.rentals.insurance",
+          "service_type": "rental",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "A comprehensive insurance policy (customer-provided) is required for all rentals. Your insurance must cover the entire rental period—show valid proof before collecting your bike."
+      },
+      {
+        "symbol": "RENTAL_005",
+        "keyword": "rental_licence_driving_license_cbt_a1_a2_a_requirements_can_i_rent_with_international_license",
+        "tags": [
+          "rental", "licence", "driving_license", "cbt", "a1", "a2", "uk_license", "international_license", "requirements", "license_needed", "can_i_use_intl_license", "foreign_license", "driving_permit", "do_i_need_license", "permit_requirements", "license_for_rental"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "rentals",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.rentals.licence_requirements",
+          "service_type": "rental",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "You must have a valid UK driving licence for the bike class—CBT, A1, A2, or A—for the full hire period. International licences valid in the UK accepted up to 6 months; after that, you’ll need a UK licence."
+      },
+      {
+        "symbol": "RENTAL_006",
+        "keyword": "rental_payment_terms_monthly_bacs_bank_transfer_how_to_pay_rental_pay_online",
+        "tags": [
+          "rental", "payment", "pay", "term", "rental_payments", "how_to_pay", "bacs", "bank_transfer", "monthly", "pay_monthly", "can_i_pay_online", "payment_method", "when_to_pay", "upfront_payment", "payment_in_advance", "payment_instructions"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "rentals",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.rentals.payment_terms",
+          "service_type": "rental",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Rental payments are monthly in advance via bank transfer (BACS). Use your vehicle registration as the payment reference. All paperwork and payment to be done within 48 hours of signing the contract."
+      },
+      {
+        "symbol": "RENTAL_007",
+        "keyword": "rental_fees_extra_charges_late_payment_repossession_recovery_cleaning_lost_keys_pcn",
+        "tags": [
+          "rental", "fees", "rental_fees", "extra_charges", "late_payment_fee", "repossession", "recovery", "impound", "cleaning_fee", "valet", "lost_keys", "pcn_processing", "penalty_fee", "charges", "fine", "charges_apply", "care_fee", "rental_fine"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "rentals",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.rentals.fees",
+          "service_type": "rental",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Rental-related fees:\n– Late payment: £10/day (up to £100 per period)\n– Repossession & recovery: fees apply if overdue\n– Vehicle recovery: £100\n– Impoundment: up to £950\n– PCN (penalty charge) processing: £25/notice\n– Cleaning/valet: £50\n– Lost keys, lost documents: charges apply\nCheck your contract or call for details."
+      },
+      {
+        "symbol": "SALE_001",
+        "keyword": "sale_overview_bike_purchase_buy_motorcycle_new_used_models_buy_a_bike_how_to_buy",
+        "tags": [
+          "sale", "purchase", "buy", "buy_a_bike", "get_a_bike", "motorcycle", "new_bike", "used_bike", "models", "available_bikes", "where_to_buy", "how_to_purchase", "bike_shop", "sale_overview", "payment_methods", "finance_available", "trade_in", "part_exchange", "test_ride", "delivery_option", "bike_store"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "sales",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.sales",
+          "service_type": "sale",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Bike Sales:\n– New bikes (2025): Honda PCX125, Vision 110, CB125F, Yamaha YZF-R125, MT-125, NMAX 125\n– Used bikes: Stock changes regularly\n– Test rides (licence required)\n– Part exchange and delivery available\n– Pay by cash, card, bank transfer, or finance\n– Finance available for all purchases\nContact: 0208 314 1498 / enquiries@neguinhomotors.co.uk"
+      },
+      {
+        "symbol": "SALE_002",
+        "keyword": "sale_prices_used_bike_cost_how_much_bike_pricing_sale_prices_list_bikes_for_sale",
+        "tags": [
+          "sale", "price", "bike_price", "cost", "used", "used_bike_price", "second_hand", "bike", "pricing", "cost_to_buy", "price_list", "sale_bikes", "sale_pricing", "bike_for_sale", "purchase_price", "affordable_bike", "best_buy"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "sales",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.sales.used_bikes",
+          "service_type": "sale",
+          "last_verified": "2025-01-27",
+          "confidence": "medium",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Used bike examples (stock/prices change):\n– Yamaha NMAX 125: £1,799\n– Honda PCX 125: £2,199.99\n– Honda NSC110: £999.99\n– Honda Forza 125: £3,699.99\n– Honda CB 500 F: £2,499.99\nCheck online or call to confirm availability and current offers."
+      },
+      {
+        "symbol": "FINANCE_001",
+        "keyword": "finance_overview_emi_payment_plan_instalment_credit_finance_bike_purchase",
+        "tags": [
+          "finance", "emi", "payment_plan", "payment_method", "instalment", "monthly_payment", "financing", "credit", "how_to_pay_in_parts", "spread_payment", "no_interest", "finance_sale", "bike_finance", "finance_available", "finance_overview"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "finance",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.finance",
+          "service_type": "finance",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Finance for bike purchases:\n– Sale agreement up to 12 months\n– No interest or extra fees (not a regulated credit agreement)\n– Total: Bike price + accessories\n– Monthly payment via bank transfer; deposit required\n– All paperwork and payments due within 48 hours\nCall 0208 314 1498 or email enquiries@neguinhomotors.co.uk"
+      },
+      {
+        "symbol": "FINANCE_002",
+        "keyword": "finance_deposit_down_payment_finance_deposit_required_payment_deposit",
+        "tags": [
+          "finance", "deposit", "down_payment", "payment", "deposit_for_finance", "finance_deposit", "deposit_amount", "amount_required", "finance_advance_payment", "finance_terms", "how_much_deposit", "initial_payment"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "finance",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.finance.deposit",
+          "service_type": "finance",
+          "last_verified": "2025-01-27",
+          "confidence": "medium",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "A deposit is required for finance (amount varies). Non-refundable unless required by law. For current deposit, contact 0208 314 1498 or enquiries@neguinhomotors.co.uk."
+      },
+      {
+        "symbol": "FINANCE_003",
+        "keyword": "finance_payment_monthly_instalment_terms_bacs_bank_transfer_how_to_pay_finance",
+        "tags": [
+          "finance", "payment", "pay", "instalment", "monthly", "bank_transfer", "bacs", "finance_payment", "payment_terms", "how_do_i_pay", "finance_payments", "card_payment", "pay_online", "pay_bank", "payment_reference"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "finance",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.finance.payment_terms",
+          "service_type": "finance",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Finance payments: Pay monthly by bank transfer (within 48 hours of contract). Some cards accepted. Use Vehicle Registration as payment reference."
+      },
+      {
+        "symbol": "FINANCE_004",
+        "keyword": "finance_ownership_title_transfer_repossession_when_do_i_own_bike",
+        "tags": [
+          "finance", "ownership", "title", "who_owns_bike", "ownership_transfer", "when_do_i_own", "get_logbook", "repossession", "bike_title", "change_owner"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "finance",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.finance.ownership",
+          "service_type": "finance",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "You become the bike’s owner only after full payment is received and confirmed by Neguinho Motors. Until then, we remain legal owners and may repossess for missed payments or breaches."
+      },
+      {
+        "symbol": "FINANCE_005",
+        "keyword": "finance_fees_penalties_extra_charges_late_payment_fees_repossession_recovery_finance_contract_fine",
+        "tags": [
+          "finance", "fees", "penalties", "finance_fees", "late_payment_fee", "repossession", "recovery_fee", "impound_fee", "pcn_fee", "cleaning_fee", "missing_keys", "lost_documents", "extra_charges", "contract_fee", "finance_penalty", "charges_apply"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "finance",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.finance.fees",
+          "service_type": "finance",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Finance fees:\n– Late payment: £10/day (up to £100 per period)\n– Repossession: £100\n– Vehicle recovery: £100\n– Impoundment: up to £950\n– PCN (penalty) processing: £25/notice\n– Cleaning/valet: £50\n– Lost keys: £150\n– Lost docs: £50"
+      },
+      {
+        "symbol": "SERVICE_001",
+        "keyword": "servicing_overview_general_service_bike_repair_maintenance_workshop_service_how_to_book",
+        "tags": [
+          "service", "servicing", "bike_service", "repair", "maintenance", "workshop", "bike_maintenance", "service_overview", "get_my_bike_serviced", "book_a_service", "what_is_included", "service_plans", "servicing_cost", "regular_service", "how_to_book", "bike_health_check"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "servicing",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.servicing",
+          "service_type": "servicing",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Servicing options:\n– BASIC: Every 6,000 miles—engine oil & filter, brakes, tyres, chain/belt, electrical, safety\n– FULL/MAJOR: Every 12,000 miles—all above plus plugs, transmission, brakes, suspension, frame/exhaust\n– Electric bike service, digital record-keeping, service-book stamping\nCall 0208 314 1498 or email enquiries@neguinhomotors.co.uk to book or enquire"
+      },
+      {
+        "symbol": "MOT_001",
+        "keyword": "mot_testing_mot_test_check_certificate_bike_mot_booking_mot_prices_mot_location",
+        "tags": [
+          "mot", "mot_test", "mot_testing", "mot_certificate", "inspection", "bike_mot", "mot_booking", "mot_price", "how_long_mot", "do_you_do_mot", "mot_branch", "mot_service", "book_mot", "mot_check"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "mot_testing",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.mot_testing",
+          "service_type": "mot",
+          "last_verified": "2025-01-27",
+          "confidence": "medium",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "MOT tests done at all branches. For prices, estimated time, advice, booking, or repairs: call 0208 314 1498 or email enquiries@neguinhomotors.co.uk."
+      },
+      {
+        "symbol": "DELIVERY_001",
+        "keyword": "delivery_nationwide_transport_delivery_to_england_bike_delivery_collection_shipping_moving_bike",
+        "tags": [
+          "delivery", "transport", "nationwide_delivery", "england_delivery", "collection", "how_to_get_bike", "shipping", "bike_delivery", "deliver_motorcycle", "move_bike", "delivery_rates", "courier", "getting_bike_home", "can_you_deliver", "fast_delivery"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "delivery_transport",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.delivery_transport",
+          "service_type": "delivery",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Delivery service:\n– England: £249.99 flat rate (insured up to £100,000)\n– Delivery within 24h–7 working days\n– Free collection if using repairs\n– Scotland, Wales, NI: custom quote\n– Emergency & express delivery available\nBook by phone, WhatsApp, or email."
+      },
+      {
+        "symbol": "POLICY_001",
+        "keyword": "warranty_policy_bike_warranty_claim_coverage_new_used_guarantee_how_to_claim",
+        "tags": [
+          "warranty", "policy", "warranty_policy", "guarantee", "warranty_claim", "coverage", "warranty_details", "claim_process", "new_warranty", "used_warranty", "warranty_for_bike", "how_to_claim", "contact_for_warranty", "bike_guarantee"
+        ],
+        "mapping": {
+          "category": "policies",
+          "subcategory": "warranty",
+          "priority": "medium",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "policies.warranty",
+          "last_verified": "2025-01-27",
+          "confidence": "low",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Warranty details for new/used bikes, turnaround and claim process – call 0208 314 1498 or email enquiries@neguinhomotors.co.uk for info or claims."
+      },
+      {
+        "symbol": "POLICY_002",
+        "keyword": "returns_policy_return_bike_refund_accessories_helmet_return_policy_exchange_exchange_policy",
+        "tags": [
+          "returns", "refund", "return_bike", "return_accessories", "policy", "return_policy", "refund_policy", "helmet_return", "gear_returns", "clothing_returns", "exchange", "exchange_policy", "how_to_return", "refunds", "get_my_money_back", "return_procedure"
+        ],
+        "mapping": {
+          "category": "policies",
+          "subcategory": "returns",
+          "priority": "medium",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "policies.returns",
+          "last_verified": "2025-01-27",
+          "confidence": "low",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Returns & refund policy applies on bikes, accessories, clothing, and helmets. For full info or help, call 0208 314 1498 or email enquiries@neguinhomotors.co.uk."
+      },
+      {
+        "symbol": "LOYALTY_001",
+        "keyword": "ngn_club_loyalty_membership_discount_credits_offer_rewards_benefits",
+        "tags": [
+          "loyalty", "ngn_club", "membership", "sign_up", "join_ngn_club", "discount", "club_benefits", "rewards", "loyalty_program", "credits", "membership_offer", "how_to_join", "club_points", "stack_offers", "member_benefits", "club_discount"
+        ],
+        "mapping": {
+          "category": "loyalty",
+          "subcategory": "ngn_club",
+          "priority": "medium",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "loyalty_programme",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "NGN Club Membership:\n– Join free (online or in-store)\n– 10% discount on each purchase\n– Credits valid for 6 months (not for PCNs or rentals)\n– One membership per person\n– To check balance or offers: 0208 314 1498 or enquiries@neguinhomotors.co.uk"
+      },
+      {
+        "symbol": "FALLBACK_001",
+        "keyword": "fallback_general_question_not_listed_other_queries_human_help_redirect_support_contact",
+        "tags": [
+          "fallback", "redirect", "customer_service", "not_listed", "need_more_help", "question_not_answered", "talk_to_human", "support", "contact_team", "get_help", "not_found", "pass_on_question", "need_assistance"
+        ],
+        "mapping": {
+          "category": "fallback",
+          "subcategory": "general",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "fallback_strategy",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "If you need details not listed, our customer service team can help! Call 0208 314 1498, WhatsApp, or email enquiries@neguinhomotors.co.uk. Want me to pass your question to a human agent?"
+      },
+      {
+        "symbol": "FALLBACK_002",
+        "keyword": "fallback_prices_service_repair_quote_pricing_customer_service_team_price_ask",
+        "tags": [
+          "fallback", "redirect", "service_quote", "repair_price", "pricing", "costs", "get_a_quote", "price_enquiry", "ask_team", "prices", "repair_cost", "service_desk", "contact_team", "price_information"
+        ],
+        "mapping": {
+          "category": "fallback",
+          "subcategory": "prices",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "fallback_strategy",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "For accurate service or repair pricing, please call 0208 314 1498 or WhatsApp us. Quotes are provided directly by our team only."
+      },
+      {
+        "symbol": "DOMAIN_RESTRICTION_001",
+        "keyword": "domain_boundary_scope_out_of_scope_chatbot_limits_what_can_chatbot_answer_topics",
+        "tags": [
+          "domain", "restriction", "boundary", "out_of_scope", "chatbot_scope", "topics_covered", "what_can_answer", "help_topics", "not_supported", "question_limit", "domain_limitations", "allowed_topics", "scope", "can_you_help"
+        ],
+        "mapping": {
+          "category": "system",
+          "subcategory": "domain_restriction",
+          "priority": "critical",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "system",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "This chatbot only answers about Neguinho Motors rentals, sales, finance/EMI, deposits, warranty, company policies, servicing, MOT testing, delivery, accessories, and Neguinho Motors company info. Other queries: 'I can only help with bike rentals, sales, finance, deposit, warranty, or our company policies. How can I help you with our services?'"
+      },
+      {
+        "symbol": "GENERAL_001",
+        "keyword": "bot_introduction_who_are_you_chatbot_about_yourself_help_assistant_service_bot",
+        "tags": [
+          "greeting", "introduction", "who_are_you", "what_is_this", "about_bot", "assistant", "help", "company_bot", "what_do_you_do", "service_bot", "virtual_assistant", "can_you_help", "chatbot_description", "info_about_bot"
+        ],
+        "mapping": {
+          "category": "general",
+          "subcategory": "introduction",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "system",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "I'm the Neguinho Motors chatbot assistant. I help with all bike rentals, sales, finance, servicing, MOT, delivery, accessories, repairs, and general enquiries. Ask me about our services, prices, or company info anytime!"
+      },
+      {
+        "symbol": "GENERAL_002",
+        "keyword": "services_overview_offer_what_do_you_have_bike_services_all_services_list_available_options",
+        "tags": [
+          "services", "help", "what_can_you_do", "all_services", "what_services", "list_services", "assist", "support", "what_do_you_offer", "available_services", "bike_services", "overview", "options", "company_services", "products", "company_offers"
+        ],
+        "mapping": {
+          "category": "general",
+          "subcategory": "services",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "company",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Neguinho Motors offers:\n– Bike Rentals (weekly/monthly)\n– Bike Sales (new & used Honda/Yamaha)\n– Bike Finance (payment plans)\n– Servicing & repairs (all brands)\n– MOT testing (every store)\n– UK-wide bike delivery\n– Accessories shop (helmets/gear)\n– Accident management\n3 London branches: Catford, Tooting, Sutton. All open Mon–Sat 9am–6pm."
+      },
+      {
+        "symbol": "RENTAL_008",
+        "keyword": "rental_comprehensive_full_details_bike_hire_information_rent_a_bike_all_you_need",
+        "tags": [
+          "rental", "hire", "renting", "comprehensive", "all_details", "full_information", "overview", "rental_info", "what_is_included", "bike_rental", "rental_terms", "requirements", "getting_a_bike", "how_it_works", "how_to_rent", "delivery_with_rental"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "rentals",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.rentals",
+          "service_type": "rental",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Bike Rental Service:\nModels: Honda Vision 125 (£70/wk), Forza 125, PCX 125, SH 125, Yamaha NMAX 125 (£75/wk each), XMAX 125 (£100/wk)\nRental terms: 6 weeks to 1 year. Pay monthly by bank transfer. Security deposit required and refunded after return. Tax, MOT & weekly maintenance included. Provide comprehensive insurance and UK/valid CBT/A1/A2/A licence. Delivery anywhere in UK. Contact: 0208 314 1498 / enquiries@neguinhomotors.co.uk"
+      },
+      {
+        "symbol": "FINANCE_006",
+        "keyword": "finance_comprehensive_full_finance_details_emi_installment_plan_how_finance_works_bike_credit",
+        "tags": [
+          "finance", "emi", "payment", "instalment", "plan", "full_details", "comprehensive", "how_finance_works", "buy_on_credit", "finance_on_bike", "monthly_payment", "finance_options", "interest_free", "payment_terms", "payment_deadlines"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "finance",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.finance",
+          "service_type": "finance",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Finance: Interest-free payment plans (up to 12 months) on all bikes. Deposit needed. Pay monthly by bank transfer within 48 hours. Late payment: £10/day (max £100). You own the bike after final payment. For all details: 0208 314 1498 / enquiries@neguinhomotors.co.uk"
+      },
+      {
+        "symbol": "OPENING_001",
+        "keyword": "opening_hours_all_branches_times_when_open_closed_working_opening_time_schedule",
+        "tags": [
+          "opening", "hours", "working_hours", "when_open", "when_closed", "branch_hours", "timings", "schedule", "store_hours", "shop_times", "opening_time", "closing_time", "open_today", "bank_holidays", "opening_hours_all", "office_hours"
+        ],
+        "mapping": {
+          "category": "branches",
+          "subcategory": "opening_hours",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "branches",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Opening Hours (all branches):\nMon–Sat: 9:00 AM–6:00 PM\nSunday: Closed\nBank holidays: may vary – call to confirm\nCatford: 0208 314 1498 | Tooting: 0203 409 5478 | Sutton: 0208 412 9275\nEmail/WhatsApp open all day. On-site parking everywhere."
+      },
+      {
+        "symbol": "CONTACT_001",
+        "keyword": "contact_information_how_to_contact_get_in_touch_address_phone_email_branch_contact",
+        "tags": [
+          "contact", "phone", "call", "email", "address", "location", "contact_us", "contact_info", "how_to_contact", "reach", "branch_contact", "find_us", "store_phone", "speak_to_us", "get_in_touch", "customer_service"
+        ],
+        "mapping": {
+          "category": "company",
+          "subcategory": "contact",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "company",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Contact Neguinho Motors:\n– Main: 0208 314 1498\n– Email: enquiries@neguinhomotors.co.uk\n– Catford: 0208 314 1498 | Tooting: 0203 409 5478 | Sutton: 0208 412 9275\n– WhatsApp & chat available for all branches\n– Registered: 9-13 Catford Hill, London SE6 4NU\n– For emergencies: 0203 409 5478 / 0208 314 1498"
+      },
+      {
+        "symbol": "ACCESSORIES_001",
+        "keyword": "accessories_shop_helmet_clothing_gear_store_buy_kit_equipment_accessory_store",
+        "tags": [
+          "accessories", "shop", "gear", "accessory", "equipment", "store", "helmet", "clothing", "buy_gear", "where_to_buy", "boots", "gloves", "luggage", "locks", "chains", "workshop", "spares", "parts", "consumables", "grab_helmet", "shop_accessories", "click_and_collect"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "accessories",
+          "priority": "medium",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.accessories_shop",
+          "service_type": "accessories",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Accessories Shop: Helmets, clothing, boots, gloves, luggage, security (locks, chains), spares, consumables. Shop online or in-store. Click & collect, UK/international shipping (DPD/UPS). For returns or questions: 0208 314 1498 / enquiries@neguinhomotors.co.uk"
+      },
+      {
+        "symbol": "ACCIDENT_001",
+        "keyword": "accident_management_insurance_claim_damage_crash_bike_accident_support_help_claim_assist",
+        "tags": [
+          "accident", "management", "accident_help", "accident_support", "insurance", "claim", "damage", "bike_crash", "help_claim", "accident_service", "recovery", "crash_management", "incident", "insurance_claim", "support", "bike_accident"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "accident_management",
+          "priority": "medium",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.accident_management",
+          "service_type": "accident_management",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Accident Management: Support with insurance claims, assessing damages, recovery after crash. Need help? Call 0208 314 1498 or email enquiries@neguinhomotors.co.uk."
+      },
+      {
+        "symbol": "SALE_003",
+        "keyword": "sale_comprehensive_new_used_bikes_models_full_list_buy_overview_availability_demo_test_ride",
+        "tags": [
+          "sale", "buy", "purchase", "comprehensive", "all_bikes", "models", "new_bikes", "used_bikes", "bikes_for_sale", "sale_list", "current_stock", "demo", "test_ride", "in_stock", "availability", "prices", "available_now", "showroom"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "sales",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.sales",
+          "service_type": "sale",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Bike Sales – New (2025): Honda PCX125, Vision 110, CB125F, Yamaha YZF-R125, MT-125, NMAX 125. Used examples: Yamaha NMAX 125 (£1,799), Honda PCX 125 (£2,199.99), Honda NSC110 (£999.99), Forza 125 (£3,699.99), CB 500 F (£2,499.99). Stock/prices change—call 0208 314 1498 or email for up-to-date info. Test rides (with licence), part exchange, delivery, finance all available."
+      },
+      {
+        "symbol": "SERVICE_002",
+        "keyword": "servicing_comprehensive_repair_maintenance_services_details_full_list_collection_bike_repair",
+        "tags": [
+          "servicing", "service", "repair", "maintenance", "comprehensive", "repairs_list", "details", "all_repairs", "full_service", "checkup", "major_service", "basic_service", "bike_repair", "tyres", "brake_repair", "diagnosis", "chain", "belt", "electrics", "same_day_service", "walk_in", "maintenance_plan"
+        ],
+        "mapping": {
+          "category": "services",
+          "subcategory": "servicing",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "services.servicing",
+          "service_type": "servicing",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Servicing & repairs:\nBASIC SERVICE (6,000 mi): Oil/filter, brakes, tyres, chain/belt/electrics, safety\nMAJOR SERVICE (12,000 mi): All basic + plugs, transmission, advanced brakes, suspension, exhaust\nREPAIRS: Fault diagnosis, brakes, tyres, chains, accessories, electrical/mechanical\nALSO: Electric bikes, digital records, FREE collection (with repairs), same-day/walk-in\nFor a service quote: 0208 314 1498 / enquiries@neguinhomotors.co.uk"
+      },
+      {
+        "symbol": "MODEL_HONDA_VISION_125",
+        "keyword": "model_honda_vision_125_pricing_rent_buy_vision125_honda_vision_rental_finance_sale_information_new_used_price_cost",
+        "tags": [
+          "honda", "vision", "125", "honda_vision", "vision_125", "honda_vision_125", "rent", "rental", "hire", "finance", "sale", "price", "new", "used", "buy", "purchase", "honda_vision_125_price", "cost", "how_much", "get_a_quote", "model_info", "test_ride", "part_exchange", "delivery", "vision125_specs"
+        ],
+        "mapping": {
+          "category": "models",
+          "subcategory": "honda_vision_125",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "models.pricing",
+          "model": "Honda Vision 125",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Honda Vision 125:\n– Rental: £70/week (6 weeks–1 year), deposit, tax, MOT, maintenance, insurance needed (customer provides)\n– Finance: Up to 12 months (interest-free), deposit, monthly payment, ask for current price\n– Sale: New & used, test rides, part exchange, delivery available, inventory/prices change—contact for now"
+      },
+      {
+        "symbol": "MODEL_HONDA_FORZA_125",
+        "keyword": "model_honda_forza_125_pricing_rent_buy_forza125_honda_forza_rental_finance_sale_info_new_used_price_cost",
+        "tags": [
+          "honda", "forza", "125", "honda_forza", "forza_125", "honda_forza_125", "rent", "rental", "hire", "finance", "sale", "price", "new", "used", "buy", "purchase", "forza_125_price", "how_much", "cost", "get_a_quote", "model_info", "test_ride", "delivery", "part_exchange", "forza125_specs"
+        ],
+        "mapping": {
+          "category": "models",
+          "subcategory": "honda_forza_125",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "models.pricing",
+          "model": "Honda Forza 125",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Honda Forza 125:\n– Rental: £75/week (6 weeks–1 year), deposit needed, tax/MOT/maintenance, user insurance\n– Finance: 12 month, interest-free, deposit, monthly, get a quote\n– Sale: New/used, example used £3,699.99, inventory/prices vary—ask for current offer"
+      },
+      {
+        "symbol": "MODEL_HONDA_PCX_125",
+        "keyword": "model_honda_pcx_125_pricing_rent_buy_pcx125_honda_pcx_rental_finance_sale_new_used_price_cost",
+        "tags": [
+          "honda", "pcx", "125", "honda_pcx", "pcx_125", "honda_pcx_125", "rent", "rental", "hire", "finance", "sale", "price", "new", "used", "buy", "purchase", "pcx_125_price", "cost", "how_much", "get_a_quote", "model_info", "test_ride", "delivery", "part_exchange", "pcx125_specs"
+        ],
+        "mapping": {
+          "category": "models",
+          "subcategory": "honda_pcx_125",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "models.pricing",
+          "model": "Honda PCX 125",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Honda PCX 125:\n– Rental: £75/week (min. 6 weeks), deposit, tax, MOT, maintenance, insurance needed\n– Finance: Up to 12 months, deposit, bank transfer\n– Sale: New/used, example £2,199.99, test ride/delivery, call/email for latest"
+      },
+      {
+        "symbol": "MODEL_HONDA_SH_125",
+        "keyword": "model_honda_sh_125_pricing_rent_buy_sh125_honda_sh_rental_finance_sale_new_used_price_cost",
+        "tags": [
+          "honda", "sh", "125", "honda_sh", "sh_125", "honda_sh_125", "rent", "rental", "hire", "finance", "sale", "price", "new", "used", "buy", "purchase", "sh_125_price", "cost", "how_much", "get_a_quote", "model_info", "test_ride", "delivery", "part_exchange", "sh125_specs"
+        ],
+        "mapping": {
+          "category": "models",
+          "subcategory": "honda_sh_125",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "models.pricing",
+          "model": "Honda SH 125",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Honda SH 125:\n– Rental: £75/week (6 weeks–1 year), deposit/tax/MOT/maintenance, insurance required\n– Finance: Up to 12 months interest-free, deposit required\n– Sale: New/used, prices change—contact for today’s offer"
+      },
+      {
+        "symbol": "MODEL_YAMAHA_NMAX_125",
+        "keyword": "model_yamaha_nmax_125_pricing_rent_buy_nmax125_yamaha_nmax_rental_finance_sale_new_used_price_cost",
+        "tags": [
+          "yamaha", "nmax", "125", "yamaha_nmax", "nmax_125", "yamaha_nmax_125", "rent", "rental", "hire", "finance", "sale", "price", "new", "used", "buy", "purchase", "nmax_125_price", "cost", "how_much", "get_a_quote", "model_info", "test_ride", "delivery", "part_exchange", "nmax125_specs"
+        ],
+        "mapping": {
+          "category": "models",
+          "subcategory": "yamaha_nmax_125",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "models.pricing",
+          "model": "Yamaha NMAX 125",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Yamaha NMAX 125:\n– Rental: £75/week (min. 6 weeks), deposit, tax/MOT/maintenance, insurance required\n– Finance: Up to 12 months interest-free with deposit\n– Sale: New/used, example £1,799, prices/inventory update often"
+      },
+      {
+        "symbol": "MODEL_YAMAHA_XMAX_125",
+        "keyword": "model_yamaha_xmax_125_pricing_rent_buy_xmax125_yamaha_xmax_rental_finance_sale_new_used_price_cost",
+        "tags": [
+          "yamaha", "xmax", "125", "yamaha_xmax", "xmax_125", "yamaha_xmax_125", "rent", "rental", "hire", "finance", "sale", "price", "new", "used", "buy", "purchase", "xmax_125_price", "cost", "how_much", "get_a_quote", "model_info", "test_ride", "delivery", "part_exchange", "xmax125_specs"
+        ],
+        "mapping": {
+          "category": "models",
+          "subcategory": "yamaha_xmax_125",
+          "priority": "high",
+          "domain": "neguinhomotors"
+        },
+        "metadata": {
+          "source": "models.pricing",
+          "model": "Yamaha XMAX 125",
+          "last_verified": "2025-01-27",
+          "confidence": "high",
+          "vendor_id": "neguinho_motors"
+        },
+        "content": "Yamaha XMAX 125:\n– Rental: £100/week (min. 6 weeks), deposit, tax/MOT/maintenance, insurance needed\n– Finance: Up to 12 months interest-free with deposit\n– Sale: New/used, price depends on condition—call/email for current price"
+      }
+    ]
+  }

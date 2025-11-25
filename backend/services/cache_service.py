@@ -5,7 +5,7 @@ Handles main cache (persistent per vendor) and temporary cache (per chat session
 from typing import Dict, List, Optional, Any, Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
-from backend.models.database import MainCache, TemporaryCache, Chat
+from backend.models.saas_models import MainCache, TemporaryCache
 from backend.config import get_settings
 from loguru import logger
 import uuid
@@ -24,9 +24,25 @@ class CacheService:
     def __init__(self, db: Session, vendor_id: Optional[str] = None):
         """Initialise cache service."""
         self.db = db
-        self.vendor_id = vendor_id or settings.default_vendor_id
+        self.vendor_id = vendor_id or settings.default_vendor_id  # Keep as slug for compatibility
+        self.vendor_db_id = None  # Will store Integer vendor.id
         self.embedding_model = None
         self._initialize_embedding_model()
+        self._load_vendor_id()
+    
+    def _load_vendor_id(self):
+        """Load vendor database ID from vendor slug."""
+        if self.db and self.vendor_id:
+            try:
+                from backend.models.saas_models import Vendor
+                vendor = self.db.query(Vendor).filter(
+                    Vendor.slug == self.vendor_id,
+                    Vendor.deleted_at.is_(None)
+                ).first()
+                if vendor:
+                    self.vendor_db_id = vendor.id
+            except Exception as e:
+                logger.warning(f"Could not load vendor ID for {self.vendor_id}: {e}")
     
     def _initialize_embedding_model(self):
         """Initialise embedding model for similarity matching."""
@@ -130,277 +146,155 @@ class CacheService:
             similarity_threshold: Minimum similarity score (0-1)
         
         Returns:
-            Cache entry dict if found, None otherwise
+            Cache entry dict with 'answer', 'cache_type', 'cache_id', 'similarity' if found, None otherwise
         """
+        if not self.db:
+            return None
+        
         try:
-            import time
-            check_start = time.time()
             effective_vendor_id = vendor_id or self.vendor_id
+            effective_vendor_db_id = self._get_vendor_db_id(effective_vendor_id)
             
-            # Get similarity threshold from config or use default
-            if similarity_threshold is None:
-                similarity_threshold = getattr(settings, 'cache_similarity_threshold', 0.85)
+            if not effective_vendor_db_id:
+                return None
             
-            # For short questions, use a lower threshold (they're harder to match)
-            question_length = len(question.split())
-            adaptive_threshold = similarity_threshold
-            if question_length <= 3:
-                # Short questions: lower threshold by 0.10
-                adaptive_threshold = max(0.70, similarity_threshold - 0.10)
-                logger.debug(f"[CACHE-SERVICE] Short question detected ({question_length} words), using adaptive threshold: {adaptive_threshold:.3f}")
+            threshold = similarity_threshold or 0.85
             
-            logger.debug(f"[CACHE-SERVICE] Checking cache - threshold: {adaptive_threshold:.3f}, vendor: {effective_vendor_id}, chat: {chat_id}")
-            logger.debug(f"[CACHE-SERVICE] Question: '{question}'")
-            
-            # Generate question embedding
+            # Generate question embedding for similarity search
             question_embedding = None
             if self.embedding_model:
-                embed_start = time.time()
-                question_embedding = self.embedding_model.encode(
-                    question,
-                    show_progress_bar=False
-                ).tolist()
-                embed_time = time.time() - embed_start
-                logger.debug(f"[CACHE-SERVICE] Generated embedding in {embed_time:.3f}s")
-            else:
-                logger.warning("[CACHE-SERVICE] Embedding model not available, using text-based matching only")
+                try:
+                    question_embedding = self.embedding_model.encode(question).tolist()
+                except Exception as e:
+                    logger.debug(f"Error generating embedding for cache check: {e}")
             
-            # First check temporary cache (if chat_id provided)
+            # Check temporary cache first (if chat_id provided)
+            # Note: TemporaryCache.chat_id stores session_uuid (String) directly
             if chat_id:
-                logger.debug(f"[CACHE-SERVICE] Checking temporary cache for chat {chat_id}...")
-                temp_cache = self._check_temporary_cache(
-                    question,
-                    question_embedding,
-                    chat_id,
-                    effective_vendor_id,
-                    adaptive_threshold
-                )
-                if temp_cache:
-                    total_time = time.time() - check_start
-                    logger.info(f"[CACHE-SERVICE] ✅ Found in TEMPORARY cache (time: {total_time:.3f}s)")
-                    return temp_cache
-                else:
-                    logger.debug(f"[CACHE-SERVICE] Not found in temporary cache")
+                try:
+                    temp_caches = self.db.query(TemporaryCache).filter(
+                        TemporaryCache.chat_id == chat_id,  # chat_id is session_uuid (String)
+                        TemporaryCache.vendor_id == effective_vendor_db_id
+                    ).all()
+                    
+                    best_match = None
+                    best_similarity = 0.0
+                    
+                    for cache in temp_caches:
+                        similarity = 0.0
+                        
+                        # Try embedding similarity first
+                        if question_embedding and cache.question_embedding:
+                            try:
+                                cache_emb = cache.question_embedding
+                                if isinstance(cache_emb, str):
+                                    import json
+                                    cache_emb = json.loads(cache_emb)
+                                similarity = float(np.dot(question_embedding, cache_emb) / (np.linalg.norm(question_embedding) * np.linalg.norm(cache_emb)))
+                            except Exception as e:
+                                logger.debug(f"Error calculating embedding similarity: {e}")
+                        
+                        # Fallback to text similarity if embedding similarity is low
+                        if similarity < threshold:
+                            text_sim = self._text_similarity(question, cache.question)
+                            similarity = max(similarity, text_sim)
+                        
+                        if similarity >= threshold and similarity > best_similarity:
+                            best_similarity = similarity
+                            best_match = cache
+                    
+                    if best_match:
+                            # Update usage stats
+                            best_match.usage_count += 1
+                            best_match.last_used_at = datetime.utcnow()
+                            self.db.commit()
+                            
+                            return {
+                                "answer": best_match.answer,
+                                "cache_type": "temporary",
+                                "cache_id": best_match.cache_id,
+                                "similarity": best_similarity
+                            }
+                except Exception as e:
+                    logger.debug(f"Error checking temporary cache: {e}")
             
-            # Then check main cache
-            logger.debug(f"[CACHE-SERVICE] Checking main cache...")
-            main_cache = self._check_main_cache(
-                question,
-                question_embedding,
-                effective_vendor_id,
-                adaptive_threshold
-            )
-            if main_cache:
-                total_time = time.time() - check_start
-                logger.info(f"[CACHE-SERVICE] ✅ Found in MAIN cache (time: {total_time:.3f}s)")
-                return main_cache
-            else:
-                total_time = time.time() - check_start
-                logger.debug(f"[CACHE-SERVICE] Not found in main cache (total check time: {total_time:.3f}s)")
-            
-            return None
-            
-        except Exception as e:
-            logger.error(f"[CACHE-SERVICE] Error checking cache: {e}")
-            import traceback
-            traceback.print_exc()
-            return None
-    
-    def _check_temporary_cache(
-        self,
-        question: str,
-        question_embedding: Optional[List[float]],
-        chat_id: str,
-        vendor_id: str,
-        similarity_threshold: float
-    ) -> Optional[Dict[str, Any]]:
-        """Check temporary cache for similar question using multiple matching techniques."""
-        try:
-            # Get all temporary cache entries for this chat (don't require embedding)
-            temp_caches = self.db.query(TemporaryCache).filter(
-                and_(
-                    TemporaryCache.chat_id == chat_id,
-                    TemporaryCache.vendor_id == vendor_id
-                )
-            ).all()
-            
-            logger.debug(f"[CACHE-SERVICE] Found {len(temp_caches)} temporary cache entries for chat {chat_id}")
-            
-            if not temp_caches:
-                return None
-            
-            # Calculate similarity with each cached question using multiple methods
-            best_match = None
-            best_similarity = 0.0
-            best_method = None
-            checked_count = 0
-            
-            for cache_entry in temp_caches:
-                checked_count += 1
-                similarities = []
-                
-                # Method 1: Text-based similarity (always available, good for short questions)
-                text_sim = self._text_similarity(question, cache_entry.question)
-                similarities.append(("text", text_sim))
-                
-                # Method 2: Embedding-based similarity (if available)
-                if question_embedding and cache_entry.question_embedding:
-                    embed_sim = self._cosine_similarity(
-                        question_embedding,
-                        cache_entry.question_embedding
-                    )
-                    similarities.append(("embedding", embed_sim))
-                
-                # Use the best similarity from all methods
-                best_method_for_entry = max(similarities, key=lambda x: x[1])
-                similarity = best_method_for_entry[1]
-                
-                if checked_count <= 5:  # Log first 5 for debugging
-                    embed_sim_str = f"{similarities[1][1]:.3f}" if len(similarities) > 1 else "N/A"
-                    logger.debug(f"[CACHE-SERVICE]   - Entry {cache_entry.cache_id}: text={text_sim:.3f}, embedding={embed_sim_str}, best={similarity:.3f} (threshold={similarity_threshold:.3f})")
-                
-                # Accept if any method meets threshold
-                if similarity >= similarity_threshold and similarity > best_similarity:
-                    best_similarity = similarity
-                    best_match = cache_entry
-                    best_method = best_method_for_entry[0]
-            
-            logger.debug(f"[CACHE-SERVICE] Checked {checked_count} entries, best similarity: {best_similarity:.3f} (method: {best_method})")
-            
-            if best_match:
-                # Update usage stats
-                best_match.usage_count += 1
-                best_match.last_used_at = datetime.utcnow()
-                self.db.commit()
-                
-                return {
-                    "cache_type": "temporary",
-                    "cache_id": best_match.cache_id,
-                    "question": best_match.question,
-                    "answer": best_match.answer,
-                    "similarity": best_similarity,
-                    "usage_count": best_match.usage_count,
-                    "metadata": best_match.cache_metadata
-                }
-            
-            return None
-            
-        except Exception as e:
-            # If table doesn't exist, silently return None (cache not available)
-            error_str = str(e).lower()
-            if "doesn't exist" in error_str or "no such table" in error_str:
-                logger.debug(f"Cache table not available (temporary_cache), skipping cache check")
-            else:
-                logger.error(f"Error checking temporary cache: {e}")
-            return None
-    
-    def _check_main_cache(
-        self,
-        question: str,
-        question_embedding: Optional[List[float]],
-        vendor_id: str,
-        similarity_threshold: float
-    ) -> Optional[Dict[str, Any]]:
-        """Check main cache for similar question using multiple matching techniques."""
-        try:
-            # Get all active main cache entries for this vendor (don't require embedding)
-            main_caches = self.db.query(MainCache).filter(
-                and_(
-                    MainCache.vendor_id == vendor_id,
+            # Check main cache
+            try:
+                main_caches = self.db.query(MainCache).filter(
+                    MainCache.vendor_id == effective_vendor_db_id,
                     MainCache.is_active == True
-                )
-            ).all()
-            
-            logger.debug(f"[CACHE-SERVICE] Found {len(main_caches)} active main cache entries for vendor {vendor_id}")
-            
-            if not main_caches:
-                return None
-            
-            # Calculate similarity with each cached question using multiple methods
-            best_match = None
-            best_similarity = 0.0
-            best_method = None
-            checked_count = 0
-            
-            for cache_entry in main_caches:
-                checked_count += 1
-                similarities = []
+                ).all()
                 
-                # Method 1: Text-based similarity (always available, good for short questions)
-                text_sim = self._text_similarity(question, cache_entry.question)
-                similarities.append(("text", text_sim))
+                best_match = None
+                best_similarity = 0.0
                 
-                # Method 2: Embedding-based similarity (if available)
-                if question_embedding and cache_entry.question_embedding:
-                    embed_sim = self._cosine_similarity(
-                        question_embedding,
-                        cache_entry.question_embedding
-                    )
-                    similarities.append(("embedding", embed_sim))
+                for cache in main_caches:
+                    similarity = 0.0
+                    
+                    # Try embedding similarity first
+                    if question_embedding and cache.question_embedding:
+                        try:
+                            cache_emb = cache.question_embedding
+                            if isinstance(cache_emb, str):
+                                import json
+                                cache_emb = json.loads(cache_emb)
+                            similarity = float(np.dot(question_embedding, cache_emb) / (np.linalg.norm(question_embedding) * np.linalg.norm(cache_emb)))
+                        except Exception as e:
+                            logger.debug(f"Error calculating embedding similarity: {e}")
+                    
+                    # Fallback to text similarity if embedding similarity is low
+                    if similarity < threshold:
+                        text_sim = self._text_similarity(question, cache.question)
+                        similarity = max(similarity, text_sim)
+                    
+                    if similarity >= threshold and similarity > best_similarity:
+                        best_similarity = similarity
+                        best_match = cache
                 
-                # Use the best similarity from all methods
-                best_method_for_entry = max(similarities, key=lambda x: x[1])
-                similarity = best_method_for_entry[1]
-                
-                if checked_count <= 5:  # Log first 5 for debugging
-                    embed_sim_str = f"{similarities[1][1]:.3f}" if len(similarities) > 1 else "N/A"
-                    logger.debug(f"[CACHE-SERVICE]   - Entry {cache_entry.cache_id}: text={text_sim:.3f}, embedding={embed_sim_str}, best={similarity:.3f} (threshold={similarity_threshold:.3f})")
-                
-                # Accept if any method meets threshold
-                if similarity >= similarity_threshold and similarity > best_similarity:
-                    best_similarity = similarity
-                    best_match = cache_entry
-                    best_method = best_method_for_entry[0]
-            
-            logger.debug(f"[CACHE-SERVICE] Checked {checked_count} entries, best similarity: {best_similarity:.3f} (method: {best_method})")
-            
-            if best_match:
-                # Update usage stats
-                best_match.usage_count += 1
-                best_match.last_used_at = datetime.utcnow()
-                self.db.commit()
-                
-                return {
-                    "cache_type": "main",
-                    "cache_id": best_match.cache_id,
-                    "question": best_match.question,
-                    "answer": best_match.answer,
-                    "similarity": best_similarity,
-                    "usage_count": best_match.usage_count,
-                    "tokens_saved": best_match.tokens_saved,
-                    "credits_saved": best_match.credits_saved,
-                    "metadata": best_match.cache_metadata
-                }
+                if best_match:
+                    # Update usage stats
+                    best_match.usage_count += 1
+                    best_match.last_used_at = datetime.utcnow()
+                    self.db.commit()
+                    
+                    return {
+                        "answer": best_match.answer,
+                        "cache_type": "main",
+                        "cache_id": best_match.cache_id,
+                        "similarity": best_similarity
+                    }
+            except Exception as e:
+                logger.debug(f"Error checking main cache: {e}")
             
             return None
             
         except Exception as e:
-            # If table doesn't exist, silently return None (cache not available)
-            error_str = str(e).lower()
-            if "doesn't exist" in error_str or "no such table" in error_str:
-                logger.debug(f"Cache table not available (main_cache), skipping cache check")
-            else:
-                logger.error(f"Error checking main cache: {e}")
+            logger.error(f"Error checking cache: {e}")
             return None
     
-    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
-        """Calculate cosine similarity between two vectors."""
+    def _calculate_credits(self, tokens: int) -> int:
+        """Calculate credits based on tokens."""
+        return max(1, tokens // 100)  # 1 credit per 100 tokens, minimum 1
+    
+    def _get_vendor_db_id(self, vendor_id: Optional[str] = None) -> Optional[int]:
+        """Get vendor database ID from vendor slug."""
+        if not self.db:
+            return None
+        
+        effective_vendor_id = vendor_id or self.vendor_id
+        if not effective_vendor_id:
+            return None
+        
         try:
-            vec1_array = np.array(vec1)
-            vec2_array = np.array(vec2)
-            
-            dot_product = np.dot(vec1_array, vec2_array)
-            norm1 = np.linalg.norm(vec1_array)
-            norm2 = np.linalg.norm(vec2_array)
-            
-            if norm1 == 0 or norm2 == 0:
-                return 0.0
-            
-            return float(dot_product / (norm1 * norm2))
-            
+            from backend.models.saas_models import Vendor
+            vendor = self.db.query(Vendor).filter(
+                Vendor.slug == effective_vendor_id,
+                Vendor.deleted_at.is_(None)
+            ).first()
+            return vendor.id if vendor else None
         except Exception as e:
-            logger.error(f"Error calculating cosine similarity: {e}")
-            return 0.0
+            logger.debug(f"Error getting vendor DB ID for {effective_vendor_id}: {e}")
+            return None
     
     def save_to_temporary_cache(
         self,
@@ -409,85 +303,52 @@ class CacheService:
         answer: str,
         vendor_id: Optional[str] = None,
         tokens_used: int = 0,
-        metadata: Optional[Dict] = None,
-        similarity_threshold: Optional[float] = None
+        metadata: Optional[Dict[str, Any]] = None,
+        similarity_threshold: float = 0.85
     ) -> Optional[str]:
-        """
-        Save Q&A pair to temporary cache (per chat session).
-        Checks for existing similar questions to avoid duplicates.
+        """Save Q&A pair to temporary cache."""
+        if not self.db:
+            logger.warning("No database session available for saving temporary cache")
+            return None
         
-        Args:
-            chat_id: Chat session ID
-            question: User question
-            answer: Assistant answer
-            vendor_id: Vendor ID
-            tokens_used: Tokens used to generate this answer (for stats)
-            metadata: Optional metadata
-            similarity_threshold: Similarity threshold for duplicate detection
-        
-        Returns:
-            Cache ID if saved successfully, None otherwise
-        """
         try:
             effective_vendor_id = vendor_id or self.vendor_id
+            vendor_db_id = self._get_vendor_db_id(effective_vendor_id)
             
-            # Generate embedding
-            if not self.embedding_model:
-                logger.warning("Embedding model not available, cannot save to cache")
+            if not vendor_db_id:
+                logger.warning(f"Could not find vendor DB ID for {effective_vendor_id}")
                 return None
             
-            question_embedding = self.embedding_model.encode(
-                question,
-                show_progress_bar=False
-            ).tolist()
+            # Note: We store session_uuid directly as chat_id (String), not the chat session ID (Integer)
+            # We don't require the chat session to exist - it might be created after the cache entry
+            from backend.models.saas_models import ChatSession
+            chat_session = self.db.query(ChatSession).filter(
+                ChatSession.session_uuid == chat_id
+            ).first()
             
-            # Check if similar question already exists in temporary cache for this chat
-            # Use a slightly lower threshold for duplicate detection to catch more similar questions
-            if similarity_threshold is None:
-                similarity_threshold = getattr(settings, 'cache_similarity_threshold', 0.85)
+            if not chat_session:
+                logger.debug(f"Chat session {chat_id} not found yet - will save cache entry anyway with session_uuid as chat_id")
             
-            # For duplicate detection, use 0.75 of the threshold (more lenient)
-            # This catches questions that are very similar but might have slight wording differences
-            duplicate_threshold = similarity_threshold * 0.75
+            # Generate embedding for question
+            question_embedding = None
+            if self.embedding_model:
+                try:
+                    question_embedding = self.embedding_model.encode(question).tolist()
+                except Exception as e:
+                    logger.debug(f"Error generating embedding: {e}")
             
-            existing = self._check_temporary_cache(
-                question,
-                question_embedding,
-                chat_id,
-                effective_vendor_id,
-                duplicate_threshold
-            )
-            
-            if existing:
-                # Update existing entry instead of creating duplicate
-                cache_entry = self.db.query(TemporaryCache).filter(
-                    TemporaryCache.cache_id == existing["cache_id"]
-                ).first()
-                
-                if cache_entry:
-                    # Update answer if different (might be improved)
-                    if cache_entry.answer != answer:
-                        cache_entry.answer = answer
-                        cache_entry.updated_at = datetime.utcnow()
-                    
-                    # Update tokens saved if this answer is better
-                    if tokens_used > cache_entry.tokens_saved:
-                        cache_entry.tokens_saved = tokens_used
-                    
-                    self.db.commit()
-                    logger.info(f"Updated temporary cache entry: {existing['cache_id']} (avoided duplicate)")
-                    return existing["cache_id"]
-            
-            # Create new cache entry
+            # Create cache entry
+            # Note: TemporaryCache.chat_id is String(100) and stores session_uuid directly
             cache_id = f"temp_{uuid.uuid4().hex[:16]}"
             cache_entry = TemporaryCache(
                 cache_id=cache_id,
-                chat_id=chat_id,
-                vendor_id=effective_vendor_id,
+                chat_id=chat_id,  # Store session_uuid (String), not chat_session.id (Integer)
+                vendor_id=vendor_db_id,
                 question=question,
                 answer=answer,
                 question_embedding=question_embedding,
-                tokens_saved=tokens_used,  # Initial save: tokens that would be saved if reused
+                similarity_threshold=similarity_threshold,
+                tokens_saved=tokens_used,
                 cache_metadata=metadata or {}
             )
             
@@ -495,12 +356,13 @@ class CacheService:
             self.db.commit()
             self.db.refresh(cache_entry)
             
-            logger.info(f"Saved to temporary cache: {cache_id} for chat {chat_id}")
+            logger.debug(f"Saved to temporary cache: {cache_id}")
             return cache_id
             
         except Exception as e:
             logger.error(f"Error saving to temporary cache: {e}")
-            self.db.rollback()
+            if self.db:
+                self.db.rollback()
             return None
     
     def save_to_main_cache(
@@ -509,70 +371,40 @@ class CacheService:
         answer: str,
         vendor_id: Optional[str] = None,
         tokens_used: int = 0,
-        similarity_threshold: Optional[float] = None,
-        metadata: Optional[Dict] = None
+        metadata: Optional[Dict[str, Any]] = None,
+        similarity_threshold: float = 0.85
     ) -> Optional[str]:
-        """
-        Save Q&A pair to main cache (persistent per vendor).
+        """Save Q&A pair to main cache."""
+        if not self.db:
+            logger.warning("No database session available for saving main cache")
+            return None
         
-        Args:
-            question: User question
-            answer: Assistant answer
-            vendor_id: Vendor ID
-            tokens_used: Tokens used to generate this answer
-            similarity_threshold: Similarity threshold for matching
-            metadata: Optional metadata
-        
-        Returns:
-            Cache ID if saved successfully, None otherwise
-        """
         try:
             effective_vendor_id = vendor_id or self.vendor_id
+            vendor_db_id = self._get_vendor_db_id(effective_vendor_id)
             
-            # Generate embedding
-            if not self.embedding_model:
-                logger.warning("Embedding model not available, cannot save to cache")
+            if not vendor_db_id:
+                logger.warning(f"Could not find vendor DB ID for {effective_vendor_id}")
                 return None
             
-            question_embedding = self.embedding_model.encode(
-                question,
-                show_progress_bar=False
-            ).tolist()
+            # Generate embedding for question
+            question_embedding = None
+            if self.embedding_model:
+                try:
+                    question_embedding = self.embedding_model.encode(question).tolist()
+                except Exception as e:
+                    logger.debug(f"Error generating embedding: {e}")
             
-            # Check if similar question already exists
-            existing = self._check_main_cache(
-                question,
-                question_embedding,
-                effective_vendor_id,
-                similarity_threshold or 0.90  # High threshold to avoid duplicates
-            )
-            
-            if existing:
-                # Update existing entry instead of creating duplicate
-                cache_entry = self.db.query(MainCache).filter(
-                    MainCache.cache_id == existing["cache_id"]
-                ).first()
-                
-                if cache_entry:
-                    # Update answer if different (might be improved)
-                    if cache_entry.answer != answer:
-                        cache_entry.answer = answer
-                        cache_entry.updated_at = datetime.utcnow()
-                    
-                    self.db.commit()
-                    logger.info(f"Updated main cache entry: {existing['cache_id']}")
-                    return existing["cache_id"]
-            
-            # Create new cache entry
+            # Create cache entry
             cache_id = f"main_{uuid.uuid4().hex[:16]}"
             cache_entry = MainCache(
                 cache_id=cache_id,
-                vendor_id=effective_vendor_id,
+                vendor_id=vendor_db_id,
                 question=question,
                 answer=answer,
                 question_embedding=question_embedding,
-                similarity_threshold=similarity_threshold or 0.85,
-                tokens_saved=tokens_used,  # Initial: tokens that would be saved if reused
+                similarity_threshold=similarity_threshold,
+                tokens_saved=tokens_used,
                 credits_saved=self._calculate_credits(tokens_used),
                 cache_metadata=metadata or {}
             )
@@ -581,12 +413,13 @@ class CacheService:
             self.db.commit()
             self.db.refresh(cache_entry)
             
-            logger.info(f"Saved to main cache: {cache_id} for vendor {effective_vendor_id}")
+            logger.debug(f"Saved to main cache: {cache_id}")
             return cache_id
             
         except Exception as e:
             logger.error(f"Error saving to main cache: {e}")
-            self.db.rollback()
+            if self.db:
+                self.db.rollback()
             return None
     
     def promote_to_main_cache(
@@ -594,183 +427,149 @@ class CacheService:
         temp_cache_id: str,
         vendor_id: Optional[str] = None
     ) -> Optional[str]:
-        """
-        Promote a temporary cache entry to main cache.
-        Useful for learning from chat sessions.
+        """Promote a temporary cache entry to main cache."""
+        if not self.db:
+            logger.warning("No database session available for promoting cache")
+            return None
         
-        Args:
-            temp_cache_id: Temporary cache ID
-            vendor_id: Vendor ID
-        
-        Returns:
-            Main cache ID if promoted successfully, None otherwise
-        """
         try:
             effective_vendor_id = vendor_id or self.vendor_id
+            vendor_db_id = self._get_vendor_db_id(effective_vendor_id)
             
-            # Get temporary cache entry
-            temp_cache = self.db.query(TemporaryCache).filter(
+            if not vendor_db_id:
+                logger.warning(f"Could not find vendor DB ID for {effective_vendor_id}")
+                return None
+            
+            # Find temporary cache entry
+            temp_entry = self.db.query(TemporaryCache).filter(
                 TemporaryCache.cache_id == temp_cache_id
             ).first()
             
-            if not temp_cache:
-                logger.warning(f"Temporary cache entry not found: {temp_cache_id}")
+            if not temp_entry:
+                logger.warning(f"Temporary cache entry {temp_cache_id} not found")
                 return None
             
-            # Save to main cache
-            main_cache_id = self.save_to_main_cache(
-                question=temp_cache.question,
-                answer=temp_cache.answer,
-                vendor_id=effective_vendor_id,
-                tokens_used=temp_cache.tokens_saved,
-                metadata=temp_cache.cache_metadata
+            # Create main cache entry from temporary
+            cache_id = f"main_{uuid.uuid4().hex[:16]}"
+            main_entry = MainCache(
+                cache_id=cache_id,
+                vendor_id=vendor_db_id,
+                question=temp_entry.question,
+                answer=temp_entry.answer,
+                question_embedding=temp_entry.question_embedding,
+                similarity_threshold=temp_entry.similarity_threshold,
+                tokens_saved=temp_entry.tokens_saved,
+                credits_saved=self._calculate_credits(temp_entry.tokens_saved),
+                cache_metadata=temp_entry.cache_metadata
             )
             
-            if main_cache_id:
-                logger.info(f"Promoted temporary cache {temp_cache_id} to main cache {main_cache_id}")
+            self.db.add(main_entry)
+            self.db.commit()
+            self.db.refresh(main_entry)
             
-            return main_cache_id
+            logger.info(f"Promoted temporary cache {temp_cache_id} to main cache {cache_id}")
+            return cache_id
             
         except Exception as e:
-            logger.error(f"Error promoting to main cache: {e}")
+            logger.error(f"Error promoting cache: {e}")
+            if self.db:
+                self.db.rollback()
             return None
     
-    def delete_temporary_cache_for_chat(self, chat_id: str) -> int:
-        """
-        Delete all temporary cache entries for a chat session.
-        Called when chat ends or is cleared.
+    def get_cache_stats(self, vendor_id: Optional[str] = None) -> Dict[str, Any]:
+        """Get cache statistics for a vendor."""
+        if not self.db:
+            return {
+                "main_cache": {
+                    "total_entries": 0,
+                    "active_entries": 0,
+                    "total_usage_count": 0,
+                    "total_tokens_saved": 0,
+                    "total_credits_saved": 0
+                },
+                "temporary_cache": {
+                    "total_entries": 0,
+                    "active_chats": 0,
+                    "total_usage_count": 0,
+                    "total_tokens_saved": 0
+                }
+            }
         
-        Args:
-            chat_id: Chat session ID
-        
-        Returns:
-            Number of entries deleted
-        """
-        try:
-            deleted_count = self.db.query(TemporaryCache).filter(
-                TemporaryCache.chat_id == chat_id
-            ).delete()
-            
-            self.db.commit()
-            logger.info(f"Deleted {deleted_count} temporary cache entries for chat {chat_id}")
-            return deleted_count
-            
-        except Exception as e:
-            logger.error(f"Error deleting temporary cache: {e}")
-            self.db.rollback()
-            return 0
-    
-    def update_cache_stats(
-        self,
-        cache_id: str,
-        cache_type: str,
-        tokens_saved: int,
-        credits_saved: Optional[int] = None
-    ):
-        """
-        Update cache statistics when a cached answer is used.
-        
-        Args:
-            cache_id: Cache entry ID
-            cache_type: "main" or "temporary"
-            tokens_saved: Tokens saved by using cache
-            credits_saved: Credits saved (optional)
-        """
-        try:
-            if cache_type == "main":
-                cache_entry = self.db.query(MainCache).filter(
-                    MainCache.cache_id == cache_id
-                ).first()
-                
-                if cache_entry:
-                    cache_entry.tokens_saved += tokens_saved
-                    if credits_saved:
-                        cache_entry.credits_saved += credits_saved
-                    else:
-                        cache_entry.credits_saved += self._calculate_credits(tokens_saved)
-                    cache_entry.last_used_at = datetime.utcnow()
-            
-            elif cache_type == "temporary":
-                cache_entry = self.db.query(TemporaryCache).filter(
-                    TemporaryCache.cache_id == cache_id
-                ).first()
-                
-                if cache_entry:
-                    cache_entry.tokens_saved += tokens_saved
-                    cache_entry.last_used_at = datetime.utcnow()
-            
-            self.db.commit()
-            
-        except Exception as e:
-            logger.error(f"Error updating cache stats: {e}")
-            self.db.rollback()
-    
-    def get_cache_stats(
-        self,
-        vendor_id: Optional[str] = None
-    ) -> Dict[str, Any]:
-        """
-        Get cache statistics for a vendor.
-        
-        Args:
-            vendor_id: Vendor ID
-        
-        Returns:
-            Dictionary with cache statistics
-        """
         try:
             effective_vendor_id = vendor_id or self.vendor_id
+            vendor_db_id = self._get_vendor_db_id(effective_vendor_id)
+            
+            if not vendor_db_id:
+                return {
+                    "main_cache": {
+                        "total_entries": 0,
+                        "active_entries": 0,
+                        "total_usage_count": 0,
+                        "total_tokens_saved": 0,
+                        "total_credits_saved": 0
+                    },
+                    "temporary_cache": {
+                        "total_entries": 0,
+                        "active_chats": 0,
+                        "total_usage_count": 0,
+                        "total_tokens_saved": 0
+                    }
+                }
             
             # Main cache stats
-            main_caches = self.db.query(MainCache).filter(
-                MainCache.vendor_id == effective_vendor_id
-            ).all()
+            main_cache_query = self.db.query(MainCache).filter(MainCache.vendor_id == vendor_db_id)
+            main_total = main_cache_query.count()
+            main_active = main_cache_query.filter(MainCache.is_active == True).count()
             
-            main_total = len(main_caches)
-            main_active = sum(1 for c in main_caches if c.is_active)
-            main_total_usage = sum(c.usage_count for c in main_caches)
-            main_total_tokens_saved = sum(c.tokens_saved for c in main_caches)
-            main_total_credits_saved = sum(c.credits_saved for c in main_caches)
+            main_stats = main_cache_query.all()
+            main_usage_count = sum(entry.usage_count for entry in main_stats)
+            main_tokens_saved = sum(entry.tokens_saved for entry in main_stats)
+            main_credits_saved = sum(entry.credits_saved for entry in main_stats)
             
             # Temporary cache stats
-            temp_caches = self.db.query(TemporaryCache).filter(
-                TemporaryCache.vendor_id == effective_vendor_id
-            ).all()
+            temp_cache_query = self.db.query(TemporaryCache).filter(TemporaryCache.vendor_id == vendor_db_id)
+            temp_total = temp_cache_query.count()
             
-            temp_total = len(temp_caches)
-            temp_total_usage = sum(c.usage_count for c in temp_caches)
-            temp_total_tokens_saved = sum(c.tokens_saved for c in temp_caches)
+            # Get unique chat sessions
+            from sqlalchemy import distinct
+            temp_chats = self.db.query(distinct(TemporaryCache.chat_id)).filter(
+                TemporaryCache.vendor_id == vendor_db_id
+            ).count()
             
-            # Group temporary cache by chat
-            temp_by_chat = {}
-            for cache in temp_caches:
-                if cache.chat_id not in temp_by_chat:
-                    temp_by_chat[cache.chat_id] = 0
-                temp_by_chat[cache.chat_id] += 1
+            temp_stats = temp_cache_query.all()
+            temp_usage_count = sum(entry.usage_count for entry in temp_stats)
+            temp_tokens_saved = sum(entry.tokens_saved for entry in temp_stats)
             
             return {
-                "vendor_id": effective_vendor_id,
                 "main_cache": {
                     "total_entries": main_total,
                     "active_entries": main_active,
-                    "total_usage_count": main_total_usage,
-                    "total_tokens_saved": main_total_tokens_saved,
-                    "total_credits_saved": main_total_credits_saved
+                    "total_usage_count": main_usage_count,
+                    "total_tokens_saved": main_tokens_saved,
+                    "total_credits_saved": main_credits_saved
                 },
                 "temporary_cache": {
                     "total_entries": temp_total,
-                    "active_chats": len(temp_by_chat),
-                    "total_usage_count": temp_total_usage,
-                    "total_tokens_saved": temp_total_tokens_saved,
-                    "entries_by_chat": temp_by_chat
+                    "active_chats": temp_chats,
+                    "total_usage_count": temp_usage_count,
+                    "total_tokens_saved": temp_tokens_saved
                 }
             }
-            
         except Exception as e:
             logger.error(f"Error getting cache stats: {e}")
-            return {}
-    
-    def _calculate_credits(self, tokens: int) -> int:
-        """Calculate credits based on tokens."""
-        return max(1, tokens // 100)  # 1 credit per 100 tokens, minimum 1
+            return {
+                "main_cache": {
+                    "total_entries": 0,
+                    "active_entries": 0,
+                    "total_usage_count": 0,
+                    "total_tokens_saved": 0,
+                    "total_credits_saved": 0
+                },
+                "temporary_cache": {
+                    "total_entries": 0,
+                    "active_chats": 0,
+                    "total_usage_count": 0,
+                    "total_tokens_saved": 0
+                }
+            }
 

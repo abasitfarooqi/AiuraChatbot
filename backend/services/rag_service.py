@@ -1,6 +1,6 @@
 """
-RAG (Retrieval-Augmented Generation) Service.
-Handles vector database operations, embeddings, and retrieval with filtering.
+RAG (Retrieval-Augmented Generation) Service with Multi-Vector Search (MVS).
+Handles vector database operations, embeddings, and hybrid retrieval with filtering.
 """
 import json
 import os
@@ -10,53 +10,47 @@ from sentence_transformers import SentenceTransformer
 from typing import List, Dict, Optional, Any
 from pathlib import Path
 from backend.config import get_settings
+from backend.services.mvs_service import MVSService
 from loguru import logger
 
 settings = get_settings()
 
 
 class RAGService:
-    """RAG service for knowledge base retrieval."""
+    """RAG service for knowledge base retrieval with Multi-Vector Search support."""
     
     def __init__(self, vendor_id: Optional[str] = None):
         """Initialize RAG service with vector database and embedding model."""
         self.settings = settings
         self.vendor_id = vendor_id or settings.default_vendor_id
         self.embedding_model = None
+        self.mvs_service = None
         self.client = None
         self.collection = None
+        self.mvs_enabled = False
         self._initialize()
     
     def _initialize(self):
-        """Initialize embedding model and vector database."""
+        """Initialize embedding model, MVS service, and vector database."""
         try:
-            # Initialize embedding model
-            logger.info(f"Loading embedding model: {self.settings.embedding_model}")
+            # Initialize MVS service (includes dense embedding model)
+            logger.info("Initializing MVS service...")
+            self.mvs_service = MVSService(vendor_id=self.vendor_id)
+            self.embedding_model = self.mvs_service.dense_model  # Use MVS dense model
             
-            # Use offline mode if enabled
-            if self.settings.embedding_offline_mode:
-                from backend.services.offline_model_manager import OfflineModelManager
-                model_manager = OfflineModelManager(cache_dir=self.settings.embedding_cache_dir)
-                
-                # Try to load from cache first
-                model = model_manager.load_embedding_model_offline(self.settings.embedding_model)
-                if model:
-                    self.embedding_model = model
-                else:
-                    # Fallback to normal loading (will cache automatically)
-                    logger.warning("Model not in cache, loading from Hugging Face (will cache for offline use)")
-                    os.environ['TRANSFORMERS_CACHE'] = self.settings.embedding_cache_dir
-                    os.environ['HF_HOME'] = self.settings.embedding_cache_dir
-                    self.embedding_model = SentenceTransformer(
-                        self.settings.embedding_model,
-                        device=self.settings.embedding_device,
-                        cache_folder=self.settings.embedding_cache_dir
-                    )
-            else:
-                self.embedding_model = SentenceTransformer(
-                    self.settings.embedding_model,
-                    device=self.settings.embedding_device
-                )
+            # Check if MVS is enabled in config
+            try:
+                from backend.utils.vendor_manager import get_vendor_manager
+                vendor_manager = get_vendor_manager()
+                config_manager = vendor_manager.get_vendor_config_manager(self.vendor_id)
+                unified_config = config_manager.load_config()
+                mvs_config = unified_config.get("rag", {}).get("mvs", {})
+                self.mvs_enabled = mvs_config.get("enabled", False)
+            except Exception as e:
+                logger.warning(f"Could not load MVS config, defaulting to disabled: {e}")
+                self.mvs_enabled = False
+            
+            logger.info(f"MVS enabled: {self.mvs_enabled}")
             
             # Initialize ChromaDB
             db_path = Path(self.settings.chroma_db_path)
@@ -86,7 +80,7 @@ class RAGService:
             
             self.collection = self.client.get_or_create_collection(
                 name=collection_name,
-                metadata={"description": collection_desc, "vendor_id": self.vendor_id}
+                metadata={"description": collection_desc, "vendor_id": self.vendor_id, "mvs_enabled": str(self.mvs_enabled)}
             )
             
             # Auto-load knowledge base if collection is empty
@@ -97,7 +91,7 @@ class RAGService:
                 except Exception as e:
                     logger.warning(f"Failed to auto-load knowledge base for vendor {self.vendor_id}: {e}")
             
-            logger.info(f"RAG service initialized successfully for vendor {self.vendor_id} (collection: {collection_name}, chunks: {self.collection.count()})")
+            logger.info(f"RAG service initialized successfully for vendor {self.vendor_id} (collection: {collection_name}, chunks: {self.collection.count()}, MVS: {self.mvs_enabled})")
             
         except Exception as e:
             logger.error(f"Error initializing RAG service: {e}")
@@ -155,6 +149,12 @@ class RAGService:
                         metadata={"description": collection_desc, "vendor_id": self.vendor_id}
                     )
             
+            # Initialize sparse index if MVS is enabled
+            if self.mvs_enabled:
+                corpus = [chunk.get("content", "") for chunk in chunks if chunk.get("content")]
+                self.mvs_service.initialize_sparse_index(corpus)
+                logger.info(f"Initialized sparse index with {len(corpus)} documents")
+            
             # Process chunks
             ids = []
             documents = []
@@ -168,11 +168,16 @@ class RAGService:
                 if not content:
                     continue
                 
-                # Generate embedding
-                embedding = self.embedding_model.encode(
-                    content,
-                    show_progress_bar=False
-                ).tolist()
+                # Generate dense embedding
+                dense_embedding = self.mvs_service.generate_dense_embedding(content)
+                
+                # Generate sparse embedding if MVS is enabled
+                sparse_embedding = None
+                if self.mvs_enabled:
+                    try:
+                        sparse_embedding = self.mvs_service.generate_sparse_embedding(content, method="bm25")
+                    except Exception as e:
+                        logger.warning(f"Failed to generate sparse embedding for chunk {chunk_id}: {e}")
                 
                 # Prepare metadata
                 metadata = {
@@ -188,10 +193,15 @@ class RAGService:
                     "confidence": chunk.get("metadata", {}).get("confidence", "medium")
                 }
                 
+                # Store sparse embedding in metadata if MVS is enabled
+                if self.mvs_enabled and sparse_embedding:
+                    metadata["sparse_embedding"] = json.dumps(sparse_embedding)
+                    metadata["sparse_model"] = "bm25"
+                
                 ids.append(chunk_id)
                 documents.append(content)
                 metadatas.append(metadata)
-                embeddings.append(embedding)
+                embeddings.append(dense_embedding)
             
             # Add to collection in batches
             batch_size = 100
@@ -223,10 +233,7 @@ class RAGService:
         vendor_id: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
-        Retrieve relevant chunks with improved filtering for rental vs sale queries.
-        """
-        """
-        Retrieve relevant chunks for a query.
+        Retrieve relevant chunks using Multi-Vector Search (MVS) if enabled, otherwise single embedding.
         
         Args:
             query: User query string
@@ -240,74 +247,184 @@ class RAGService:
         try:
             top_k = top_k or self.settings.rag_top_k
             
-            # Generate query embedding
-            query_embedding = self.embedding_model.encode(
-                query,
-                show_progress_bar=False
-            ).tolist()
-            
-            # Build where clause for filtering
-            # Note: We don't filter by vendor_id since each vendor has its own collection
-            # The collection itself is vendor-specific, so no need for vendor_id filter
-            where_clause = {}
-            if filters:
-                where_clause.update(filters)
-            # Removed vendor_id filter - collection is already vendor-specific
-            
-            # Enhanced filtering: if query mentions "rental", prioritize rental chunks
-            query_lower = query.lower()
-            # Note: We don't filter here, but we'll boost rental chunks in retrieval
-            # The LLM prompt will handle the distinction
-            
-            # Query collection
-            results = self.collection.query(
-                query_embeddings=[query_embedding],
-                n_results=top_k,
-                where=where_clause if where_clause else None
-            )
-            
-            # Format results
-            retrieved_chunks = []
-            if results["ids"] and len(results["ids"][0]) > 0:
-                # Apply similarity threshold (more lenient)
-                # Lower threshold for better retrieval
-                # Note: ChromaDB uses cosine distance, similarity = 1 - distance
-                # Distance can be > 1, making similarity negative
-                threshold = max(-0.5, self.settings.rag_similarity_threshold - 0.3)  # More lenient for negative similarities
-                
-                for i in range(len(results["ids"][0])):
-                    chunk = {
-                        "id": results["ids"][0][i],
-                        "content": results["documents"][0][i],
-                        "metadata": results["metadatas"][0][i],
-                        "distance": results["distances"][0][i] if results.get("distances") else None,
-                        "similarity": 1 - results["distances"][0][i] if results.get("distances") else None
-                    }
-                    
-                    # Accept if similarity meets threshold OR if it's the best match (top result)
-                    if chunk["similarity"] is not None:
-                        if chunk["similarity"] >= threshold or i == 0:  # Always include top result
-                            retrieved_chunks.append(chunk)
-                    elif i == 0:  # Include top result even if similarity is None
-                        retrieved_chunks.append(chunk)
-                
-                # If still no chunks, force include top result
-                if not retrieved_chunks and len(results["ids"][0]) > 0:
-                    chunk = {
-                        "id": results["ids"][0][0],
-                        "content": results["documents"][0][0],
-                        "metadata": results["metadatas"][0][0],
-                        "distance": results["distances"][0][0] if results.get("distances") else None,
-                        "similarity": 1 - results["distances"][0][0] if results.get("distances") else None
-                    }
-                    retrieved_chunks.append(chunk)
-            
-            logger.debug(f"Retrieved {len(retrieved_chunks)} chunks for query: {query[:50]}...")
-            return retrieved_chunks
+            # Use MVS hybrid search if enabled
+            if self.mvs_enabled:
+                return self._retrieve_mvs(query, top_k, filters)
+            else:
+                return self._retrieve_single(query, top_k, filters)
             
         except Exception as e:
             logger.error(f"Error retrieving chunks: {e}")
             return []
+    
+    def _retrieve_single(
+        self,
+        query: str,
+        top_k: int,
+        filters: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, Any]]:
+        """Retrieve using single dense embedding (legacy method)."""
+        # Generate query embedding
+        query_embedding = self.mvs_service.generate_dense_embedding(query)
+        
+        # Build where clause for filtering
+        where_clause = {}
+        if filters:
+            where_clause.update(filters)
+        
+        # Query collection
+        results = self.collection.query(
+            query_embeddings=[query_embedding],
+            n_results=top_k,
+            where=where_clause if where_clause else None
+        )
+        
+        # Format results
+        retrieved_chunks = []
+        if results["ids"] and len(results["ids"][0]) > 0:
+            threshold = max(-0.5, self.settings.rag_similarity_threshold - 0.3)
+            
+            for i in range(len(results["ids"][0])):
+                chunk = {
+                    "id": results["ids"][0][i],
+                    "content": results["documents"][0][i],
+                    "metadata": results["metadatas"][0][i],
+                    "distance": results["distances"][0][i] if results.get("distances") else None,
+                    "similarity": 1 - results["distances"][0][i] if results.get("distances") else None
+                }
+                
+                if chunk["similarity"] is not None:
+                    if chunk["similarity"] >= threshold or i == 0:
+                        retrieved_chunks.append(chunk)
+                elif i == 0:
+                    retrieved_chunks.append(chunk)
+            
+            if not retrieved_chunks and len(results["ids"][0]) > 0:
+                chunk = {
+                    "id": results["ids"][0][0],
+                    "content": results["documents"][0][0],
+                    "metadata": results["metadatas"][0][0],
+                    "distance": results["distances"][0][0] if results.get("distances") else None,
+                    "similarity": 1 - results["distances"][0][0] if results.get("distances") else None
+                }
+                retrieved_chunks.append(chunk)
+        
+        logger.debug(f"Retrieved {len(retrieved_chunks)} chunks (single embedding) for query: {query[:50]}...")
+        return retrieved_chunks
+    
+    def _retrieve_mvs(
+        self,
+        query: str,
+        top_k: int,
+        filters: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, Any]]:
+        """Retrieve using Multi-Vector Search (dense + sparse hybrid)."""
+        try:
+            # Get MVS config
+            from backend.utils.vendor_manager import get_vendor_manager
+            vendor_manager = get_vendor_manager()
+            config_manager = vendor_manager.get_vendor_config_manager(self.vendor_id)
+            unified_config = config_manager.load_config()
+            mvs_config = unified_config.get("rag", {}).get("mvs", {})
+            
+            fusion_method = mvs_config.get("fusion_method", "rrf")
+            dense_weight = mvs_config.get("dense_weight", 0.6)
+            sparse_weight = mvs_config.get("sparse_weight", 0.4)
+            rrf_k = mvs_config.get("rrf_k", 60)
+            
+            # Step 1: Generate multi-vectors for query
+            query_dense = self.mvs_service.generate_dense_embedding(query)
+            query_sparse = self.mvs_service.generate_sparse_embedding(query, method="bm25")
+            
+            # Step 2: Dense search (ChromaDB)
+            where_clause = {}
+            if filters:
+                where_clause.update(filters)
+            
+            dense_results_raw = self.collection.query(
+                query_embeddings=[query_dense],
+                n_results=top_k * 2,  # Get more results for fusion
+                where=where_clause if where_clause else None
+            )
+            
+            # Format dense results
+            dense_results = []
+            if dense_results_raw["ids"] and len(dense_results_raw["ids"][0]) > 0:
+                for i in range(len(dense_results_raw["ids"][0])):
+                    chunk = {
+                        "id": dense_results_raw["ids"][0][i],
+                        "chunk_id": dense_results_raw["ids"][0][i],
+                        "content": dense_results_raw["documents"][0][i],
+                        "metadata": dense_results_raw["metadatas"][0][i],
+                        "distance": dense_results_raw["distances"][0][i] if dense_results_raw.get("distances") else None,
+                        "similarity": 1 - dense_results_raw["distances"][0][i] if dense_results_raw.get("distances") else None
+                    }
+                    dense_results.append(chunk)
+            
+            # Step 3: Sparse search (in-memory)
+            sparse_results = []
+            if query_sparse:
+                # Get all chunks from collection
+                all_chunks = self.collection.get()
+                
+                # Calculate sparse similarity for each chunk
+                chunk_scores = []
+                for i, chunk_id in enumerate(all_chunks["ids"]):
+                    chunk_metadata = all_chunks["metadatas"][i] if all_chunks.get("metadatas") else {}
+                    chunk_content = all_chunks["documents"][i] if all_chunks.get("documents") else ""
+                    
+                    # Get stored sparse embedding
+                    stored_sparse = chunk_metadata.get("sparse_embedding")
+                    if stored_sparse:
+                        try:
+                            chunk_sparse = json.loads(stored_sparse)
+                            similarity = self.mvs_service.sparse_similarity(query_sparse, chunk_sparse)
+                            
+                            chunk_scores.append({
+                                "id": chunk_id,
+                                "chunk_id": chunk_id,
+                                "content": chunk_content,
+                                "metadata": chunk_metadata,
+                                "similarity": similarity
+                            })
+                        except Exception as e:
+                            logger.debug(f"Error parsing sparse embedding for chunk {chunk_id}: {e}")
+                
+                # Sort by similarity and take top K
+                chunk_scores.sort(key=lambda x: x["similarity"], reverse=True)
+                sparse_results = chunk_scores[:top_k * 2]
+            
+            # Step 4: Fuse results
+            if fusion_method == "rrf":
+                ranked_chunks = self.mvs_service.reciprocal_rank_fusion(
+                    dense_results, sparse_results, k=rrf_k
+                )
+            else:
+                ranked_chunks = self.mvs_service.weighted_fusion(
+                    dense_results, sparse_results,
+                    dense_weight=dense_weight, sparse_weight=sparse_weight
+                )
+            
+            # Step 5: Apply threshold and return top K
+            threshold = max(-0.5, self.settings.rag_similarity_threshold - 0.3)
+            retrieved_chunks = []
+            
+            for chunk in ranked_chunks[:top_k]:
+                similarity = chunk.get("combined_similarity") or chunk.get("rrf_score") or chunk.get("similarity", 0.0)
+                if similarity >= threshold or len(retrieved_chunks) == 0:  # Always include top result
+                    retrieved_chunks.append(chunk)
+            
+            # Ensure at least one result
+            if not retrieved_chunks and ranked_chunks:
+                retrieved_chunks.append(ranked_chunks[0])
+            
+            logger.debug(f"Retrieved {len(retrieved_chunks)} chunks (MVS hybrid) for query: {query[:50]}...")
+            return retrieved_chunks
+            
+        except Exception as e:
+            logger.error(f"Error in MVS retrieval: {e}")
+            # Fallback to single embedding
+            return self._retrieve_single(query, top_k, filters)
     
     def is_domain_relevant(self, query: str) -> bool:
         """Check if query is relevant to the domain."""

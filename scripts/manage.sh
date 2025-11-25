@@ -86,22 +86,20 @@ start_server() {
     # Create necessary directories
     mkdir -p data logs config/vendors rag_knowledge_base
     
-    # Check if database is accessible
-    echo -e "${YELLOW}🔍 Checking database connection...${NC}"
-    python3 -c "
-from backend.config.database import get_database_engine
-try:
-    engine = get_database_engine()
-    with engine.connect() as conn:
-        print('✅ Database connection successful')
-except Exception as e:
-    print(f'⚠️  Database connection warning: {e}')
-    print('   Server will still start, but database features may not work')
-" 2>/dev/null || echo -e "${YELLOW}⚠️  Could not verify database connection${NC}"
-    
-    # Start server in background
+    # Start server in background with environment variables
     echo -e "${GREEN}Starting server process...${NC}"
-    nohup uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload > logs/server.log 2>&1 &
+    # Use venv's python3 explicitly and pass all environment variables
+    # This matches start_server.sh approach but runs in background
+    cd "$PROJECT_DIR"
+    VENV_PYTHON="$PROJECT_DIR/venv/bin/python3"
+    nohup env USE_MYSQL="$USE_MYSQL" \
+             MYSQL_USER="$MYSQL_USER" \
+             MYSQL_PASSWORD="$MYSQL_PASSWORD" \
+             MYSQL_DATABASE="$MYSQL_DATABASE" \
+             MYSQL_HOST="$MYSQL_HOST" \
+             MYSQL_PORT="$MYSQL_PORT" \
+             JWT_SECRET_KEY="$JWT_SECRET_KEY" \
+             "$VENV_PYTHON" -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload > logs/server.log 2>&1 &
     SERVER_PID=$!
     echo $SERVER_PID > "$PID_FILE"
     

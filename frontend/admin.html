@@ -400,33 +400,43 @@
         <div id="memory" class="tab-content">
             <div class="section">
                 <h2>Memory Management</h2>
+                <p style="margin-bottom: 1.5rem; color: #666;">
+                    Manage conversation memory per chat session. Memory stores entities, topics, intents, and conversation summaries.
+                </p>
                 
                 <div class="form-group">
-                    <label>Clear Chat Memory Only</label>
-                    <input type="text" id="clearMemoryChatId" placeholder="Enter chat_id to clear memory">
-                    <button onclick="clearMemory()" style="margin-top: 0.5rem; background: #e74c3c;">Clear Memory</button>
-                    <small style="display: block; margin-top: 0.25rem; color: #666;">
-                        Clears conversation context only. Chat history remains.
-                    </small>
-                </div>
-                
-                <div class="form-group" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
-                    <label>Clear ALL Chat Data</label>
-                    <input type="text" id="clearAllChatId" placeholder="Enter chat_id to clear everything">
-                    <button onclick="clearAllChat()" style="margin-top: 0.5rem; background: #c0392b; color: white;">Clear All Data</button>
-                    <small style="display: block; margin-top: 0.25rem; color: #c0392b;">
-                        ⚠️ WARNING: This will delete ALL messages, memory, and token usage for this chat. This cannot be undone!
-                    </small>
+                    <h3>Memory Statistics</h3>
+                    <div id="memoryStats" style="padding: 1rem; background: #f8f9fa; margin-bottom: 1rem;">Loading...</div>
+                    <button onclick="loadMemoryStats()" style="background: #27ae60;">Refresh Stats</button>
                 </div>
                 
                 <div class="form-group" style="margin-top: 2rem;">
-                    <label>How to Get Chat ID:</label>
-                    <ol style="margin-left: 1.5rem; margin-top: 0.5rem; color: #666;">
-                        <li>In the chat interface, the Chat ID is shown in the header</li>
-                        <li>Click "Copy" button next to Chat ID to copy it</li>
-                        <li>Or check the chat list sidebar - click on chat ID to copy</li>
-                        <li>Or use API: <code>GET /api/v1/chat/chats/{user_id}</code></li>
-                    </ol>
+                    <h3>Memory List (All Memories - No Chat ID Required)</h3>
+                    <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">
+                        View all conversation memories for this vendor. Click on any memory to view details.
+                    </p>
+                    <div style="margin-bottom: 1rem;">
+                        <button onclick="loadMemoryList()" style="background: #3498db; margin-right: 0.5rem;">Load All Memories</button>
+                        <button onclick="clearAllMemories()" style="background: #e74c3c;">Clear All Memories</button>
+                    </div>
+                    <div id="memoryList" style="background: #f8f9fa; padding: 1rem; max-height: 500px; overflow-y: auto;">
+                        <p style="color: #666;">Click "Load All Memories" to view conversation memories</p>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
+                    <h3>Memory Actions (Optional: Search by Chat ID)</h3>
+                    <p style="color: #666; margin-bottom: 1rem; font-size: 0.9rem;">
+                        You can optionally search for a specific chat's memory by entering its Chat ID below. Leave empty and click "Get Memory" to view all memories.
+                    </p>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                        <input type="text" id="memoryChatId" placeholder="Enter Chat ID (optional)" style="flex: 1; min-width: 200px; padding: 0.75rem;">
+                        <button onclick="getMemory()" style="background: #3498db;">Get Memory</button>
+                        <button onclick="clearMemory()" style="background: #e74c3c;">Clear Memory</button>
+                    </div>
+                    <div id="memoryDetails" style="background: #f8f9fa; padding: 1rem; margin-top: 1rem; display: none; max-height: 400px; overflow-y: auto; border-radius: 4px;">
+                        <!-- Memory details will be displayed here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -606,6 +616,70 @@
                         <input type="file" id="kbFileUpload" accept=".json" onchange="uploadKBFile()" style="display: none;">
                     </label>
                 </div>
+                <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
+                    <h3>Multi-Vector Search (MVS) Configuration</h3>
+                    <div id="mvsStatus" style="padding: 1rem; background: #f8f9fa; margin-bottom: 1rem; border: 1px solid #ddd;">Loading MVS status...</div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Enable MVS</label>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                                <input type="checkbox" id="mvsEnabled" onchange="updateMVSConfig()">
+                                <span>Use Multi-Vector Search (Dense + Sparse)</span>
+                            </label>
+                            <small style="display: block; margin-top: 0.25rem; color: #666;">
+                                Combines semantic (dense) and keyword (sparse) search for better retrieval
+                            </small>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Fusion Method</label>
+                            <select id="mvsFusionMethod" onchange="updateMVSConfig()" style="width: 100%; padding: 0.5rem;">
+                                <option value="rrf">Reciprocal Rank Fusion (RRF)</option>
+                                <option value="weighted">Weighted Fusion</option>
+                            </select>
+                            <small style="display: block; margin-top: 0.25rem; color: #666;">
+                                How to combine dense and sparse results
+                            </small>
+                        </div>
+                    </div>
+                    
+                    <div id="mvsWeightConfig" style="display: none; padding: 1rem; background: #f8f9fa; margin-bottom: 1rem; border: 1px solid #ddd;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Weight Configuration (for Weighted Fusion)</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div>
+                                <label style="display: block; margin-bottom: 0.25rem;">Dense Weight: <span id="mvsDenseWeightValue">0.6</span></label>
+                                <input type="range" id="mvsDenseWeight" min="0" max="1" step="0.1" value="0.6" oninput="document.getElementById('mvsDenseWeightValue').textContent = this.value; updateMVSConfig();" style="width: 100%;">
+                                <small style="display: block; margin-top: 0.25rem; color: #666;">Semantic similarity weight</small>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 0.25rem;">Sparse Weight: <span id="mvsSparseWeightValue">0.4</span></label>
+                                <input type="range" id="mvsSparseWeight" min="0" max="1" step="0.1" value="0.4" oninput="document.getElementById('mvsSparseWeightValue').textContent = this.value; updateMVSConfig();" style="width: 100%;">
+                                <small style="display: block; margin-top: 0.25rem; color: #666;">Keyword matching weight</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Sparse Model</label>
+                            <select id="mvsSparseModel" onchange="updateMVSConfig()" style="width: 100%; padding: 0.5rem;">
+                                <option value="bm25">BM25 (Recommended)</option>
+                                <option value="tfidf">TF-IDF</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">RRF K Parameter</label>
+                            <input type="number" id="mvsRrfK" min="10" max="100" step="10" value="60" onchange="updateMVSConfig()" style="width: 100%; padding: 0.5rem;">
+                            <small style="display: block; margin-top: 0.25rem; color: #666;">Higher = more weight on top results</small>
+                        </div>
+                    </div>
+                    
+                    <button onclick="loadMVSStatus()" style="background: #27ae60; margin-right: 0.5rem;">Refresh MVS Status</button>
+                    <button onclick="testMVSQuery()" style="background: #3498db; color: white;">Test MVS Query</button>
+                </div>
+                
                 <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #ddd;">
                     <h3>ChromaDB Management</h3>
                     <div id="chromadbInfo" style="padding: 0.75rem; background: #ecf0f1; margin-bottom: 1rem;">Loading...</div>
@@ -945,7 +1019,7 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                         </div>
                         
                         <div id="temporaryCacheList" style="background: #f8f9fa; padding: 1rem; max-height: 500px; overflow-y: auto;">
-                            <p style="color: #666;">Click "Load Entries" to view temporary cache</p>
+                            <p style="color: #666; padding: 2rem; text-align: center;">No temporary cache entries found</p>
                         </div>
                     </div>
                 </div>
@@ -1007,7 +1081,8 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
         const API_BASE = '/api/v1';
         
         // Super Admin - Vendor Management (declared early to avoid initialization errors)
-        let currentVendorId = null;
+        // Load saved vendor from localStorage, or default to null
+        let currentVendorId = localStorage.getItem('admin_currentVendorId') || null;
         let allVendors = [];
         
         // Authentication
@@ -1128,6 +1203,7 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
             if (tabName === 'knowledge-base') {
                 loadKBVersions();
                 loadKnowledgeBaseEditor();
+                loadMVSStatus();
             }
             if (tabName === 'aiura-mind') {
                 // Auto-fill vendor info if vendor is selected - ALWAYS verify current vendor
@@ -1175,9 +1251,16 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
             if (tabName === 'database') {
                 loadDatabaseStats();
             }
+            if (tabName === 'memory') {
+                loadMemoryStats();
+                loadMemoryList();
+            }
             if (tabName === 'caching') {
                 loadCacheStats();
                 loadCacheSettings();
+                // Auto-load cache history when tab is opened
+                loadMainCache();
+                loadTemporaryCache();
             }
             if (tabName === 'updates') {
                 loadOfflineModels();
@@ -1470,32 +1553,232 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
             }
         }
         
-        async function clearMemory() {
-            const chatId = document.getElementById('clearMemoryChatId').value.trim();
+        async function loadMemoryStats() {
+            try {
+                if (!currentVendorId) {
+                    document.getElementById('memoryStats').innerHTML = '<p style="color: #e74c3c;">⚠️ Please select a vendor first</p>';
+                    return;
+                }
+                const response = await fetch(`${API_BASE}/memory/stats?vendor_id=${currentVendorId}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const stats = data.stats;
+                    document.getElementById('memoryStats').innerHTML = `
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                            <div style="padding: 1rem; background: white; border-radius: 4px; border-left: 4px solid #3498db;">
+                                <strong style="display: block; color: #2c3e50; margin-bottom: 0.5rem;">Total Memories</strong>
+                                <span style="font-size: 1.5rem; font-weight: bold; color: #3498db;">${stats.total || 0}</span>
+                            </div>
+                            <div style="padding: 1rem; background: white; border-radius: 4px; border-left: 4px solid #27ae60;">
+                                <strong style="display: block; color: #2c3e50; margin-bottom: 0.5rem;">Active</strong>
+                                <span style="font-size: 1.5rem; font-weight: bold; color: #27ae60;">${stats.active || 0}</span>
+                            </div>
+                            <div style="padding: 1rem; background: white; border-radius: 4px; border-left: 4px solid #95a5a6;">
+                                <strong style="display: block; color: #2c3e50; margin-bottom: 0.5rem;">Inactive</strong>
+                                <span style="font-size: 1.5rem; font-weight: bold; color: #95a5a6;">${stats.inactive || 0}</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('memoryStats').innerHTML = '<p style="color: #e74c3c;">Error loading stats</p>';
+                }
+            } catch (error) {
+                console.error('Error loading memory stats:', error);
+                document.getElementById('memoryStats').innerHTML = '<p style="color: #e74c3c;">Error loading stats</p>';
+            }
+        }
+        
+        async function loadMemoryList() {
+            try {
+                document.getElementById('memoryList').innerHTML = '<p style="color: #666; padding: 1rem;">Loading memories...</p>';
+                
+                if (!currentVendorId) {
+                    document.getElementById('memoryList').innerHTML = '<p style="color: #e74c3c;">⚠️ Please select a vendor first</p>';
+                    return;
+                }
+                console.log('Loading memories for vendor:', currentVendorId);
+                
+                const response = await fetch(`${API_BASE}/memory/list?vendor_id=${currentVendorId}&limit=100`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Memory list response:', data);
+                
+                if (data.status === 'success' && data.memories) {
+                    if (data.memories.length === 0) {
+                        document.getElementById('memoryList').innerHTML = '<p style="color: #666; padding: 2rem; text-align: center;">No memories found. Memories will appear here after conversations are processed.</p>';
+                        return;
+                    }
+                    
+                    let html = `<div style="margin-bottom: 1rem; padding: 0.5rem; background: #e8f5e9; border-radius: 4px;">
+                        <strong>Total: ${data.total || data.memories.length} memories</strong> 
+                        <span style="color: #666; font-size: 0.9rem;">(Showing ${data.memories.length})</span>
+                    </div>`;
+                    html += '<div style="display: grid; gap: 0.5rem;">';
+                    
+                    data.memories.forEach(memory => {
+                        html += `
+                            <div style="padding: 1rem; background: white; border-radius: 4px; border-left: 4px solid #3498db; cursor: pointer; transition: background 0.2s;" 
+                                 onmouseover="this.style.background='#f0f8ff'" 
+                                 onmouseout="this.style.background='white'"
+                                 onclick="getMemoryById('${memory.chat_id}')">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div style="flex: 1;">
+                                        <strong style="color: #2c3e50; display: block; margin-bottom: 0.5rem;">
+                                            Chat ID: <code style="background: #f5f5f5; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.9rem;">${memory.chat_id}</code>
+                                        </strong>
+                                        <div style="display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
+                                            <span><strong>Turns:</strong> ${memory.turn_count || 0}</span>
+                                            <span><strong>Topics:</strong> ${(memory.topics || []).length}</span>
+                                            <span><strong>Entities:</strong> ${Object.keys(memory.entities || {}).length}</span>
+                                            <span><strong>Intents:</strong> ${(memory.intent_history || []).length}</span>
+                                        </div>
+                                        <small style="color: #999; font-size: 0.8rem;">
+                                            Last accessed: ${memory.last_accessed_at ? new Date(memory.last_accessed_at).toLocaleString() : 'Never'} | 
+                                            Created: ${memory.created_at ? new Date(memory.created_at).toLocaleString() : 'Unknown'}
+                                        </small>
+                                    </div>
+                                    <button onclick="event.stopPropagation(); clearMemoryById('${memory.chat_id}')" 
+                                            style="background: #e74c3c; color: white; border: none; padding: 0.5rem 1rem; border-radius: 3px; cursor: pointer; font-size: 0.85rem; margin-left: 1rem;">
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    document.getElementById('memoryList').innerHTML = html;
+                } else {
+                    document.getElementById('memoryList').innerHTML = `<div style="padding: 1rem; background: #fee; border-left: 4px solid #e74c3c; border-radius: 4px;">
+                        <strong style="color: #e74c3c;">Error loading memories:</strong><br>
+                        <span style="color: #666;">${data.detail || 'Unknown error'}</span>
+                    </div>`;
+                }
+            } catch (error) {
+                console.error('Error loading memory list:', error);
+                document.getElementById('memoryList').innerHTML = `<div style="padding: 1rem; background: #fee; border-left: 4px solid #e74c3c; border-radius: 4px;">
+                    <strong style="color: #e74c3c;">Error loading memories:</strong><br>
+                    <span style="color: #666; font-size: 0.9rem;">${error.message}</span><br>
+                    <small style="color: #999;">Check console for details</small>
+                </div>`;
+            }
+        }
+        
+        async function getMemory() {
+            const chatId = document.getElementById('memoryChatId').value.trim();
             if (!chatId) {
-                alert('Please enter a chat_id');
+                // If no chat ID, show all memories instead
+                loadMemoryList();
                 return;
             }
-            
-            if (!confirm(`Are you sure you want to clear memory for chat ${chatId}?\n\nThis will only clear conversation context. Messages will remain.`)) {
+            await getMemoryById(chatId);
+        }
+        
+        async function getMemoryById(chatId) {
+            try {
+                if (!currentVendorId) {
+                    alert('⚠️ Please select a vendor first');
+                    return;
+                }
+                const response = await fetch(`${API_BASE}/memory/chat/${chatId}?vendor_id=${currentVendorId}`);
+                const data = await response.json();
+                
+                if (data.status === 'success' && data.memory) {
+                    const mem = data.memory;
+                    document.getElementById('memoryDetails').style.display = 'block';
+                    document.getElementById('memoryDetails').innerHTML = `
+                        <h4 style="margin-top: 0; color: #2c3e50;">Memory for Chat: ${chatId}</h4>
+                        <div style="margin-top: 1rem;">
+                            <strong>Turn Count:</strong> ${mem.turn_count || 0}<br>
+                            <strong>Topics:</strong> ${(mem.topics || []).length > 0 ? mem.topics.join(', ') : 'None'}<br>
+                            <strong>Entities:</strong> ${Object.keys(mem.entities || {}).length > 0 ? JSON.stringify(mem.entities, null, 2) : 'None'}<br>
+                            <strong>Intent History:</strong> ${(mem.intent_history || []).length} intents<br>
+                            ${mem.context_summary ? `<strong>Summary:</strong> ${mem.context_summary}` : ''}
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <button onclick="clearMemoryById('${chatId}')" style="background: #e74c3c; color: white; border: none; padding: 0.5rem 1rem; border-radius: 3px; cursor: pointer;">Clear This Memory</button>
+                        </div>
+                    `;
+                    document.getElementById('memoryChatId').value = chatId;
+                } else {
+                    alert('Memory not found');
+                }
+            } catch (error) {
+                console.error('Error getting memory:', error);
+                alert('Error getting memory');
+            }
+        }
+        
+        async function clearMemory() {
+            const chatId = document.getElementById('memoryChatId').value.trim();
+            if (!chatId) {
+                alert('Please enter a chat ID');
+                return;
+            }
+            await clearMemoryById(chatId);
+        }
+        
+        async function clearMemoryById(chatId) {
+            if (!confirm(`Are you sure you want to clear memory for chat ${chatId}?\n\nThis will only clear conversation memory (entities, topics, intents). Messages will remain.`)) {
                 return;
             }
             
             try {
-                const response = await fetch(`${API_BASE}/chat/memory/clear/${chatId}`, {
-                    method: 'POST'
+                if (!currentVendorId) {
+                    alert('⚠️ Please select a vendor first');
+                    return;
+                }
+                const response = await fetch(`${API_BASE}/memory/chat/${chatId}?vendor_id=${currentVendorId}`, {
+                    method: 'DELETE'
                 });
                 
                 const data = await response.json();
                 if (data.status === 'success') {
                     alert('Memory cleared successfully');
-                    document.getElementById('clearMemoryChatId').value = '';
+                    document.getElementById('memoryChatId').value = '';
+                    document.getElementById('memoryDetails').style.display = 'none';
+                    loadMemoryStats();
+                    loadMemoryList();
                 } else {
-                    alert('Error clearing memory');
+                    alert('Error clearing memory: ' + (data.detail || 'Unknown error'));
                 }
             } catch (error) {
                 console.error('Error clearing memory:', error);
                 alert('Error clearing memory');
+            }
+        }
+        
+        async function clearAllMemories() {
+            if (!confirm('⚠️ WARNING: Are you sure you want to clear ALL memories for this vendor?\n\nThis will delete all conversation memory data. This cannot be undone!')) {
+                return;
+            }
+            
+            try {
+                if (!currentVendorId) {
+                    alert('⚠️ Please select a vendor first');
+                    return;
+                }
+                const response = await fetch(`${API_BASE}/memory/vendor/${currentVendorId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    alert(`Cleared ${data.deleted_count || 0} memories successfully`);
+                    loadMemoryStats();
+                    loadMemoryList();
+                } else {
+                    alert('Error clearing memories: ' + (data.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error clearing all memories:', error);
+                alert('Error clearing all memories');
             }
         }
         
@@ -2802,6 +3085,9 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
         
         async function switchActiveVendorById(vendorId) {
             currentVendorId = vendorId;
+            // Save to localStorage for persistence across page refreshes
+            localStorage.setItem('admin_currentVendorId', vendorId);
+            
             currentConfigVersion = 'current';
             currentKBVersion = 'current';
             const vendor = allVendors.find(v => v.vendor_id === vendorId);
@@ -2826,17 +3112,39 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                     document.getElementById('aiuraVendorName').value = vendor.vendor_name || '';
                 }
             }
-            // Reload all vendor-specific tabs
+            
+            // Reload all vendor-specific tabs and data
             loadVendors();
             
-            // Reload versions and data for the new vendor
-            if (document.getElementById('unified-config').style.display !== 'none') {
+            // Get currently visible tab to reload it
+            const visibleTab = Array.from(document.querySelectorAll('.tab-content')).find(tab => tab.style.display !== 'none');
+            const currentTabName = visibleTab ? visibleTab.id : null;
+            
+            // Reload all vendor-specific data based on current tab
+            if (currentTabName === 'dashboard') {
+                await loadDashboardStats();
+            } else if (currentTabName === 'models') {
+                await loadModels();
+            } else if (currentTabName === 'rag') {
+                await getRAGStats();
+            } else if (currentTabName === 'memory') {
+                await loadMemoryStats();
+                await loadMemoryList();
+            } else if (currentTabName === 'config') {
+                await loadLLMConfig();
+            } else if (currentTabName === 'unified-config') {
                 await loadConfigVersions();
-                loadUnifiedConfig();
-            }
-            if (document.getElementById('knowledge-base').style.display !== 'none') {
+                await loadUnifiedConfig();
+            } else if (currentTabName === 'knowledge-base') {
                 await loadKBVersions();
-                loadKnowledgeBaseEditor();
+                await loadKnowledgeBaseEditor();
+            } else if (currentTabName === 'caching') {
+                await loadCacheStats();
+                await loadCacheSettings();
+                await loadMainCache();
+                await loadTemporaryCache();
+            } else if (currentTabName === 'database') {
+                // Database tab will reload when opened
             }
         }
         
@@ -3611,33 +3919,60 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
         
         async function loadMainCache() {
             try {
-                let url = `${API_BASE}/cache/main?limit=50&active_only=true`;
+                document.getElementById('mainCacheList').innerHTML = '<p style="color: #666; padding: 1rem;">Loading...</p>';
+                
+                // Get vendor slug from currentVendorId (which is already a slug)
+                // Build URL - use vendor slug (API will convert to ID)
+                let url = `${API_BASE}/cache/main?limit=100&active_only=false`;
                 if (currentVendorId) {
                     url += `&vendor_id=${currentVendorId}`;
                 }
                 
+                console.log('Loading main cache from:', url);
                 const response = await fetch(url);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
                 const data = await response.json();
+                console.log('Main cache response:', data);
                 
                 if (data.entries && data.entries.length > 0) {
-                    let html = `<div style="margin-bottom: 0.5rem;"><strong>Total: ${data.total} entries</strong></div>`;
-                    html += '<div style="max-height: 400px; overflow-y: auto;">';
+                    let html = `<div style="margin-bottom: 0.5rem; padding: 0.5rem; background: #e8f5e9; border-radius: 4px;">
+                        <strong>Total: ${data.total || data.entries.length} entries</strong> 
+                        <span style="color: #666; font-size: 0.9rem;">(Showing ${data.entries.length})</span>
+                    </div>`;
+                    html += '<div style="max-height: 500px; overflow-y: auto;">';
                     
                     data.entries.forEach(entry => {
-                        html += `<div style="padding: 1rem; margin-bottom: 1rem; background: white; border: 1px solid #ddd; border-left: 4px solid ${entry.is_active ? '#27ae60' : '#95a5a6'};">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <strong style="color: #2c3e50;">${entry.cache_id}</strong>
-                                <span style="font-size: 0.85rem; color: #666;">${entry.is_active ? '✓ Active' : '✗ Inactive'}</span>
+                        html += `<div style="padding: 1rem; margin-bottom: 1rem; background: white; border: 1px solid #ddd; border-left: 4px solid ${entry.is_active ? '#27ae60' : '#95a5a6'}; border-radius: 4px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; align-items: start;">
+                                <div style="flex: 1;">
+                                    <strong style="color: #2c3e50; font-size: 0.9rem;">Cache ID:</strong> 
+                                    <code style="background: #f5f5f5; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.85rem;">${entry.cache_id}</code>
+                                </div>
+                                <span style="font-size: 0.85rem; color: ${entry.is_active ? '#27ae60' : '#95a5a6'}; font-weight: 600;">
+                                    ${entry.is_active ? '✓ Active' : '✗ Inactive'}
+                                </span>
                             </div>
-                            <div style="margin-bottom: 0.5rem;"><strong>Q:</strong> ${entry.question.substring(0, 100)}${entry.question.length > 100 ? '...' : ''}</div>
-                            <div style="margin-bottom: 0.5rem;"><strong>A:</strong> ${entry.answer.substring(0, 150)}${entry.answer.length > 150 ? '...' : ''}</div>
-                            <div style="display: flex; gap: 1rem; font-size: 0.85rem; color: #666;">
-                                <span>Used: ${entry.usage_count}x</span>
-                                <span>Tokens Saved: ${entry.tokens_saved.toLocaleString()}</span>
-                                <span>Credits Saved: ${entry.credits_saved.toLocaleString()}</span>
+                            <div style="margin-bottom: 0.5rem; padding: 0.5rem; background: #f8f9fa; border-radius: 3px;">
+                                <strong style="color: #2c3e50;">Q:</strong> 
+                                <span style="color: #555;">${entry.question ? entry.question.substring(0, 150) : 'N/A'}${entry.question && entry.question.length > 150 ? '...' : ''}</span>
+                            </div>
+                            <div style="margin-bottom: 0.5rem; padding: 0.5rem; background: #f8f9fa; border-radius: 3px;">
+                                <strong style="color: #2c3e50;">A:</strong> 
+                                <span style="color: #555;">${entry.answer ? entry.answer.substring(0, 200) : 'N/A'}${entry.answer && entry.answer.length > 200 ? '...' : ''}</span>
+                            </div>
+                            <div style="display: flex; gap: 1rem; font-size: 0.85rem; color: #666; flex-wrap: wrap;">
+                                <span><strong>Used:</strong> ${entry.usage_count || 0}x</span>
+                                <span><strong>Tokens Saved:</strong> ${(entry.tokens_saved || 0).toLocaleString()}</span>
+                                <span><strong>Credits Saved:</strong> ${(entry.credits_saved || 0).toLocaleString()}</span>
                             </div>
                             <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #999;">
-                                Last used: ${entry.last_used_at ? new Date(entry.last_used_at).toLocaleString() : 'Never'}
+                                <strong>Last used:</strong> ${entry.last_used_at ? new Date(entry.last_used_at).toLocaleString() : 'Never'} | 
+                                <strong>Created:</strong> ${entry.created_at ? new Date(entry.created_at).toLocaleString() : 'Unknown'}
                             </div>
                         </div>`;
                     });
@@ -3645,18 +3980,27 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                     html += '</div>';
                     document.getElementById('mainCacheList').innerHTML = html;
                 } else {
-                    document.getElementById('mainCacheList').innerHTML = '<p style="color: #666; padding: 2rem; text-align: center;">No main cache entries found</p>';
+                    document.getElementById('mainCacheList').innerHTML = '<p style="color: #666; padding: 2rem; text-align: center;">No main cache entries found. Cache entries will appear here after conversations are cached.</p>';
                 }
             } catch (error) {
                 console.error('Error loading main cache:', error);
-                document.getElementById('mainCacheList').innerHTML = `<span style="color: #e74c3c;">Error: ${error.message}</span>`;
+                document.getElementById('mainCacheList').innerHTML = `<div style="padding: 1rem; background: #fee; border-left: 4px solid #e74c3c; border-radius: 4px;">
+                    <strong style="color: #e74c3c;">Error loading main cache:</strong><br>
+                    <span style="color: #666; font-size: 0.9rem;">${error.message}</span><br>
+                    <small style="color: #999;">Check console for details</small>
+                </div>`;
             }
         }
         
         async function loadTemporaryCache() {
             try {
-                const chatId = document.getElementById('tempCacheChatId').value.trim();
-                let url = `${API_BASE}/cache/temporary?limit=50`;
+                document.getElementById('temporaryCacheList').innerHTML = '<p style="color: #666; padding: 1rem;">Loading...</p>';
+                
+                const chatId = document.getElementById('tempCacheChatId')?.value.trim() || '';
+                
+                // Get vendor slug from currentVendorId
+                // Build URL - use vendor slug (API will convert to ID)
+                let url = `${API_BASE}/cache/temporary?limit=100`;
                 if (currentVendorId) {
                     url += `&vendor_id=${currentVendorId}`;
                 }
@@ -3664,29 +4008,61 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
                     url += `&chat_id=${chatId}`;
                 }
                 
+                console.log('Loading temporary cache from:', url);
                 const response = await fetch(url);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+                
                 const data = await response.json();
+                console.log('Temporary cache response:', data);
                 
                 if (data.entries && data.entries.length > 0) {
                     let html = `<div style="margin-bottom: 0.5rem;"><strong>Total: ${data.total} entries</strong></div>`;
                     html += '<div style="max-height: 400px; overflow-y: auto;">';
                     
+                    // Group entries by session UUID
+                    const groupedBySession = {};
                     data.entries.forEach(entry => {
-                        html += `<div style="padding: 1rem; margin-bottom: 1rem; background: white; border: 1px solid #ddd; border-left: 4px solid #3498db;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <strong style="color: #2c3e50;">${entry.cache_id}</strong>
-                                <span style="font-size: 0.85rem; color: #666;">Chat: ${entry.chat_id.substring(0, 20)}...</span>
-                            </div>
-                            <div style="margin-bottom: 0.5rem;"><strong>Q:</strong> ${entry.question.substring(0, 100)}${entry.question.length > 100 ? '...' : ''}</div>
-                            <div style="margin-bottom: 0.5rem;"><strong>A:</strong> ${entry.answer.substring(0, 150)}${entry.answer.length > 150 ? '...' : ''}</div>
-                            <div style="display: flex; gap: 1rem; font-size: 0.85rem; color: #666;">
-                                <span>Used: ${entry.usage_count}x</span>
-                                <span>Tokens Saved: ${entry.tokens_saved.toLocaleString()}</span>
-                            </div>
-                            <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #999;">
-                                Created: ${new Date(entry.created_at).toLocaleString()}
-                            </div>
-                        </div>`;
+                        const sessionKey = entry.session_uuid || `chat_${entry.chat_id}`;
+                        if (!groupedBySession[sessionKey]) {
+                            groupedBySession[sessionKey] = [];
+                        }
+                        groupedBySession[sessionKey].push(entry);
+                    });
+                    
+                    // Display grouped by session
+                    Object.keys(groupedBySession).forEach(sessionKey => {
+                        const sessionEntries = groupedBySession[sessionKey];
+                        const sessionUuid = sessionEntries[0].session_uuid || sessionKey;
+                        
+                        html += `<div style="margin-bottom: 1.5rem; padding: 1rem; background: #e8f4f8; border: 1px solid #3498db; border-radius: 4px;">
+                            <div style="margin-bottom: 0.75rem; font-weight: 600; color: #2c3e50; font-size: 0.9rem;">
+                                📋 Chat Session: <code style="background: white; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.85rem;">${sessionUuid}</code>
+                                <span style="font-size: 0.8rem; color: #666; margin-left: 1rem;">(${sessionEntries.length} cached Q&A)</span>
+                            </div>`;
+                        
+                        sessionEntries.forEach(entry => {
+                            html += `<div style="padding: 0.75rem; margin-bottom: 0.75rem; background: white; border: 1px solid #ddd; border-left: 3px solid #3498db;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <strong style="color: #2c3e50; font-size: 0.85rem;">${entry.cache_id}</strong>
+                                </div>
+                                <div style="margin-bottom: 0.5rem; font-size: 0.9rem;"><strong>Q:</strong> ${entry.question.substring(0, 120)}${entry.question.length > 120 ? '...' : ''}</div>
+                                <div style="margin-bottom: 0.5rem; font-size: 0.9rem;"><strong>A:</strong> ${entry.answer.substring(0, 150)}${entry.answer.length > 150 ? '...' : ''}</div>
+                                <div style="display: flex; gap: 1rem; font-size: 0.8rem; color: #666;">
+                                    <span>Used: ${entry.usage_count}x</span>
+                                    <span>Tokens Saved: ${entry.tokens_saved.toLocaleString()}</span>
+                                </div>
+                                <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #999;">
+                                    Created: ${new Date(entry.created_at).toLocaleString()}
+                                    ${entry.last_used_at ? ` | Last used: ${new Date(entry.last_used_at).toLocaleString()}` : ''}
+                                </div>
+                            </div>`;
+                        });
+                        
+                        html += `</div>`;
                     });
                     
                     html += '</div>';
@@ -3996,13 +4372,32 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
             }
         }
         
-        // Load vendors on page load and set default vendor
+        // Load vendors on page load and restore saved vendor or set default
         loadVendors().then(() => {
-            // Auto-select first vendor if available
-            if (allVendors.length > 0 && !currentVendorId) {
-                const activeVendor = allVendors.find(v => v.is_active) || allVendors[0];
-                if (activeVendor) {
-                    switchActiveVendorById(activeVendor.vendor_id);
+            if (allVendors.length > 0) {
+                if (currentVendorId) {
+                    // Restore saved vendor if it still exists
+                    const savedVendor = allVendors.find(v => v.vendor_id === currentVendorId);
+                    if (savedVendor) {
+                        // Set selector and display without triggering full reload (will happen when tab is opened)
+                        document.getElementById('vendorSelector').value = currentVendorId;
+                        updateVendorDisplay(savedVendor);
+                        document.getElementById('currentVendorName').textContent = savedVendor.vendor_name;
+                    } else {
+                        // Saved vendor no longer exists, use first available
+                        currentVendorId = null;
+                        localStorage.removeItem('admin_currentVendorId');
+                        const activeVendor = allVendors.find(v => v.is_active) || allVendors[0];
+                        if (activeVendor) {
+                            switchActiveVendorById(activeVendor.vendor_id);
+                        }
+                    }
+                } else {
+                    // No saved vendor, auto-select first vendor if available
+                    const activeVendor = allVendors.find(v => v.is_active) || allVendors[0];
+                    if (activeVendor) {
+                        switchActiveVendorById(activeVendor.vendor_id);
+                    }
                 }
             }
         });
@@ -4034,6 +4429,8 @@ My Company offers service1 and service2. Contact us at 123-456-7890 or info@comp
             // Set current vendor to vendor admin's vendor
             if (vendorSlug) {
                 currentVendorId = vendorSlug;
+                // Save to localStorage
+                localStorage.setItem('admin_currentVendorId', vendorSlug);
                 // Load vendors and auto-select their vendor
                 loadVendors().then(() => {
                     if (currentVendorId) {

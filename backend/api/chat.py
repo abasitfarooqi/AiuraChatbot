@@ -68,104 +68,143 @@ async def send_message(
             if not vendor:
                 raise HTTPException(status_code=404, detail=f"Vendor {effective_vendor_id} not found")
         
-        # Get or create user (for anonymous chatbot users, we don't require password)
-        # Use a dummy password hash for anonymous chatbot users
-        from backend.utils.auth import hash_password
-        user_obj = db.query(User).filter(User.email == request.user_id).first()
-        if not user_obj and vendor:
-            # Create anonymous user with dummy password (for chatbot usage)
-            # Use a random password hash that will never be used for login
-            dummy_password_hash = hash_password("chatbot_anonymous_user_" + str(uuid.uuid4()))
-            user_obj = User(
+        # Get or create chat_user (for users who chat, separate from vendor users)
+        from backend.models.saas_models import ChatUser
+        chat_user = db.query(ChatUser).filter(
+            ChatUser.vendor_id == vendor.id,
+            ChatUser.identifier == request.user_id
+        ).first()
+        
+        if not chat_user and vendor:
+            # Create new chat_user (anonymous by default)
+            chat_user = ChatUser(
                 vendor_id=vendor.id,
-                email=request.user_id,
+                identifier=request.user_id,
                 name=request.user_id,
-                password_hash=dummy_password_hash,
-                is_active=True
+                email=request.user_id if "@" in request.user_id else None,
+                is_anonymous=True
             )
-            db.add(user_obj)
+            db.add(chat_user)
             db.commit()
-            db.refresh(user_obj)
+            db.refresh(chat_user)
         
         # Get or create chat session
         chat_session = None
+        is_new_session = False
         if request.chat_id:
             chat_session = db.query(ChatSession).filter(
                 ChatSession.session_uuid == request.chat_id
             ).first()
         
         if not chat_session:
+            # Generate title from first message (first 50 chars or first sentence)
+            title = request.message[:50].strip()
+            if len(request.message) > 50:
+                title += "..."
+            # Clean up title - remove extra whitespace
+            title = " ".join(title.split())
+            
             chat_session = ChatSession(
                 vendor_id=vendor.id if vendor else None,
-                user_id=user_obj.id if user_obj else None,
+                chat_user_id=chat_user.id if chat_user else None,
                 session_uuid=str(uuid.uuid4()),
-                status="open"
+                title=title,
+                status="open",
+                total_tokens_used=0
             )
             db.add(chat_session)
             db.commit()
             db.refresh(chat_session)
-        
-        # Save user message
-        user_message = ChatMessage(
-            session_id=chat_session.id,
-            vendor_id=vendor.id if vendor else None,
-            sender=MessageSender.USER,
-            role="user",
-            content=request.message
-        )
-        db.add(user_message)
-        db.commit()
+            is_new_session = True
         
         # Call chatbot service (db is optional now since API handles persistence)
         chatbot_service = ChatbotService(db=db, vendor_id=effective_vendor_id)
         result = await chatbot_service.process_message(
-            user_id=str(user_obj.id) if user_obj else request.user_id,
+            user_id=str(chat_user.id) if chat_user else request.user_id,
             chat_id=chat_session.session_uuid,
             message=request.message,
             vendor_id=effective_vendor_id
         )
         
-        # Save bot response
+        # Get model ID if model name is provided
+        model_id = None
+        if result.get("model_used"):
+            from backend.models.saas_models import Model
+            model_name = result.get("model_used", "").strip()
+            # Try multiple matching strategies
+            # 1. Exact match on code
+            model = db.query(Model).filter(Model.code == model_name).first()
+            # 2. Try display_name if code doesn't match
+            if not model:
+                model = db.query(Model).filter(Model.display_name == model_name).first()
+            # 3. Try case-insensitive match on code
+            if not model:
+                model = db.query(Model).filter(Model.code.ilike(model_name)).first()
+            # 4. Try partial match (e.g., "mistral" matches "mistral:latest")
+            if not model:
+                model = db.query(Model).filter(Model.code.ilike(f"%{model_name.split(':')[0]}%")).first()
+            
+            if model:
+                model_id = model.id
+                logger.info(f"Matched model '{model_name}' to model_id {model_id} (code: {model.code})")
+            else:
+                logger.warning(f"Could not find model in database for '{model_name}'")
+        
+        # Update chat session with model_id and total_tokens_used
+        tokens_used = result.get("tokens_used", 0)
+        if model_id and not chat_session.model_id:
+            chat_session.model_id = model_id
+        if tokens_used > 0:
+            chat_session.total_tokens_used = (chat_session.total_tokens_used or 0) + tokens_used
+        
+        # Save user message (user messages typically don't use tokens, but we save model_id for consistency)
+        user_message = ChatMessage(
+            session_id=chat_session.id,
+            vendor_id=vendor.id if vendor else None,
+            sender=MessageSender.USER,
+            role="user",
+            content=request.message,
+            tokens_used=0,  # User messages don't consume tokens
+            model_id=None  # User messages don't have a model
+        )
+        db.add(user_message)
+        
+        # Save bot response with tokens_used and model_id
         bot_message = ChatMessage(
             session_id=chat_session.id,
             vendor_id=vendor.id if vendor else None,
             sender=MessageSender.BOT,
             role="assistant",
-            content=result.get("response", "")
+            content=result.get("response", ""),
+            tokens_used=tokens_used,
+            model_id=model_id
         )
         db.add(bot_message)
         
         # Create usage record for tokens used
-        if vendor and result.get("tokens_used", 0) > 0:
+        if vendor and tokens_used > 0:
             from backend.models.saas_models import UsageRecord, ResourceType, UsageSource
-            from backend.models.saas_models import Model
             from datetime import datetime
-            
-            # Get model ID if model name is provided
-            model_id = None
-            if result.get("model_used"):
-                # Model table uses 'code' field for model identifier
-                model = db.query(Model).filter(
-                    (Model.code == result.get("model_used")) | 
-                    (Model.display_name == result.get("model_used"))
-                ).first()
-                if model:
-                    model_id = model.id
             
             usage_record = UsageRecord(
                 vendor_id=vendor.id,
-                user_id=user_obj.id if user_obj else None,
+                user_id=None,  # Usage records track vendor usage, not chat_user
                 model_id=model_id,
                 session_id=chat_session.id,
                 resource_type=ResourceType.TOKENS,
-                amount=float(result.get("tokens_used", 0)),
+                amount=float(tokens_used),
                 source=UsageSource.API,
                 cost=float(result.get("credits_used", 0)),
                 timestamp=datetime.utcnow()
             )
             db.add(usage_record)
+            
+            # Update chat_user's last_chat_at
+            if chat_user:
+                chat_user.last_chat_at = datetime.utcnow()
         
         db.commit()
+        db.refresh(chat_session)
         
         return ChatMessageResponse(
             response=result.get("response", ""),
@@ -232,31 +271,47 @@ async def get_user_chats(
     vendor_id: Optional[str] = None,
     db: Session = Depends(get_db)
 ):
-    """Get all chats for a user (vendor-aware)."""
+    """Get all chats for a chat_user (vendor-aware)."""
     try:
-        from backend.models.saas_models import Vendor
+        from backend.config import get_settings
+        from backend.models.saas_models import Vendor, ChatUser
+        settings = get_settings()
         
-        # Get user by email
-        user_obj = db.query(User).filter(User.email == user_id).first()
-        if not user_obj:
+        effective_vendor_id = vendor_id or settings.default_vendor_id
+        
+        # Get vendor
+        vendor = db.query(Vendor).filter(
+            Vendor.slug == effective_vendor_id,
+            Vendor.deleted_at.is_(None)
+        ).first()
+        
+        if not vendor:
+            raise HTTPException(status_code=404, detail=f"Vendor {effective_vendor_id} not found")
+        
+        # Get chat_user by identifier
+        chat_user = db.query(ChatUser).filter(
+            ChatUser.vendor_id == vendor.id,
+            ChatUser.identifier == user_id
+        ).first()
+        
+        if not chat_user:
             return {
                 "user_id": user_id,
-                "vendor_id": vendor_id,
+                "vendor_id": effective_vendor_id,
                 "chats": []
             }
         
-        # Filter by user and vendor
-        query = db.query(ChatSession).filter(ChatSession.user_id == user_obj.id)
-        if vendor_id:
-            vendor = db.query(Vendor).filter(Vendor.slug == vendor_id).first()
-            if vendor:
-                query = query.filter(ChatSession.vendor_id == vendor.id)
+        # Filter by chat_user and vendor
+        query = db.query(ChatSession).filter(
+            ChatSession.chat_user_id == chat_user.id,
+            ChatSession.vendor_id == vendor.id
+        )
         
         chats = query.order_by(ChatSession.created_at.desc()).all()
         
         return {
             "user_id": user_id,
-            "vendor_id": vendor_id,
+            "vendor_id": effective_vendor_id,
             "chats": [
                 {
                     "chat_id": chat.session_uuid,
@@ -268,6 +323,8 @@ async def get_user_chats(
             ]
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error getting user chats: {e}")
         raise HTTPException(status_code=500, detail=str(e))

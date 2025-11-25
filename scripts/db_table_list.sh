@@ -1,0 +1,1 @@
+mysql -u root -pabc123 aiura_chatbots -e "SHOW TABLES;"
