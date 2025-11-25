@@ -367,3 +367,183 @@ INFO:     127.0.0.1:63952 - "GET /api/v1/models/current?vendor_id=neguinho_motor
 2025-11-25 06:26:35 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
 2025-11-25 06:26:35 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
 INFO:     127.0.0.1:63954 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-25 06:26:40 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:26:40 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:26:40 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:26:40 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:26:40 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:26:40 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:26:40 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:26:40 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:26:40 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:26:40 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:26:40 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+INFO:     127.0.0.1:63954 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-25 06:26:45 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:26:45 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:26:45 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:26:45 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:26:45 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:26:45 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:26:45 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:26:45 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:26:45 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:26:45 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:26:45 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+INFO:     127.0.0.1:63954 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-25 06:26:50 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:26:50 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:26:50 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:26:50 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:26:50 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:26:50 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:26:50 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:26:50 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:26:50 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:26:50 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:26:50 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+INFO:     127.0.0.1:63954 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-25 06:26:55 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:26:55 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:26:55 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:26:55 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:26:55 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:26:55 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:26:55 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:26:55 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:26:55 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:26:55 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:26:55 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+INFO:     127.0.0.1:63954 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-25 06:27:00 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:27:00 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:27:00 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:27:00 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:27:00 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:27:00 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:00 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:27:00 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:27:00 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:00 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:00 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+INFO:     127.0.0.1:63954 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-25 06:27:05 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:27:05 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:27:05 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:27:05 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:27:05 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:27:05 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:05 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:27:05 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:27:05 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:05 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:05 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+INFO:     127.0.0.1:63954 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-25 06:27:10 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:27:10 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:27:10 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:27:10 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:27:10 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:27:10 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:10 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:27:10 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:27:10 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:10 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:10 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+INFO:     127.0.0.1:63954 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+INFO:     127.0.0.1:63955 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63954 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+INFO:     127.0.0.1:63954 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-25 06:27:15 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:27:15 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:27:15 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:27:15 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:27:15 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:27:15 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:15 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:27:15 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:27:15 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:15 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:27:15 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+INFO:     127.0.0.1:63954 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+INFO:     127.0.0.1:64196 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64197 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+INFO:     127.0.0.1:64196 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔍 [LLMService.__init__] Attempting to load vendor-specific model for vendor_id: neguinho_motors (db: True)
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 📊 Fresh DB query (by slug): vendor_slug=neguinho_motors, vendor_id=1, default_model_id=1, model_code=mistral
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor model from FRESH DB query: mistral (ollama) for vendor neguinho_motors (model_id: 1)
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - ✅ Loaded vendor default model from DB: mistral (ollama) for vendor neguinho_motors (model_id: 1, vendor.default_model_id: 1)
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔒 Vendor model locked: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_check_ollama_connection - Ollama connection successful
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_initialize_provider - LLM service initialized with provider: ollama, model: mistral
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔒 FORCED vendor model after init: mistral (vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:__init__ - 🔍 FINAL CHECK - LLMService instance model: mistral (provider: ollama, vendor_id: neguinho_motors) [SOURCE: DATABASE]
+2025-11-25 06:28:11 | INFO     | backend.services.llm_service:_load_model_config_from_db - ✅ Loaded model config from DB: max_tokens=4000, temp=0.10, top_p=0.50, top_k=50
+INFO:     127.0.0.1:64196 - "GET /api/v1/models/current?vendor_id=neguinho_motors HTTP/1.1" 200 OK
